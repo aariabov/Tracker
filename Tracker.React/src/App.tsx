@@ -1,16 +1,30 @@
-import React, { FC } from 'react';
-import { observer } from 'mobx-react';
-import OrgStruct from './OrgStruct';
-import OrgStructElementForm from './OrgStructElementForm';
-import { Space } from 'antd';
+import React, { FC, createContext } from "react";
+import { Link } from "react-router-dom";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
+import InstructionsPage from "./pages/instructions/InstructionsPage";
+import OrgStructPage from "./pages/orgStruct/OrgStructPage";
+import AppLayout from "./AppLayout";
+import { ConfigProvider } from "antd";
+import ruRU from "antd/lib/locale/ru_RU";
+import { mainStore } from "./stores/MainStore";
 
-const App: FC = observer(() => {
-    return <div className='app'>
-        <Space direction="vertical" size="large">
-            <OrgStructElementForm />
-            <OrgStruct />
-        </Space>
-    </div>;
-});
+export const StoreContext = createContext(mainStore);
+
+const App: FC = () => {
+  return (
+    <ConfigProvider locale={ruRU}>
+      <StoreContext.Provider value={mainStore}>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<AppLayout />}>
+              <Route path="instructions" element={<InstructionsPage />} />
+              <Route path="org-struct" element={<OrgStructPage />} />
+            </Route>
+          </Routes>
+        </BrowserRouter>
+      </StoreContext.Provider>
+    </ConfigProvider>
+  );
+};
 
 export default App;

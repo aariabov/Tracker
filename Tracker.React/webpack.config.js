@@ -11,45 +11,46 @@ module.exports = {
     publicPath: "/",
   },
   devServer: {
-    static: './dist',
+    static: "./dist",
+    historyApiFallback: true,
     proxy: {
-      '/api': {
-        target: 'https://localhost:44302/',
+      "/api": {
+        target: "https://localhost:44302/",
         secure: false,
       },
     },
   },
   devtool: "source-map",
   module: {
-    rules:[
-        {
-            test: /\.tsx?$/,
-            use: 'ts-loader',
-            exclude: /node_modules/,
-        },
-        {
-            test: /\.(less|css)$/i,
-            use: [
-                { loader: "style-loader" },
-                { loader: "css-loader" },
-                {
-                    loader: "less-loader",
-                    options: {
-                        lessOptions: {
-                            javascriptEnabled: true,
-                        }
-                    }
-                }
-            ],
-        },
-    ], 
+    rules: [
+      {
+        test: /\.tsx?$/,
+        use: "ts-loader",
+        exclude: /node_modules/,
+      },
+      {
+        test: /\.(less|css)$/i,
+        use: [
+          { loader: "style-loader" },
+          { loader: "css-loader" },
+          {
+            loader: "less-loader",
+            options: {
+              lessOptions: {
+                javascriptEnabled: true,
+              },
+            },
+          },
+        ],
+      },
+    ],
   },
   resolve: {
-    extensions: ['.tsx', '.ts', '.js'],
+    extensions: [".tsx", ".ts", ".js"],
   },
   plugins: [
     new HtmlWebpackPlugin({
-      template: "./src/index.html"
-    })
-  ]
-}
+      template: "./src/index.html",
+    }),
+  ],
+};
