@@ -1,5 +1,7 @@
 import { action, makeObservable, observable } from "mobx";
+import { post } from "../helpers/api";
 import { MainStore } from "./MainStore";
+import { OrgStructElement } from "./OrgStructStore";
 
 export class OrgStructElementStore {
   private _id: number = 0;
@@ -26,40 +28,39 @@ export class OrgStructElementStore {
     this.mainStore = mainStore;
   }
 
-  clear = () => {
+  clear = (): void => {
     this._id = 0;
     this._name = "";
     this._parentId = undefined;
   };
 
-  setName = (e: React.ChangeEvent<HTMLInputElement>) => {
+  setName = (e: React.ChangeEvent<HTMLInputElement>): void => {
     this._name = e.target.value;
   };
 
-  setParentId = (value: number) => {
+  setParentId = (value: number): void => {
     this._parentId = value;
   };
 
   save = async (): Promise<void> => {
-    const body = JSON.stringify({
+    const body: Body = {
       name: this._name,
       parentId: this._parentId,
-    });
+    };
 
-    const rawResponse = await fetch("api/OrgStruct", {
-      method: "POST",
-      credentials: "same-origin",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-      },
-      body: body,
-    });
+    const createdElement = await post<Body, OrgStructElement>(
+      "api/OrgStruct",
+      body
+    );
 
-    const createdElement = await rawResponse.json();
     if (createdElement.id > 0) {
       this.mainStore.orgStructStore.load();
       this.clear();
     }
   };
+}
+
+interface Body {
+  name: string;
+  parentId: number | undefined;
 }

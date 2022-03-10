@@ -1,20 +1,19 @@
-import ReactDOM from "react-dom";
 import React, { FC } from "react";
-import { BrowserRouter, Route, Routes, Outlet } from "react-router-dom";
-import App from "./App";
-import InstructionsPage from "./pages/instructions/InstructionsPage";
-import OrgStructPage from "./pages/orgStruct/OrgStructPage";
+import { Outlet } from "react-router-dom";
 import { Layout, Menu } from "antd";
 import { Link } from "react-router-dom";
 import "antd/dist/antd.less";
 import "./styles.less";
+import { observer } from "mobx-react";
+import LoggedUser from "./components/LoggedUser/LoggedUser";
 
-const { Header, Content, Footer, Sider } = Layout;
+const { Content, Sider } = Layout;
 
-const AppLayout: FC = () => {
+const AppLayout: FC = observer(() => {
   return (
     <Layout>
       <Sider style={{ height: "100vh" }}>
+        <LoggedUser />
         <Menu theme="dark" mode="inline">
           <Menu.Item key="1">
             <Link to="/org-struct">Оргструктура</Link>
@@ -31,6 +30,6 @@ const AppLayout: FC = () => {
       </Layout>
     </Layout>
   );
-};
+});
 
 export default AppLayout;

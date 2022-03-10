@@ -4,7 +4,6 @@ import { Form, Input, Button, TreeSelect, Select, DatePicker } from "antd";
 import { StoreContext } from "../../App";
 
 const { Option } = Select;
-const width = "180px";
 
 const InstructionForm: FC = observer(() => {
   const {

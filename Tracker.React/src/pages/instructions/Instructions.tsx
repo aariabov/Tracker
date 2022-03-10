@@ -5,10 +5,8 @@ import { StoreContext } from "../../App";
 import { Instruction, InstructionRow } from "../../stores/InstructionsStore";
 
 const Instructions: FC = observer(() => {
-  const { instructionsStore, orgStructStore } = useContext(StoreContext);
-  const dataWasLoaded =
-    instructionsStore.instructions.size &&
-    orgStructStore.orgStructElements.size;
+  const { instructionsStore } = useContext(StoreContext);
+  const dataWasLoaded = instructionsStore.instructions.size;
 
   return (
     <>

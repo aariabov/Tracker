@@ -2,6 +2,7 @@ import { makeObservable, observable, computed, action } from "mobx";
 import { MainStore } from "./MainStore";
 import { listToTree } from "../helpers";
 import TreeNode from "../interfaces/TreeNode";
+import { get } from "../helpers/api";
 
 export class InstructionsStore {
   instructions: Map<number, Instruction> = new Map();
@@ -15,8 +16,6 @@ export class InstructionsStore {
     });
 
     this.mainStore = mainStore;
-
-    this.load();
   }
 
   get instructionsRows(): InstructionRow[] {
@@ -45,11 +44,8 @@ export class InstructionsStore {
     return tree;
   }
 
-  async load() {
-    const url = "api/Instructions";
-    const response = await fetch(url);
-    const data: Instruction[] = await response.json();
-
+  async load(): Promise<void> {
+    const data = await get<Instruction[]>("api/Instructions");
     this.instructions = new Map(data.map((el) => [el.id, el]));
   }
 }

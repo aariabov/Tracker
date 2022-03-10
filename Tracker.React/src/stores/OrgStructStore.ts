@@ -2,6 +2,7 @@ import TreeNode from "../interfaces/TreeNode";
 import { makeObservable, observable, computed, action } from "mobx";
 import { listToTree } from "../helpers";
 import { MainStore } from "./MainStore";
+import { get } from "../helpers/api";
 
 export class OrgStructStore {
   orgStructElements: Map<number, OrgStructElement> = new Map();
@@ -15,7 +16,6 @@ export class OrgStructStore {
     });
 
     this.mainStore = mainStore;
-    this.load();
   }
 
   get orgStructTreeData(): TreeNode[] {
@@ -39,13 +39,9 @@ export class OrgStructStore {
     return children;
   };
 
-  load = async () => {
-    const url = "api/OrgStruct";
-    const response = await fetch(url);
-    const data: OrgStructElement[] = await response.json();
-
+  load = async (): Promise<void> => {
+    const data = await get<OrgStructElement[]>("api/OrgStruct");
     this.orgStructElements = new Map(data.map((el) => [el.id, el]));
-    console.log("OrgStruct was loaded");
   };
 }
 

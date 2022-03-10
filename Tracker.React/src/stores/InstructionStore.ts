@@ -1,5 +1,7 @@
 import { action, makeObservable, observable } from "mobx";
 import moment from "moment";
+import { post } from "../helpers/api";
+import { Instruction } from "./InstructionsStore";
 import { MainStore } from "./MainStore";
 
 export class InstructionStore {
@@ -10,19 +12,19 @@ export class InstructionStore {
   private _executorId: number | undefined = undefined;
   private _deadline: moment.Moment | null = null;
 
-  public get name() {
+  public get name(): string {
     return this._name;
   }
-  public get parentId() {
+  public get parentId(): number | undefined {
     return this._parentId;
   }
-  public get creatorId() {
+  public get creatorId(): number | undefined {
     return this._creatorId;
   }
-  public get executorId() {
+  public get executorId(): number | undefined {
     return this._executorId;
   }
-  public get deadline() {
+  public get deadline(): moment.Moment | null {
     return this._deadline;
   }
 
@@ -49,7 +51,7 @@ export class InstructionStore {
     this.mainStore = mainStore;
   }
 
-  clear = () => {
+  clear = (): void => {
     this._id = 0;
     this._name = "";
     this._parentId = undefined;
@@ -58,49 +60,51 @@ export class InstructionStore {
     this._deadline = null;
   };
 
-  setName = (e: React.ChangeEvent<HTMLInputElement>) => {
+  setName = (e: React.ChangeEvent<HTMLInputElement>): void => {
     this._name = e.target.value;
   };
 
-  setParentId = (value: number) => {
+  setParentId = (value: number): void => {
     this._parentId = value;
   };
 
-  setCreatorId = (value: number) => {
+  setCreatorId = (value: number): void => {
     this._creatorId = value;
   };
 
-  setExecutorId = (value: number) => {
+  setExecutorId = (value: number): void => {
     this._executorId = value;
   };
 
-  setDeadline = (momentDate: moment.Moment | null) => {
+  setDeadline = (momentDate: moment.Moment | null): void => {
     this._deadline = momentDate;
   };
 
   save = async (): Promise<void> => {
-    const body = JSON.stringify({
+    const body: InstructionBody = {
       name: this._name,
       parentId: this._parentId,
       creatorId: this._creatorId,
       executorId: this._executorId,
       deadline: this._deadline?.toDate(),
-    });
+    };
 
-    const rawResponse = await fetch("/api/Instructions", {
-      method: "POST",
-      credentials: "same-origin",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-      },
-      body: body,
-    });
+    const createdElement = await post<InstructionBody, Instruction>(
+      "api/Instructions",
+      body
+    );
 
-    const createdElement = await rawResponse.json();
     if (createdElement.id > 0) {
       this.mainStore.instructionsStore.load();
       this.clear();
     }
   };
+}
+
+interface InstructionBody {
+  name: string;
+  parentId: number | undefined;
+  creatorId: number | undefined;
+  executorId: number | undefined;
+  deadline: Date | undefined;
 }
