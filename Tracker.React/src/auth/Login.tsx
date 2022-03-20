@@ -13,7 +13,6 @@ const Login: FC = observer(() => {
         <Card>
           <Form
             layout="vertical"
-            autoComplete="off"
             className="login__form"
             onFinish={loginStore.handleSubmit}
           >
@@ -21,16 +20,11 @@ const Login: FC = observer(() => {
               Вход
             </Title>
             <Form.Item label="Email" name="email">
-              <Input
-                autoComplete="off"
-                name="email"
-                onChange={loginStore.setEmail}
-              />
+              <Input name="email" onChange={loginStore.setEmail} />
             </Form.Item>
             <Form.Item label="Пароль" name="password">
               <Input
                 type="password"
-                autoComplete="off"
                 name="password"
                 onChange={loginStore.setPassword}
               />

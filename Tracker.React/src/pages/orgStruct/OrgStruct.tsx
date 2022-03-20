@@ -8,7 +8,7 @@ const OrgStruct: FC = observer(() => {
 
   return (
     <div>
-      <h3>Сотрудники ({orgStructStore.orgStructElements.size})</h3>
+      <h3>Сотрудники ({orgStructStore.orgStructElements.length})</h3>
       <Tree
         key={Math.random()}
         showLine={{ showLeafIcon: false }}

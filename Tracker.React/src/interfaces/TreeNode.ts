@@ -1,7 +1,7 @@
-export default interface TreeNode {
-  key: number;
-  value: number;
+export default interface TreeNode<T extends number | string> {
+  key: T;
+  value: T;
   title: string;
-  parentId?: number;
-  children: TreeNode[];
+  parentId?: T;
+  children: TreeNode<T>[];
 }

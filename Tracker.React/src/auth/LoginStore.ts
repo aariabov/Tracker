@@ -1,5 +1,11 @@
 import { action, makeObservable, observable } from "mobx";
+import { post } from "../helpers/api";
 import { userStore } from "./UserStore";
+
+interface LoginBody {
+  email: string;
+  password: string;
+}
 
 export class LoginStore {
   private _email: string = "";
@@ -35,8 +41,14 @@ export class LoginStore {
     this._password = e.target.value;
   };
 
-  handleSubmit = async (e: React.FormEvent): Promise<void> => {
-    userStore.loadUserInfo(this._email, this._password);
+  handleSubmit = async (): Promise<void> => {
+    const body: LoginBody = {
+      email: this._email,
+      password: this._password,
+    };
+
+    const token = await post<LoginBody, string>("api/user/login", body);
+    userStore.setToken(token);
     this.clear();
   };
 }

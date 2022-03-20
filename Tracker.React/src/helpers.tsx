@@ -9,7 +9,7 @@ export function listToTree<
   TListElement extends ListElement<TKey>,
   TTreeElement extends TreeElement<TKey>
 >(
-  items: TListElement[],
+  items: Iterable<TListElement>,
   mapFunc: (value: TListElement) => TTreeElement
 ): TTreeElement[] {
   const map = new Map<TKey, TTreeElement>();
@@ -22,11 +22,11 @@ export function listToTree<
   for (const item of items) {
     const currentNode = map.get(item.id)!;
 
-    if (!item.parentId) {
-      result.push(currentNode);
-    } else {
+    if (item.parentId && map.get(item.parentId)) {
       const parentNode = map.get(item.parentId)!;
       parentNode.children.push(currentNode);
+    } else {
+      result.push(currentNode);
     }
   }
 

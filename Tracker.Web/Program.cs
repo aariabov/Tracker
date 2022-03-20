@@ -10,7 +10,7 @@ using Tracker.Web.Domain;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddDbContext<IdentityContext>(options => options.UseSqlite("Data Source=tracker.db"));
+builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlite("Data Source=tracker.db"));
 builder.Services.AddIdentityCore<User>(o => {
     o.Password.RequireDigit = false;
     o.Password.RequireLowercase = false;
@@ -18,7 +18,7 @@ builder.Services.AddIdentityCore<User>(o => {
     o.Password.RequireNonAlphanumeric = false;
     o.Password.RequiredLength = 1;
     o.User.AllowedUserNameCharacters = null;
-}).AddEntityFrameworkStores<IdentityContext>()
+}).AddEntityFrameworkStores<AppDbContext>()
     .AddSignInManager<SignInManager<User>>();
 
 var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["TokenKey"]));
@@ -64,5 +64,7 @@ app.UseAuthorization();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}").RequireAuthorization();
+
+app.UseExceptionHandler(app.Environment.IsDevelopment() ? "/error-development" : "/error");
 
 app.Run();

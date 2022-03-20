@@ -1,15 +1,25 @@
 import React, { FC } from "react";
 import { Outlet } from "react-router-dom";
-import { Layout, Menu } from "antd";
+import { Button, Layout, Menu, Modal } from "antd";
 import { Link } from "react-router-dom";
 import "antd/dist/antd.less";
 import "./styles.less";
 import { observer } from "mobx-react";
 import LoggedUser from "./components/LoggedUser/LoggedUser";
+import { errorStore } from "./stores/ErrorStore";
 
 const { Content, Sider } = Layout;
 
 const AppLayout: FC = observer(() => {
+  const showErrorModal = (): void => {
+    Modal.error({
+      title: "Произошла ошибка",
+      content: errorStore.error,
+      okText: "Закрыть",
+      onOk: (): void => errorStore.clearError(),
+    });
+  };
+
   return (
     <Layout>
       <Sider style={{ height: "100vh" }}>
@@ -28,6 +38,7 @@ const AppLayout: FC = observer(() => {
           <Outlet />
         </Content>
       </Layout>
+      {errorStore.error && showErrorModal()}
     </Layout>
   );
 });

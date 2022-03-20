@@ -16,7 +16,11 @@ public class JwtGenerator
 
     public string CreateToken(User user)
     {
-        var claims = new List<Claim>{ new Claim(JwtRegisteredClaimNames.NameId, user.UserName) };
+        var claims = new List<Claim>
+        {
+            new (JwtRegisteredClaimNames.NameId, user.Id),
+            new (JwtRegisteredClaimNames.Email, user.Email)
+        };
 
         var credentials = new SigningCredentials(_key, SecurityAlgorithms.HmacSha512Signature);
 

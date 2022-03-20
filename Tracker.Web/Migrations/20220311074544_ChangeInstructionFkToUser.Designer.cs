@@ -8,11 +8,11 @@ using Tracker.Web.Db;
 
 #nullable disable
 
-namespace Tracker.Web.Migrations.Identity
+namespace Tracker.Web.Migrations
 {
-    [DbContext(typeof(IdentityContext))]
-    [Migration("20220302074154_CreateIdentityTables")]
-    partial class CreateIdentityTables
+    [DbContext(typeof(AppDbContext))]
+    [Migration("20220311074544_ChangeInstructionFkToUser")]
+    partial class ChangeInstructionFkToUser
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -147,6 +147,66 @@ namespace Tracker.Web.Migrations.Identity
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("Tracker.Web.Domain.Instruction", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("CreatorId")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("Deadline")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("ExecDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ExecutorId")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar");
+
+                    b.Property<int?>("ParentId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatorId");
+
+                    b.HasIndex("ExecutorId");
+
+                    b.HasIndex("ParentId");
+
+                    b.ToTable("Instructions");
+                });
+
+            modelBuilder.Entity("Tracker.Web.Domain.OrgStructElement", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar");
+
+                    b.Property<int?>("ParentId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ParentId");
+
+                    b.ToTable("OrgStruct");
+                });
+
             modelBuilder.Entity("Tracker.Web.Domain.User", b =>
                 {
                     b.Property<string>("Id")
@@ -154,6 +214,9 @@ namespace Tracker.Web.Migrations.Identity
 
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("INTEGER");
+
+                    b.Property<string>("BossId")
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
@@ -260,6 +323,41 @@ namespace Tracker.Web.Migrations.Identity
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Tracker.Web.Domain.Instruction", b =>
+                {
+                    b.HasOne("Tracker.Web.Domain.User", "Creator")
+                        .WithMany()
+                        .HasForeignKey("CreatorId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Tracker.Web.Domain.User", "Executor")
+                        .WithMany()
+                        .HasForeignKey("ExecutorId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Tracker.Web.Domain.Instruction", null)
+                        .WithMany("Children")
+                        .HasForeignKey("ParentId");
+
+                    b.Navigation("Creator");
+
+                    b.Navigation("Executor");
+                });
+
+            modelBuilder.Entity("Tracker.Web.Domain.OrgStructElement", b =>
+                {
+                    b.HasOne("Tracker.Web.Domain.OrgStructElement", null)
+                        .WithMany()
+                        .HasForeignKey("ParentId");
+                });
+
+            modelBuilder.Entity("Tracker.Web.Domain.Instruction", b =>
+                {
+                    b.Navigation("Children");
                 });
 #pragma warning restore 612, 618
         }

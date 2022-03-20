@@ -1,20 +1,20 @@
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Tracker.Web.Domain;
 
 namespace Tracker.Web.Db;
 
-public class AppDbContext : DbContext
+public class AppDbContext : IdentityDbContext<User>
 {
     public DbSet<OrgStructElement> OrgStruct => Set<OrgStructElement>();
     public DbSet<Instruction> Instructions => Set<Instruction>();
- 
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    {
-        optionsBuilder.UseSqlite("Data Source=tracker.db");
-    }
+    
+    public AppDbContext(DbContextOptions options) : base(options) { }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        base.OnModelCreating(modelBuilder);
+        
         modelBuilder.Entity<OrgStructElement>()   
             .Property(p => p.Name)   
             .HasColumnType("nvarchar")
@@ -31,7 +31,7 @@ public class AppDbContext : DbContext
             .HasMaxLength(255);
         
         modelBuilder.Entity<Instruction>()
-            .HasOne<Instruction>()
+            .HasOne(i => i.Parent)
             .WithMany(i => i.Children)
             .HasForeignKey(e => e.ParentId);
         

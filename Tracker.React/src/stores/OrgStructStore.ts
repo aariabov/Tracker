@@ -1,12 +1,13 @@
-import TreeNode from "../interfaces/TreeNode";
 import { makeObservable, observable, computed, action } from "mobx";
 import { listToTree } from "../helpers";
 import { MainStore } from "./MainStore";
 import { get } from "../helpers/api";
+import TreeNode from "../interfaces/TreeNode";
 
 export class OrgStructStore {
-  orgStructElements: Map<number, OrgStructElement> = new Map();
-  mainStore: MainStore;
+  private readonly mainStore: MainStore;
+
+  orgStructElements: OrgStructElement[] = [];
 
   constructor(mainStore: MainStore) {
     makeObservable(this, {
@@ -18,35 +19,29 @@ export class OrgStructStore {
     this.mainStore = mainStore;
   }
 
-  get orgStructTreeData(): TreeNode[] {
-    const mapFunc = (e: OrgStructElement): TreeNode => ({
+  get orgStructTreeData(): TreeNode<string>[] {
+    const mapFunc = (e: OrgStructElement): TreeNode<string> => ({
       key: e.id,
       value: e.id,
       title: e.name,
       parentId: e.parentId,
       children: [],
     });
-    const tree = listToTree(
-      Array.from(this.orgStructElements.values()),
-      mapFunc
-    );
-    return tree;
+
+    return listToTree(this.orgStructElements, mapFunc);
   }
 
-  getChildren = (parentId: number): OrgStructElement[] => {
-    const elements = Array.from(this.orgStructElements.values());
-    const children = elements.filter((e) => e.parentId === parentId);
-    return children;
+  getChildren = (parentId: string): OrgStructElement[] => {
+    return this.orgStructElements.filter((e) => e.parentId === parentId);
   };
 
   load = async (): Promise<void> => {
-    const data = await get<OrgStructElement[]>("api/OrgStruct");
-    this.orgStructElements = new Map(data.map((el) => [el.id, el]));
+    this.orgStructElements = await get<OrgStructElement[]>("api/OrgStruct");
   };
 }
 
 export interface OrgStructElement {
-  id: number;
+  id: string;
   name: string;
-  parentId?: number;
+  parentId?: string;
 }

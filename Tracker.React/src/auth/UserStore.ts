@@ -1,17 +1,20 @@
 import { action, computed, makeObservable, observable } from "mobx";
-import { post } from "../helpers/api";
 
 interface UserInfo {
-  token: string;
+  nameid: string;
   email: string;
 }
 
-interface LoginBody {
-  email: string;
-  password: string;
+function parseJwt(token: string): UserInfo | null {
+  try {
+    return JSON.parse(atob(token.split(".")[1]));
+  } catch (e) {
+    return null;
+  }
 }
 
 export class UserStore {
+  private _id: string = "";
   private _token: string = "";
   private _email: string = "";
 
@@ -21,15 +24,15 @@ export class UserStore {
       _token: observable,
       token: computed,
       email: computed,
-      loadUserInfo: action,
+      setToken: action,
     });
 
-    const userInfoStr = localStorage.getItem("userInfo");
-    if (userInfoStr) {
-      const userInfo: UserInfo = JSON.parse(userInfoStr);
-      this._email = userInfo.email;
-      this._token = userInfo.token;
-    }
+    const token = localStorage.getItem("token");
+    this.setToken(token);
+  }
+
+  get id(): string {
+    return this._id;
   }
 
   get token(): string {
@@ -40,20 +43,20 @@ export class UserStore {
     return this._email;
   }
 
-  loadUserInfo = async (email: string, password: string): Promise<void> => {
-    const body: LoginBody = {
-      email,
-      password,
-    };
-
-    const userInfo = await post<LoginBody, UserInfo>("api/user/login", body);
-    localStorage.setItem("userInfo", JSON.stringify(userInfo));
-    this._email = userInfo.email;
-    this._token = userInfo.token;
+  setToken = (token: string | null): void => {
+    if (token) {
+      const userInfo = parseJwt(token);
+      if (userInfo) {
+        this._id = userInfo.nameid;
+        this._email = userInfo.email;
+        this._token = token;
+        localStorage.setItem("token", token);
+      }
+    }
   };
 
   logout = (): void => {
-    localStorage.removeItem("userInfo");
+    localStorage.removeItem("token");
     this._email = "";
     this._token = "";
   };

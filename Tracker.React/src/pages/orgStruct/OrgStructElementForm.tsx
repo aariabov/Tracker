@@ -14,7 +14,9 @@ const OrgStructElementForm: FC = observer(() => {
         <Form.Item label="ФИО">
           <Input
             value={store.name}
-            onChange={store.setName}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>): void =>
+              store.setName(e.target.value)
+            }
             style={{ width: "300px" }}
           />
         </Form.Item>

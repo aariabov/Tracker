@@ -4,6 +4,8 @@ import { MainStore } from "./MainStore";
 import { OrgStructElement } from "./OrgStructStore";
 
 export class OrgStructElementStore {
+  private readonly mainStore: MainStore;
+
   private _id: number = 0;
   private _name: string = "";
   private _parentId: number | undefined = undefined;
@@ -14,8 +16,6 @@ export class OrgStructElementStore {
   public get parentId(): number | undefined {
     return this._parentId;
   }
-
-  mainStore: MainStore;
 
   constructor(mainStore: MainStore) {
     makeObservable<OrgStructElementStore, "_name" | "_parentId">(this, {
@@ -34,8 +34,8 @@ export class OrgStructElementStore {
     this._parentId = undefined;
   };
 
-  setName = (e: React.ChangeEvent<HTMLInputElement>): void => {
-    this._name = e.target.value;
+  setName = (value: string): void => {
+    this._name = value;
   };
 
   setParentId = (value: number): void => {
@@ -53,9 +53,9 @@ export class OrgStructElementStore {
       body
     );
 
-    if (createdElement.id > 0) {
-      this.mainStore.orgStructStore.load();
+    if (createdElement.id) {
       this.clear();
+      return this.mainStore.orgStructStore.load();
     }
   };
 }
