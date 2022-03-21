@@ -15,16 +15,25 @@ function isJsonResponse(response: Response): boolean {
   return contentType !== null && contentType.includes("application/json");
 }
 
-async function processResponse<T>(response: Response): Promise<T> {
+async function makeRequest<T>(
+  url: string,
+  requestInit: RequestInit
+): Promise<T> {
   try {
+    const response = await fetch(url, requestInit);
     if (!response.ok) {
       if (response.status === 401) {
         userStore.logout();
         throw new Error(response.statusText);
       }
 
-      const backendError: BackendError = await response.json();
-      throw new Error(backendError.title);
+      let errorMsg = response.statusText;
+      if (isJsonResponse(response)) {
+        const backendError: BackendError = await response.json();
+        errorMsg = backendError.title;
+      }
+
+      throw new Error(errorMsg);
     }
 
     const data = isJsonResponse(response) ? await response.json() : undefined;
@@ -42,13 +51,13 @@ async function processResponse<T>(response: Response): Promise<T> {
 }
 
 export async function get<T>(path: string): Promise<T> {
-  const response = await fetch(BACKEND_URL + path, {
+  const requestInit: RequestInit = {
     headers: {
       Authorization: "Bearer " + userStore.token,
     },
-  });
+  };
 
-  return processResponse(response);
+  return makeRequest(BACKEND_URL + path, requestInit);
 }
 
 export async function post<TBody, TRes = void>(
@@ -57,7 +66,7 @@ export async function post<TBody, TRes = void>(
 ): Promise<TRes> {
   const body = JSON.stringify(bodyObj);
 
-  const response = await fetch(BACKEND_URL + path, {
+  const requestInit: RequestInit = {
     method: "POST",
     credentials: "same-origin",
     headers: {
@@ -66,7 +75,7 @@ export async function post<TBody, TRes = void>(
       "Content-Type": "application/json",
     },
     body,
-  });
+  };
 
-  return processResponse(response);
+  return makeRequest(BACKEND_URL + path, requestInit);
 }

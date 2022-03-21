@@ -1,10 +1,14 @@
-import React, { FC, useContext } from "react";
+import React, { FC } from "react";
 import { observer } from "mobx-react";
 import { Tree } from "antd";
-import { StoreContext } from "../../App";
+import { OrgStructStore } from "../../stores/OrgStructStore";
 
-const OrgStruct: FC = observer(() => {
-  const { orgStructStore } = useContext(StoreContext);
+interface Props {
+  orgStructStore: OrgStructStore;
+}
+
+const OrgStruct: FC<Props> = observer((props: Props) => {
+  const { orgStructStore } = props;
 
   return (
     <div>

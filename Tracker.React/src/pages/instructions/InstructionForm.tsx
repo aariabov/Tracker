@@ -9,7 +9,7 @@ import {
   DatePicker,
   Modal,
 } from "antd";
-import { StoreContext } from "../../App";
+import { StoreContext } from "./InstructionsPage";
 import { userStore } from "../../auth/UserStore";
 
 const { Option } = Select;

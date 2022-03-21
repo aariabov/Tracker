@@ -22,20 +22,23 @@ public class OrgStructController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IEnumerable<OrgStructElementVm>> Get()
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<OrgStructElementVm>))]
+    public async Task<ActionResult<IEnumerable<OrgStructElementVm>>> Get()
     {
         var users = await _userManager.Users
             .Select(u => new OrgStructElementVm(u.Id, u.UserName, u.BossId))
             .ToArrayAsync();
         
-        return users;
+        return Ok(users);
     }
     
     [HttpPost]
-    public async Task<OrgStructElement> CreateOrgStructElement([FromBody]OrgStructElement newOrgStructElement)
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(OrgStructElement))]
+    public async Task<ActionResult<OrgStructElement>> CreateOrgStructElement([FromBody]OrgStructElement newOrgStructElement)
     {
+        // TODO: добавить валидацию
         _db.OrgStruct.Add(newOrgStructElement);
         await _db.SaveChangesAsync();
-        return newOrgStructElement;
+        return Ok(newOrgStructElement);
     }
 }

@@ -1,11 +1,11 @@
 import { action, makeObservable, observable } from "mobx";
 import moment from "moment";
-import { post } from "../helpers/api";
+import { post } from "../../../helpers/api";
 import { Instruction } from "./InstructionsStore";
-import { MainStore } from "./MainStore";
+import { PageStore } from "./PageStore";
 
 export class InstructionStore {
-  private readonly mainStore: MainStore;
+  private readonly mainStore: PageStore;
 
   private _id: number = 0;
   private _name: string = "";
@@ -33,7 +33,7 @@ export class InstructionStore {
   /**
    * @todo https://tfs.parma.ru/tfs/PARMA/EDU/_git/Riabov.AA/pullrequest/141456?_a=files&path=%2FTracker.React%2Fsrc%2Fstores%2FInstructionStore.ts&discussionId=945688
    */
-  constructor(mainStore: MainStore) {
+  constructor(mainStore: PageStore) {
     makeObservable<
       InstructionStore,
       | "_id"
@@ -90,6 +90,10 @@ export class InstructionStore {
     this._isModalVisible = false;
     this.clear();
   };
+
+  async setExecutionDate(instructionId: number, execDate: Date): Promise<void> {
+    await post<Date>(`api/Instructions/${instructionId}`, execDate);
+  }
 
   save = async (): Promise<void> => {
     if (this._executorId && this._deadline) {

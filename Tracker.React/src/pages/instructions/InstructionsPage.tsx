@@ -1,15 +1,16 @@
 import { Space } from "antd";
-import React, { FC, useContext, useEffect, useState } from "react";
+import React, { createContext, FC, useContext, useEffect } from "react";
 import Instructions from "./Instructions";
 import InstructionForm from "./InstructionForm";
-import { StoreContext } from "../../App";
 import { observer } from "mobx-react";
 import FullInstruction from "./FullInstruction";
-import { FullInstructionStore } from "./FullInstructionStore";
+import { userStore } from "../../auth/UserStore";
+import { pageStore } from "./stores/PageStore";
+
+export const StoreContext = createContext(pageStore);
 
 const InstructionsPage: FC = observer(() => {
   const { instructionsStore, orgStructStore } = useContext(StoreContext);
-  const [fullInstructionStore] = useState(() => new FullInstructionStore());
   useEffect(() => {
     orgStructStore.load();
     instructionsStore.load();
@@ -17,11 +18,13 @@ const InstructionsPage: FC = observer(() => {
 
   return (
     <div className="app">
-      <Space direction="vertical" size="large" style={{ width: "100%" }}>
-        <InstructionForm />
-        <Instructions fullInstructionStore={fullInstructionStore} />
-        <FullInstruction fullInstructionStore={fullInstructionStore} />
-      </Space>
+      <StoreContext.Provider value={pageStore}>
+        <Space direction="vertical" size="large" style={{ width: "100%" }}>
+          {userStore.isUserBoss && <InstructionForm />}
+          <Instructions />
+          <FullInstruction />
+        </Space>
+      </StoreContext.Provider>
     </div>
   );
 });

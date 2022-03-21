@@ -1,21 +1,18 @@
-import React, { FC, useContext, useEffect } from "react";
+import React, { FC, useState } from "react";
 import { observer } from "mobx-react";
 import OrgStruct from "./OrgStruct";
 import OrgStructElementForm from "./OrgStructElementForm";
 import { Space } from "antd";
-import { StoreContext } from "../../App";
+import { OrgStructStore } from "../../stores/OrgStructStore";
 
 const OrgStructPage: FC = observer(() => {
-  const { orgStructStore } = useContext(StoreContext);
-  useEffect(() => {
-    orgStructStore.load();
-  }, []);
+  const [orgStructStore] = useState(() => new OrgStructStore());
 
   return (
     <div className="app">
       <Space direction="vertical" size="large">
-        <OrgStructElementForm />
-        <OrgStruct />
+        <OrgStructElementForm orgStructStore={orgStructStore} />
+        <OrgStruct orgStructStore={orgStructStore} />
       </Space>
     </div>
   );

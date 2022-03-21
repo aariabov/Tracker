@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Tracker.Web.Controllers;
 
 [ApiController]
+[ApiExplorerSettings(IgnoreApi = true)]
 [Route("api/[controller]")]
 public class ErrorsController : ControllerBase
 {

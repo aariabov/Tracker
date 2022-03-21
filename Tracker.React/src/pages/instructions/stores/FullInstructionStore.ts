@@ -1,6 +1,6 @@
 import { makeObservable, observable, computed, action } from "mobx";
-import { listToTree } from "../../helpers";
-import { get, post } from "../../helpers/api";
+import { listToTree } from "../../../helpers";
+import { get, post } from "../../../helpers/api";
 
 export class FullInstructionStore {
   private _instructions: Instruction[] = [];
@@ -43,10 +43,6 @@ export class FullInstructionStore {
     this._isDrawerVisible = false;
     this._instructions = [];
   };
-
-  async setExecutionDate(instructionId: number, execDate: Date): Promise<void> {
-    await post<Date>(`api/Instructions/${instructionId}`, execDate);
-  }
 }
 
 export interface Instruction {

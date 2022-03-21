@@ -14,12 +14,13 @@ public class JwtGenerator
         _key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["TokenKey"]));
     }
 
-    public string CreateToken(User user)
+    public string CreateToken(User user, bool isUserBoss)
     {
         var claims = new List<Claim>
         {
             new (JwtRegisteredClaimNames.NameId, user.Id),
-            new (JwtRegisteredClaimNames.Email, user.Email)
+            new (JwtRegisteredClaimNames.Email, user.Email),
+            new ("isUserBoss", isUserBoss.ToString().ToLower())
         };
 
         var credentials = new SigningCredentials(_key, SecurityAlgorithms.HmacSha512Signature);

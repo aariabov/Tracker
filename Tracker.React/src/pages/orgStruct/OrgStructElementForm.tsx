@@ -1,42 +1,79 @@
-import React, { FC, useContext } from "react";
+import React, { FC, useState } from "react";
 import { observer } from "mobx-react";
-import { Form, Input, Button, TreeSelect } from "antd";
-import { StoreContext } from "../../App";
+import { Form, Input, Button, TreeSelect, Modal } from "antd";
+import { OrgStructStore } from "../../stores/OrgStructStore";
+import { OrgStructElementStore } from "./OrgStructElementStore";
 
-const OrgStructElementForm: FC = observer(() => {
-  const { orgStructElementStore: store, orgStructStore } =
-    useContext(StoreContext);
+interface Props {
+  orgStructStore: OrgStructStore;
+}
+
+const OrgStructElementForm: FC<Props> = observer((props: Props) => {
+  const { orgStructStore } = props;
+  const [store] = useState(() => new OrgStructElementStore());
 
   return (
     <div>
-      <h3>Создать нового сотрудника</h3>
-      <Form layout={"inline"}>
-        <Form.Item label="ФИО">
-          <Input
-            value={store.name}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>): void =>
-              store.setName(e.target.value)
-            }
-            style={{ width: "300px" }}
-          />
-        </Form.Item>
-        <Form.Item label="Руководитель">
-          <TreeSelect
-            style={{ width: "300px" }}
-            dropdownStyle={{ maxHeight: 400, overflow: "auto" }}
-            treeData={orgStructStore.orgStructTreeData}
-            treeDefaultExpandAll
-            value={store.parentId}
-            onChange={store.setParentId}
-            allowClear
-          />
-        </Form.Item>
-        <Form.Item>
-          <Button type="primary" onClick={store.save}>
+      <Button type="primary" onClick={store.showModal}>
+        Создать нового сотрудника
+      </Button>
+      <Modal
+        title="Создание нового сотрудника"
+        visible={store.isModalVisible}
+        onCancel={store.hideModal}
+        footer={[
+          <Button key="back" onClick={store.hideModal}>
+            Отмена
+          </Button>,
+          <Button
+            key="submit"
+            type="primary"
+            onClick={async (): Promise<void> => {
+              await store.save();
+              orgStructStore.load();
+            }}
+          >
             Сохранить
-          </Button>
-        </Form.Item>
-      </Form>
+          </Button>,
+        ]}
+      >
+        <Form layout={"vertical"} autoComplete="off">
+          <Form.Item label="ФИО">
+            <Input
+              value={store.name}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>): void =>
+                store.setName(e.target.value)
+              }
+            />
+          </Form.Item>
+          <Form.Item label="Email">
+            <Input
+              value={store.email}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>): void =>
+                store.setEmail(e.target.value)
+              }
+            />
+          </Form.Item>
+          <Form.Item label="Пароль">
+            <Input
+              value={store.password}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>): void =>
+                store.setPassword(e.target.value)
+              }
+            />
+          </Form.Item>
+          <Form.Item label="Руководитель">
+            <TreeSelect
+              dropdownStyle={{ maxHeight: 400, overflow: "auto" }}
+              treeData={orgStructStore.orgStructTreeData}
+              treeDefaultExpandAll
+              value={store.parentId}
+              onChange={store.setParentId}
+              allowClear
+            />
+          </Form.Item>
+        </Form>
+      </Modal>
     </div>
   );
 });

@@ -23,7 +23,8 @@ public class InstructionsController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IEnumerable<InstructionVm>> GetUserInstructions()
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<InstructionVm>))]
+    public async Task<ActionResult<IEnumerable<InstructionVm>>> GetUserInstructions()
     {
         var userId = GetCurrentUserId();
         var allInstructions = await GetAllInstructions();
@@ -39,11 +40,13 @@ public class InstructionsController : ControllerBase
             return InstructionVm.Create(instruction, canCreateChild, canBeExecuted);
         });
         
-        return instructionVms;
+        return Ok(instructionVms);
     }
 
     [HttpGet("{id:int}")]
-    public async Task<IEnumerable<InstructionVm>> GetTreeInstruction(int id)
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<InstructionVm>))]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<IEnumerable<InstructionVm>>> GetTreeInstruction(int id)
     {
         // Функции и процедуры не поддерживаются в SQLite
         // SQL не может содержать связанные данные, но можно потом добавить Include
@@ -61,16 +64,17 @@ public class InstructionsController : ControllerBase
         var allInstructions = await GetAllInstructions();
         var instruction = allInstructions.SingleOrDefault(i => i.Id == id);
         if (instruction is null)
-            throw new Exception($"Instruction not found by id:{id}");
+            return NotFound();
         
         var rootInstruction = instruction.GetRoot();
         var instructions = rootInstruction.GetAllChildren();
         var result = InstructionVm.CreateCollection(instructions);
-        return result;
+        return Ok(result);
     }
 
     [HttpPost]
-    public async Task<Instruction> CreateInstruction([FromBody]InstructionRm instruction)
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Instruction))]
+    public async Task<ActionResult<Instruction>> CreateInstruction([FromBody]InstructionRm instruction)
     {
         var userId = GetCurrentUserId();
         // TODO: добавить валидацию
@@ -82,19 +86,26 @@ public class InstructionsController : ControllerBase
             ParentId = instruction.ParentId,
             Deadline = instruction.Deadline
         };
+        
         _db.Instructions.Add(newInstruction);
         await _db.SaveChangesAsync();
-        return newInstruction;
+        return Ok(newInstruction);
     }
     
     [HttpPost("{id:int}")]
-    public async Task SetExecDate(int id, [FromBody] DateTime execDate)
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult> SetExecDate(int id, [FromBody] DateTime execDate)
     {
-        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        var userId = GetCurrentUserId();
         var allInstructions = await GetAllInstructions();
-        var instruction = allInstructions.Single(i => i.Id == id);
+        var instruction = allInstructions.SingleOrDefault(i => i.Id == id);
+        if(instruction is null)
+            return NotFound();
+        
         instruction.SetExecDate(execDate, userId);
         await _db.SaveChangesAsync();
+        return Ok();
     }
 
     private async Task<Instruction[]> GetAllInstructions()

@@ -1,14 +1,11 @@
 import { Button, Drawer, Table } from "antd";
 import { observer } from "mobx-react";
-import React, { FC, ReactNode } from "react";
-import { FullInstructionStore, InstructionRow } from "./FullInstructionStore";
+import React, { FC, ReactNode, useContext } from "react";
+import { StoreContext } from "./InstructionsPage";
+import { InstructionRow } from "./stores/FullInstructionStore";
 
-interface Props {
-  fullInstructionStore: FullInstructionStore;
-}
-
-const FullInstruction: FC<Props> = observer((props: Props) => {
-  const { fullInstructionStore: store } = props;
+const FullInstruction: FC = observer(() => {
+  const { fullInstructionStore: store } = useContext(StoreContext);
   const dataWasLoaded = store.instructionsRows.length;
 
   return (

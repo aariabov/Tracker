@@ -2,6 +2,7 @@ using System.Net;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Tracker.Web.Domain;
 using Tracker.Web.ViewModels;
 
@@ -24,22 +25,34 @@ public class UserController : ControllerBase
     }
 
     [HttpPost("register")]
-    public async Task<IdentityResult> RegisterAsync([FromBody]UserRegistrationVm userVm)
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(string))]
+    [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(IEnumerable<IdentityError>))]
+    public async Task<ActionResult> RegisterAsync([FromBody]UserRegistrationVm userVm)
     {
+        // TODO: валидация
         var newUser = new User(userVm.Name, userVm.Email, userVm.BossId);
         var result = await _userManager.CreateAsync(newUser, userVm.Password);
-        return result;
+        if (result.Succeeded) 
+            return Ok(newUser.Id);
+
+        return BadRequest(result.Errors);
     }
     
     [HttpPost("login")]
-    public async Task<string> LoginAsync(LoginVM loginVm)
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(string))]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<string>> LoginAsync(LoginVM loginVm)
     {
         var user = await _userManager.FindByEmailAsync(loginVm.Email);
+        if (user is null)
+            return NotFound();
+        
         var result = await _signInManager.CheckPasswordSignInAsync(user, loginVm.Password, false);
-
-        if (result.Succeeded)
-            return _jwtGenerator.CreateToken(user);
-
-        throw new Exception();
+        if (!result.Succeeded) 
+            return Unauthorized();
+        
+        var isUserBoss = await _userManager.Users.AnyAsync(u => u.BossId == user.Id);
+        return Ok(_jwtGenerator.CreateToken(user, isUserBoss));
     }
 }

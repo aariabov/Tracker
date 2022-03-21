@@ -1,22 +1,19 @@
 import { makeObservable, observable, computed, action } from "mobx";
 import { listToTree } from "../helpers";
-import { MainStore } from "./MainStore";
 import { get } from "../helpers/api";
 import TreeNode from "../interfaces/TreeNode";
 
 export class OrgStructStore {
-  private readonly mainStore: MainStore;
-
   orgStructElements: OrgStructElement[] = [];
 
-  constructor(mainStore: MainStore) {
+  constructor() {
     makeObservable(this, {
       orgStructElements: observable,
       orgStructTreeData: computed,
       load: action,
     });
 
-    this.mainStore = mainStore;
+    this.load();
   }
 
   get orgStructTreeData(): TreeNode<string>[] {

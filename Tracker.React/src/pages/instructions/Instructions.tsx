@@ -1,17 +1,12 @@
 import { Modal, Table } from "antd";
 import { observer } from "mobx-react";
 import React, { FC, ReactNode, useContext } from "react";
-import { StoreContext } from "../../App";
-import { InstructionRow } from "../../stores/InstructionsStore";
-import { FullInstructionStore } from "./FullInstructionStore";
+import { InstructionRow } from "./stores/InstructionsStore";
+import { StoreContext } from "./InstructionsPage";
 
-interface Props {
-  fullInstructionStore: FullInstructionStore;
-}
-
-const Instructions: FC<Props> = observer((props: Props) => {
-  const { instructionsStore, instructionStore } = useContext(StoreContext);
-  const { fullInstructionStore } = props;
+const Instructions: FC = observer(() => {
+  const { instructionsStore, instructionStore, fullInstructionStore } =
+    useContext(StoreContext);
   const dataWasLoaded = instructionsStore.instructions.length;
 
   const showConfirmModal = (instructionId: number): void => {
@@ -22,7 +17,7 @@ const Instructions: FC<Props> = observer((props: Props) => {
         "Будет установлена дата исполнения: " +
         date.toLocaleDateString("ru-RU"),
       async onOk() {
-        await fullInstructionStore.setExecutionDate(instructionId, date);
+        await instructionStore.setExecutionDate(instructionId, date);
         instructionsStore.load();
       },
     });

@@ -1,12 +1,13 @@
 import React, { FC } from "react";
-import { Outlet } from "react-router-dom";
-import { Button, Layout, Menu, Modal } from "antd";
+import { Navigate, Outlet, useLocation } from "react-router-dom";
+import { Layout, Menu, Modal } from "antd";
 import { Link } from "react-router-dom";
 import "antd/dist/antd.less";
 import "./styles.less";
 import { observer } from "mobx-react";
 import LoggedUser from "./components/LoggedUser/LoggedUser";
 import { errorStore } from "./stores/ErrorStore";
+import { userStore } from "./auth/UserStore";
 
 const { Content, Sider } = Layout;
 
@@ -19,6 +20,11 @@ const AppLayout: FC = observer(() => {
       onOk: (): void => errorStore.clearError(),
     });
   };
+
+  if (!userStore.token) {
+    let location = useLocation();
+    return <Navigate to="/login" state={{ from: location }} />;
+  }
 
   return (
     <Layout>
