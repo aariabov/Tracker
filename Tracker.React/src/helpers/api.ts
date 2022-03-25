@@ -10,6 +10,10 @@ interface BackendError {
   traceId: string;
 }
 
+export interface ModelErrors<T> {
+  modelErrors?: T;
+}
+
 function isJsonResponse(response: Response): boolean {
   const contentType = response.headers.get("content-type");
   return contentType !== null && contentType.includes("application/json");

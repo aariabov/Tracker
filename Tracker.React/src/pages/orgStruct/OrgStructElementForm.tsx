@@ -29,8 +29,8 @@ const OrgStructElementForm: FC<Props> = observer((props: Props) => {
             key="submit"
             type="primary"
             onClick={async (): Promise<void> => {
-              await store.save();
-              orgStructStore.load();
+              const wasSaved = await store.save();
+              if (wasSaved) orgStructStore.load();
             }}
           >
             Сохранить
@@ -38,7 +38,11 @@ const OrgStructElementForm: FC<Props> = observer((props: Props) => {
         ]}
       >
         <Form layout={"vertical"} autoComplete="off">
-          <Form.Item label="ФИО">
+          <Form.Item
+            label="ФИО"
+            validateStatus={store.errors?.name && "error"}
+            help={store.errors?.name}
+          >
             <Input
               value={store.name}
               onChange={(e: React.ChangeEvent<HTMLInputElement>): void =>
@@ -46,7 +50,11 @@ const OrgStructElementForm: FC<Props> = observer((props: Props) => {
               }
             />
           </Form.Item>
-          <Form.Item label="Email">
+          <Form.Item
+            label="Email"
+            validateStatus={store.errors?.email && "error"}
+            help={store.errors?.email}
+          >
             <Input
               value={store.email}
               onChange={(e: React.ChangeEvent<HTMLInputElement>): void =>
@@ -54,7 +62,11 @@ const OrgStructElementForm: FC<Props> = observer((props: Props) => {
               }
             />
           </Form.Item>
-          <Form.Item label="Пароль">
+          <Form.Item
+            label="Пароль"
+            validateStatus={store.errors?.password && "error"}
+            help={store.errors?.password}
+          >
             <Input
               value={store.password}
               onChange={(e: React.ChangeEvent<HTMLInputElement>): void =>
@@ -62,7 +74,11 @@ const OrgStructElementForm: FC<Props> = observer((props: Props) => {
               }
             />
           </Form.Item>
-          <Form.Item label="Руководитель">
+          <Form.Item
+            label="Руководитель"
+            validateStatus={store.errors?.bossId && "error"}
+            help={store.errors?.bossId}
+          >
             <TreeSelect
               dropdownStyle={{ maxHeight: 400, overflow: "auto" }}
               treeData={orgStructStore.orgStructTreeData}

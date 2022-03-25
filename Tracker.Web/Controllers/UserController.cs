@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Tracker.Web.Domain;
+using Tracker.Web.RequestModels;
+using Tracker.Web.Validators;
 using Tracker.Web.ViewModels;
 
 namespace Tracker.Web.Controllers;
@@ -27,11 +29,17 @@ public class UserController : ControllerBase
     [HttpPost("register")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(string))]
     [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(IEnumerable<IdentityError>))]
-    public async Task<ActionResult> RegisterAsync([FromBody]UserRegistrationVm userVm)
+    public async Task<ActionResult> RegisterAsync([FromBody]UserRegistrationRm userRm)
     {
-        // TODO: валидация
-        var newUser = new User(userVm.Name, userVm.Email, userVm.BossId);
-        var result = await _userManager.CreateAsync(newUser, userVm.Password);
+        // можно явно руками писать валидацию, но надо ответ приводить к единому формату
+        // с одной стороны так понятнее, а с другой больше писать и нет централизованной обработки
+        // var userValidator = new UserValidator(_userManager);
+        // var validationResult = await userValidator.ValidateAsync(userVm);
+        // if (!validationResult.IsValid)
+        //     return Ok(validationResult.Errors);
+        
+        var newUser = new User(userRm.Name, userRm.Email, userRm.BossId);
+        var result = await _userManager.CreateAsync(newUser, userRm.Password);
         if (result.Succeeded) 
             return Ok(newUser.Id);
 

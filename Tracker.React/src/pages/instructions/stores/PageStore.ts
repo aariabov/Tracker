@@ -10,8 +10,8 @@ export class PageStore {
   fullInstructionStore: FullInstructionStore;
 
   constructor() {
-    this.instructionsStore = new InstructionsStore(this);
-    this.instructionStore = new InstructionStore(this);
+    this.instructionsStore = new InstructionsStore();
+    this.instructionStore = new InstructionStore();
     this.fullInstructionStore = new FullInstructionStore();
     this.orgStructStore = new OrgStructStore();
   }

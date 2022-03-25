@@ -1,22 +1,17 @@
 import { makeObservable, observable, computed, action } from "mobx";
-import { PageStore } from "./PageStore";
 import { listToTree } from "../../../helpers";
 import TreeNode from "../../../interfaces/TreeNode";
 import { get } from "../../../helpers/api";
 
 export class InstructionsStore {
-  private readonly mainStore: PageStore;
-
   instructions: Instruction[] = [];
 
-  constructor(mainStore: PageStore) {
+  constructor() {
     makeObservable(this, {
       instructions: observable,
       instructionsRows: computed,
       load: action,
     });
-
-    this.mainStore = mainStore;
   }
 
   get instructionsRows(): InstructionRow[] {

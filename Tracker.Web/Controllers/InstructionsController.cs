@@ -72,38 +72,33 @@ public class InstructionsController : ControllerBase
         return Ok(result);
     }
 
-    [HttpPost]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Instruction))]
-    public async Task<ActionResult<Instruction>> CreateInstruction([FromBody]InstructionRm instruction)
+    [HttpPost("create")]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(int))]
+    public async Task<ActionResult<int>> CreateInstruction([FromBody]InstructionRm instruction)
     {
         var userId = GetCurrentUserId();
-        // TODO: добавить валидацию
         var newInstruction = new Instruction
         {
             Name = instruction.Name,
             CreatorId = userId,
             ExecutorId = instruction.ExecutorId,
             ParentId = instruction.ParentId,
-            Deadline = instruction.Deadline
+            Deadline = instruction.Deadline.Value
         };
         
         _db.Instructions.Add(newInstruction);
         await _db.SaveChangesAsync();
-        return Ok(newInstruction);
+        return Ok(newInstruction.Id);
     }
     
-    [HttpPost("{id:int}")]
+    [HttpPost("set-exec-date")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult> SetExecDate(int id, [FromBody] DateTime execDate)
+    public async Task<ActionResult> SetExecDate([FromBody] ExecDateRm execDateRm)
     {
         var userId = GetCurrentUserId();
-        var allInstructions = await GetAllInstructions();
-        var instruction = allInstructions.SingleOrDefault(i => i.Id == id);
-        if(instruction is null)
-            return NotFound();
-        
-        instruction.SetExecDate(execDate, userId);
+        var instruction = _db.Instructions.Single(i => i.Id == execDateRm.InstructionId);
+        instruction.SetExecDate(execDateRm.ExecDate.Value, userId);
         await _db.SaveChangesAsync();
         return Ok();
     }

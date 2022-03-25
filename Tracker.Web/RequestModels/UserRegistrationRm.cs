@@ -1,6 +1,6 @@
-namespace Tracker.Web.ViewModels;
+namespace Tracker.Web.RequestModels;
 
-public class UserRegistrationVm
+public class UserRegistrationRm
 {
     public string Name { get; set; }
     public string Email { get; set; }

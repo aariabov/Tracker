@@ -1,6 +1,5 @@
 import { action, makeObservable, observable } from "mobx";
-import { post } from "../../helpers/api";
-import { OrgStructElement } from "../../stores/OrgStructStore";
+import { ModelErrors, post } from "../../helpers/api";
 
 export class OrgStructElementStore {
   private _id: number = 0;
@@ -8,6 +7,8 @@ export class OrgStructElementStore {
   private _email: string = "";
   private _password: string = "";
   private _parentId: number | undefined = undefined;
+
+  private _errors: Errors | undefined = undefined;
 
   private _isModalVisible: boolean = false;
 
@@ -23,6 +24,9 @@ export class OrgStructElementStore {
   public get parentId(): number | undefined {
     return this._parentId;
   }
+  public get errors(): Errors | undefined {
+    return this._errors;
+  }
   public get isModalVisible(): boolean {
     return this._isModalVisible;
   }
@@ -30,15 +34,22 @@ export class OrgStructElementStore {
   constructor() {
     makeObservable<
       OrgStructElementStore,
-      "_name" | "_email" | "_password" | "_parentId" | "_isModalVisible"
+      | "_name"
+      | "_email"
+      | "_password"
+      | "_parentId"
+      | "_isModalVisible"
+      | "_errors"
     >(this, {
       _name: observable,
       _parentId: observable,
       _email: observable,
       _password: observable,
+      _errors: observable,
       _isModalVisible: observable,
       setName: action,
       setParentId: action,
+      save: action,
     });
   }
 
@@ -48,26 +59,32 @@ export class OrgStructElementStore {
     this._email = "";
     this._password = "";
     this._parentId = undefined;
+    this._errors = undefined;
   };
 
   setName = (value: string): void => {
     this._name = value;
+    if (this._errors?.name) this._errors.name = undefined;
   };
 
   setEmail = (value: string): void => {
     this._email = value;
+    if (this._errors?.email) this._errors.email = undefined;
   };
 
   setPassword = (value: string): void => {
     this._password = value;
+    if (this._errors?.password) this._errors.password = undefined;
   };
 
   setParentId = (value: number): void => {
     this._parentId = value;
+    if (this._errors?.bossId) this._errors.bossId = undefined;
   };
 
   showModal = (): void => {
     this._isModalVisible = true;
+    if (this._errors?.name) this._errors.name = undefined;
   };
 
   hideModal = (): void => {
@@ -75,7 +92,7 @@ export class OrgStructElementStore {
     this.clear();
   };
 
-  save = async (): Promise<void> => {
+  save = async (): Promise<boolean> => {
     const body: Body = {
       name: this._name,
       email: this._email,
@@ -83,18 +100,30 @@ export class OrgStructElementStore {
       bossId: this._parentId,
     };
 
-    const userId = await post<Body, string>("api/User/register", body);
-
-    if (userId) {
+    const result = await post<Body, RequestResult>("api/User/register", body);
+    if (result.modelErrors) {
+      this._errors = result.modelErrors;
+      return false;
+    } else {
       this.hideModal();
       this.clear();
+      return true;
     }
   };
 }
+
+type RequestResult = string & ModelErrors<Errors>;
 
 interface Body {
   name: string;
   email: string;
   password: string;
   bossId: number | undefined;
+}
+
+interface Errors {
+  name?: string;
+  email?: string;
+  password?: string;
+  bossId?: string;
 }
