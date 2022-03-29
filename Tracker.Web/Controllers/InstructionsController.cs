@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Tracker.Web.Db;
 using Tracker.Web.Domain;
 using Tracker.Web.RequestModels;
+using Tracker.Web.Validators;
 using Tracker.Web.ViewModels;
 
 namespace Tracker.Web.Controllers;
@@ -15,11 +16,18 @@ public class InstructionsController : ControllerBase
 {
     private readonly AppDbContext _db;
     private readonly UserManager<User> _userManager;
+    private readonly InstructionValidator _instructionValidator;
+    private readonly ExecDateValidator _execDateValidator;
     
-    public InstructionsController(AppDbContext db, UserManager<User> userManager)
+    public InstructionsController(AppDbContext db
+        , UserManager<User> userManager
+        , InstructionValidator instructionValidator
+        , ExecDateValidator execDateValidator)
     {
         _db = db;
         _userManager = userManager;
+        _instructionValidator = instructionValidator;
+        _execDateValidator = execDateValidator;
     }
 
     [HttpGet]
@@ -74,16 +82,21 @@ public class InstructionsController : ControllerBase
 
     [HttpPost("create")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(int))]
-    public async Task<ActionResult<int>> CreateInstruction([FromBody]InstructionRm instruction)
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ModelErrorsVm))]
+    public async Task<ActionResult<int>> CreateInstruction([FromBody]InstructionRm instructionRm)
     {
+        var validationResult = await _instructionValidator.ValidateAsync(instructionRm);
+        if (!validationResult.IsValid)
+            return Ok(validationResult.Errors.Format());
+        
         var userId = GetCurrentUserId();
         var newInstruction = new Instruction
         {
-            Name = instruction.Name,
+            Name = instructionRm.Name,
             CreatorId = userId,
-            ExecutorId = instruction.ExecutorId,
-            ParentId = instruction.ParentId,
-            Deadline = instruction.Deadline.Value
+            ExecutorId = instructionRm.ExecutorId,
+            ParentId = instructionRm.ParentId,
+            Deadline = instructionRm.Deadline
         };
         
         _db.Instructions.Add(newInstruction);
@@ -93,12 +106,17 @@ public class InstructionsController : ControllerBase
     
     [HttpPost("set-exec-date")]
     [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ModelErrorsVm))]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult> SetExecDate([FromBody] ExecDateRm execDateRm)
     {
+        var validationResult = await _execDateValidator.ValidateAsync(execDateRm);
+        if (!validationResult.IsValid)
+            return Ok(validationResult.Errors.Format());
+        
         var userId = GetCurrentUserId();
         var instruction = _db.Instructions.Single(i => i.Id == execDateRm.InstructionId);
-        instruction.SetExecDate(execDateRm.ExecDate.Value, userId);
+        instruction.SetExecDate(execDateRm.ExecDate, userId);
         await _db.SaveChangesAsync();
         return Ok();
     }

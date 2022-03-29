@@ -31,11 +31,10 @@ public class InstructionValidator : AbstractValidator<InstructionRm>
         RuleFor(instruction => instruction.ExecutorId)
             .Cascade(CascadeMode.Stop)
             .NotEmpty().WithMessage("Исполнитель не может быть пустым")
-            .MustAsync(ExecutorExistsAsync).WithMessage("Исполнитель не уже существует");
+            .MustAsync(ExecutorExistsAsync).WithMessage("Исполнитель не существует");
         RuleFor(instruction => instruction.Deadline)
             .Cascade(CascadeMode.Stop)
             .NotNull().WithMessage("Дедлайн не может быть пустым")
-            .Must(BeAValidDate).WithMessage("Дедлайн должен быть правильной датой")
             .GreaterThanOrEqualTo(DateTime.Today).WithMessage("Дедлайн должен быть больше или равно сегодня");
         RuleFor(instruction => instruction.ParentId)
             .Cascade(CascadeMode.Stop)
@@ -48,11 +47,6 @@ public class InstructionValidator : AbstractValidator<InstructionRm>
     private async Task<bool> ExecutorExistsAsync(string executorId, CancellationToken token)
     {
         return await _db.Users.AnyAsync(u => u.Id == executorId, token);
-    }
-    
-    private bool BeAValidDate(DateTime? date)
-    {
-        return !date.Equals(default(DateTime));
     }
     
     private async Task<bool> ParentExistsAsync(int? parentId, CancellationToken token)

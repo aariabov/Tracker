@@ -1,10 +1,8 @@
 using FluentValidation;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Tracker.Web.Db;
 using Tracker.Web.Domain;
 using Tracker.Web.RequestModels;
-using Tracker.Web.ViewModels;
 
 namespace Tracker.Web.Validators;
 
@@ -45,7 +43,7 @@ public class UserValidator : AbstractValidator<UserRegistrationRm>
         return !emailExists;
     }
     
-    private async Task<bool> BossExistsAsync(string bossId, CancellationToken token)
+    private async Task<bool> BossExistsAsync(string? bossId, CancellationToken token)
     {
         return await _userManager.Users.AnyAsync(u => u.Id == bossId, token);
     }

@@ -18,25 +18,28 @@ public class UserController : ControllerBase
     private readonly UserManager<User> _userManager;
     private readonly SignInManager<User> _signInManager;
     private readonly JwtGenerator _jwtGenerator;
+    private readonly UserValidator _userValidator;
 
-    public UserController(UserManager<User> userManager, SignInManager<User> signInManager, JwtGenerator jwtGenerator)
+    public UserController(UserManager<User> userManager
+        , SignInManager<User> signInManager
+        , JwtGenerator jwtGenerator
+        , UserValidator userValidator)
     {
         _userManager = userManager;
         _signInManager = signInManager;
         _jwtGenerator = jwtGenerator;
+        _userValidator = userValidator;
     }
 
     [HttpPost("register")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(string))]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ModelErrorsVm))]
     [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(IEnumerable<IdentityError>))]
     public async Task<ActionResult> RegisterAsync([FromBody]UserRegistrationRm userRm)
     {
-        // можно явно руками писать валидацию, но надо ответ приводить к единому формату
-        // с одной стороны так понятнее, а с другой больше писать и нет централизованной обработки
-        // var userValidator = new UserValidator(_userManager);
-        // var validationResult = await userValidator.ValidateAsync(userVm);
-        // if (!validationResult.IsValid)
-        //     return Ok(validationResult.Errors);
+        var validationResult = await _userValidator.ValidateAsync(userRm);
+        if (!validationResult.IsValid)
+            return Ok(validationResult.Errors.Format());
         
         var newUser = new User(userRm.Name, userRm.Email, userRm.BossId);
         var result = await _userManager.CreateAsync(newUser, userRm.Password);

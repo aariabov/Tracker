@@ -1,10 +1,7 @@
 using System.Security.Claims;
 using FluentValidation;
-using FluentValidation.Validators;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Tracker.Web.Db;
-using Tracker.Web.Domain;
 using Tracker.Web.RequestModels;
 
 namespace Tracker.Web.Validators;
@@ -20,21 +17,15 @@ public class ExecDateValidator: AbstractValidator<ExecDateRm>
         _httpContext = httpContext;
         RuleFor(rm => rm.InstructionId)
             .Cascade(CascadeMode.Stop)
-            .NotNull().WithMessage("Идентификатор поручения не может быть пустым")
+            .NotEmpty().WithMessage("Идентификатор поручения не может быть пустым")
             .CustomAsync(MustBeValidInstruction);
         RuleFor(rm => rm.ExecDate)
             .Cascade(CascadeMode.Stop)
-            .NotNull().WithMessage("Дата исполнения не может быть пустой")
-            .Must(BeAValidDate).WithMessage("Дата исполнения должена быть правильной датой")
-            .Must(execDate => execDate.Value.Date == DateTime.Today).WithMessage("Дата исполнения должна быть сегодня");
+            .NotEmpty().WithMessage("Дата исполнения не может быть пустой")
+            .Must(execDate => execDate.Date == DateTime.Today).WithMessage("Дата исполнения должна быть сегодня");
     }
     
-    private bool BeAValidDate(DateTime? date)
-    {
-        return !date.Equals(default(DateTime));
-    }
-    
-    private async Task MustBeValidInstruction(int? id, ValidationContext<ExecDateRm> context, CancellationToken token)
+    private async Task MustBeValidInstruction(int id, ValidationContext<ExecDateRm> context, CancellationToken token)
     {
         var userId = _httpContext.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier);
         var allInstructions = await _db.Instructions.ToArrayAsync(token);

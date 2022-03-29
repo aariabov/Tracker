@@ -1,17 +1,13 @@
-using System.Reflection;
 using System.Text;
-using System.Text.Json;
-using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using Tracker.Web;
 using Tracker.Web.Db;
 using Tracker.Web.Domain;
+using Tracker.Web.Validators;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -49,32 +45,14 @@ builder.Services.AddControllers(option =>
     option.Filters.Add(new AuthorizeFilter(policy));
 }).ConfigureApiBehaviorOptions(options =>
 {
-    // options.SuppressModelStateInvalidFilter = true; // ручная валидация в контроллерах
-    options.InvalidModelStateResponseFactory = context =>
-    {
-        // свойства моделей при ошибке валидации в PascalCase по умолчанию, сами приводим к camelCase
-        // https://github.com/dotnet/aspnetcore/issues/17999
-        // https://github.com/FluentValidation/FluentValidation/issues/226
-        // https://github.com/FluentValidation/FluentValidation/issues/1061
-        var errors = context.ModelState
-            .Where(i => i.Value != null && i.Value.Errors.Any())
-            .ToDictionary(i => JsonNamingPolicy.CamelCase.ConvertName(i.Key)
-                        , i => i.Value?.Errors.First().ErrorMessage);
-
-        return new OkObjectResult(new {
-            modelErrors = errors
-        });
-    };
-}).AddFluentValidation(options =>
-{
-    options.ImplicitlyValidateChildProperties = true;
-    options.ImplicitlyValidateRootCollectionElements = true;
-    options.DisableDataAnnotationsValidation = true;
-
-    options.RegisterValidatorsFromAssembly(Assembly.GetExecutingAssembly());
+    options.SuppressModelStateInvalidFilter = true; // ручная валидация в контроллерах
 });
 
 builder.Services.AddTransient<JwtGenerator>();
+
+builder.Services.AddScoped<ExecDateValidator>();
+builder.Services.AddScoped<InstructionValidator>();
+builder.Services.AddScoped<UserValidator>();
 
 var app = builder.Build();
 
