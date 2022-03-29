@@ -1,4 +1,5 @@
 using System.Net;
+using System.Security.Cryptography;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -11,7 +12,6 @@ using Tracker.Web.ViewModels;
 namespace Tracker.Web.Controllers;
 
 [ApiController]
-[AllowAnonymous]
 [Route("api/[controller]")]
 public class UserController : ControllerBase
 {
@@ -19,18 +19,24 @@ public class UserController : ControllerBase
     private readonly SignInManager<User> _signInManager;
     private readonly JwtGenerator _jwtGenerator;
     private readonly UserValidator _userValidator;
+    
+    private readonly int _refreshTokenValidityInDays;
 
     public UserController(UserManager<User> userManager
         , SignInManager<User> signInManager
         , JwtGenerator jwtGenerator
-        , UserValidator userValidator)
+        , UserValidator userValidator
+        , IConfiguration config)
     {
         _userManager = userManager;
         _signInManager = signInManager;
         _jwtGenerator = jwtGenerator;
         _userValidator = userValidator;
+        
+        _refreshTokenValidityInDays = config.GetValue<int>("Token:RefreshTokenValidityInDays");
     }
 
+    [AllowAnonymous]
     [HttpPost("register")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(string))]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ModelErrorsVm))]
@@ -49,11 +55,12 @@ public class UserController : ControllerBase
         return BadRequest(result.Errors);
     }
     
+    [AllowAnonymous]
     [HttpPost("login")]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(string))]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(TokensVm))]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult<string>> LoginAsync(LoginVM loginVm)
+    public async Task<ActionResult<TokensVm>> LoginAsync(LoginVM loginVm)
     {
         var user = await _userManager.FindByEmailAsync(loginVm.Email);
         if (user is null)
@@ -64,6 +71,55 @@ public class UserController : ControllerBase
             return Unauthorized();
         
         var isUserBoss = await _userManager.Users.AnyAsync(u => u.BossId == user.Id);
-        return Ok(_jwtGenerator.CreateToken(user, isUserBoss));
+        var token = _jwtGenerator.CreateToken(user, isUserBoss);
+        var refreshToken = GenerateRefreshToken();
+        
+        user.RefreshToken = refreshToken;
+        user.RefreshTokenExpiryTime = DateTime.Now.AddDays(_refreshTokenValidityInDays);
+        await _userManager.UpdateAsync(user);
+        
+        return Ok(new TokensVm(token, refreshToken));
+    }
+    
+    [AllowAnonymous]
+    [HttpPost("refresh-token")]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(TokensVm))]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<ActionResult<TokensVm>> RefreshToken([FromBody]string refreshToken)
+    {
+        var user = await _userManager.Users.SingleOrDefaultAsync(u => u.RefreshToken == refreshToken);
+        if (user is null || user.RefreshTokenExpiryTime < DateTime.Now)
+            return Unauthorized();
+        
+        var isUserBoss = await _userManager.Users.AnyAsync(u => u.BossId == user.Id);
+        var token = _jwtGenerator.CreateToken(user, isUserBoss);
+        var newRefreshToken = GenerateRefreshToken();
+        
+        user.RefreshToken = newRefreshToken;
+        await _userManager.UpdateAsync(user);
+        
+        return Ok(new TokensVm(token, newRefreshToken));
+    }
+    
+    [HttpPost("revoke")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult> Revoke()
+    {
+        var user = await _userManager.GetUserAsync(HttpContext.User);
+        if (user is null)
+            return NotFound();
+        
+        user.RefreshToken = null;
+        await _userManager.UpdateAsync(user);
+        return NoContent();
+    }
+    
+    private static string GenerateRefreshToken()
+    {
+        var randomNumber = new byte[64];
+        using var rng = RandomNumberGenerator.Create();
+        rng.GetBytes(randomNumber);
+        return Convert.ToBase64String(randomNumber);
     }
 }

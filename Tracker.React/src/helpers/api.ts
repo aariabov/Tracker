@@ -10,6 +10,11 @@ interface BackendError {
   traceId: string;
 }
 
+export interface TokenResponse {
+  token: string;
+  refreshToken: string;
+}
+
 export interface ModelErrors<T> {
   modelErrors?: T;
 }
@@ -19,29 +24,67 @@ function isJsonResponse(response: Response): boolean {
   return contentType !== null && contentType.includes("application/json");
 }
 
+function createPostRequestInit<T>(bodyObj: T): RequestInit {
+  const body = JSON.stringify(bodyObj);
+
+  const requestInit: RequestInit = {
+    method: "POST",
+    headers: {
+      Authorization: "Bearer " + userStore.token,
+      Accept: "application/json",
+      "Content-Type": "application/json",
+    },
+    body,
+  };
+
+  return requestInit;
+}
+
+async function parseResponse<T>(response: Response): Promise<T> {
+  if (!response.ok) {
+    let errorMsg = response.statusText;
+    if (isJsonResponse(response)) {
+      const backendError: BackendError = await response.json();
+      errorMsg = backendError.title;
+    }
+
+    throw new Error(errorMsg);
+  }
+
+  return isJsonResponse(response) ? response.json() : undefined;
+}
+
+async function refreshToken(): Promise<void> {
+  const requestInit = createPostRequestInit(userStore.refreshToken);
+
+  const response = await fetch("api/user/refresh-token", requestInit);
+  if (!response.ok) {
+    userStore.logout();
+    throw new Error(response.statusText);
+  }
+
+  const data = await parseResponse<TokenResponse>(response);
+  userStore.setTokens(data.token, data.refreshToken);
+}
+
 async function makeRequest<T>(
   url: string,
   requestInit: RequestInit
 ): Promise<T> {
   try {
-    const response = await fetch(url, requestInit);
+    let response = await fetch(url, requestInit);
     if (!response.ok) {
       if (response.status === 401) {
-        userStore.logout();
-        throw new Error(response.statusText);
+        await refreshToken();
+        requestInit.headers = {
+          ...requestInit.headers,
+          Authorization: "Bearer " + userStore.token,
+        };
+        response = await fetch(url, requestInit);
       }
-
-      let errorMsg = response.statusText;
-      if (isJsonResponse(response)) {
-        const backendError: BackendError = await response.json();
-        errorMsg = backendError.title;
-      }
-
-      throw new Error(errorMsg);
     }
 
-    const data = isJsonResponse(response) ? await response.json() : undefined;
-    return data;
+    return await parseResponse<T>(response);
   } catch (err: unknown) {
     if (typeof err === "string") {
       errorStore.setError(err);
@@ -61,25 +104,13 @@ export async function get<T>(path: string): Promise<T> {
     },
   };
 
-  return makeRequest(BACKEND_URL + path, requestInit);
+  return makeRequest<T>(BACKEND_URL + path, requestInit);
 }
 
 export async function post<TBody, TRes = void>(
   path: string,
   bodyObj: TBody
 ): Promise<TRes> {
-  const body = JSON.stringify(bodyObj);
-
-  const requestInit: RequestInit = {
-    method: "POST",
-    credentials: "same-origin",
-    headers: {
-      Authorization: "Bearer " + userStore.token,
-      Accept: "application/json",
-      "Content-Type": "application/json",
-    },
-    body,
-  };
-
-  return makeRequest(BACKEND_URL + path, requestInit);
+  const requestInit = createPostRequestInit(bodyObj);
+  return makeRequest<TRes>(BACKEND_URL + path, requestInit);
 }

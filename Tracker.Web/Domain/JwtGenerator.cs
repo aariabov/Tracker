@@ -8,10 +8,15 @@ namespace Tracker.Web.Domain;
 public class JwtGenerator
 {
     private readonly SymmetricSecurityKey _key;
+    private readonly int _tokenValidityInMinutes;
 
     public JwtGenerator(IConfiguration config)
     {
-        _key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["TokenKey"]));
+        var section = config.GetSection("Token");
+        var key = section.GetValue<string>("TokenKey");
+        _tokenValidityInMinutes = section.GetValue<int>("TokenValidityInMinutes");
+
+        _key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key));
     }
 
     public string CreateToken(User user, bool isUserBoss)
@@ -28,7 +33,7 @@ public class JwtGenerator
         var tokenDescriptor = new SecurityTokenDescriptor
         {
             Subject = new ClaimsIdentity(claims),
-            Expires = DateTime.Now.AddDays(7),
+            Expires = DateTime.Now.AddMinutes(_tokenValidityInMinutes),
             SigningCredentials = credentials
         };
         var tokenHandler = new JwtSecurityTokenHandler();

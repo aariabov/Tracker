@@ -5,6 +5,8 @@ namespace Tracker.Web.Domain;
 public sealed class User : IdentityUser
 {
     public string? BossId { get; set; }
+    public string? RefreshToken { get; set; }
+    public DateTime RefreshTokenExpiryTime { get; set; }
 
     private User(){}
 

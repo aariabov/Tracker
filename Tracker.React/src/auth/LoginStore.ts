@@ -1,5 +1,5 @@
 import { action, makeObservable, observable } from "mobx";
-import { post } from "../helpers/api";
+import { post, TokenResponse } from "../helpers/api";
 import { userStore } from "./UserStore";
 
 interface LoginBody {
@@ -61,8 +61,11 @@ export class LoginStore {
     };
 
     try {
-      const token = await post<LoginBody, string>("api/user/login", body);
-      userStore.setToken(token);
+      const response = await post<LoginBody, TokenResponse>(
+        "api/user/login",
+        body
+      );
+      userStore.setTokens(response.token, response.refreshToken);
       this.clear();
     } catch (err) {
       this._error = "Неправильный email или пароль";

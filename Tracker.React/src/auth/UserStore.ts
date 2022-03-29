@@ -14,24 +14,33 @@ function parseJwt(token: string): UserInfo | null {
   }
 }
 
+const tokenKey = "token";
+const refreshTokenKey = "refreshToken";
+
 export class UserStore {
   private _id: string = "";
   private _token: string = "";
+  private _refreshToken: string = "";
   private _email: string = "";
   private _isUserBoss: boolean = false;
 
   constructor() {
-    makeObservable<UserStore, "_email" | "_token" | "_isUserBoss">(this, {
+    makeObservable<
+      UserStore,
+      "_email" | "_token" | "_refreshToken" | "_isUserBoss"
+    >(this, {
       _email: observable,
       _token: observable,
+      _refreshToken: observable,
       _isUserBoss: observable,
       token: computed,
       email: computed,
-      setToken: action,
+      setTokens: action,
     });
 
-    const token = localStorage.getItem("token");
-    this.setToken(token);
+    const token = localStorage.getItem(tokenKey);
+    const refreshToken = localStorage.getItem(refreshTokenKey);
+    if (token && refreshToken) this.setTokens(token, refreshToken);
   }
 
   get id(): string {
@@ -42,6 +51,10 @@ export class UserStore {
     return this._token;
   }
 
+  get refreshToken(): string {
+    return this._refreshToken;
+  }
+
   get email(): string {
     return this._email;
   }
@@ -50,21 +63,23 @@ export class UserStore {
     return this._isUserBoss;
   }
 
-  setToken = (token: string | null): void => {
-    if (token) {
-      const userInfo = parseJwt(token);
-      if (userInfo) {
-        this._id = userInfo.nameid;
-        this._email = userInfo.email;
-        this._isUserBoss = userInfo.isUserBoss === "true";
-        this._token = token;
-        localStorage.setItem("token", token);
-      }
+  setTokens = (token: string, refreshToken: string): void => {
+    const userInfo = parseJwt(token);
+    if (userInfo) {
+      this._id = userInfo.nameid;
+      this._email = userInfo.email;
+      this._isUserBoss = userInfo.isUserBoss === "true";
+      this._token = token;
+      localStorage.setItem(tokenKey, token);
     }
+
+    this._refreshToken = refreshToken;
+    localStorage.setItem(refreshTokenKey, refreshToken);
   };
 
   logout = (): void => {
-    localStorage.removeItem("token");
+    localStorage.removeItem(tokenKey);
+    localStorage.removeItem(refreshTokenKey);
     this._email = "";
     this._token = "";
     this._isUserBoss = false;

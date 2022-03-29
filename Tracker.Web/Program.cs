@@ -22,7 +22,7 @@ builder.Services.AddIdentityCore<User>(o => {
 }).AddEntityFrameworkStores<AppDbContext>()
     .AddSignInManager<SignInManager<User>>();
 
-var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["TokenKey"]));
+var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Token:TokenKey"]));
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(
         opt =>
@@ -33,6 +33,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 IssuerSigningKey = key,
                 ValidateAudience = false,
                 ValidateIssuer = false,
+                RequireExpirationTime = true,
+                ClockSkew = TimeSpan.Zero
             };
         });
 
