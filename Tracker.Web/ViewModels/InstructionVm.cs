@@ -41,21 +41,9 @@ public class InstructionVm
             , ExecutorName = instruction.Executor.UserName
             , Deadline = instruction.Deadline
             , ExecDate = instruction.ExecDate
-            , Status = GetStatus(instruction.Status)
+            , Status = instruction.Status.GetString()
             , CanCreateChild = canCreateChild
             , CanBeExecuted = canBeExecuted
         };
-    }
-
-    private static string GetStatus(ExecStatus status)
-    {
-        switch (status)
-        {
-            case ExecStatus.InWork: return "В работе";
-            case ExecStatus.InWorkOverdue: return "В работе просрочено";
-            case ExecStatus.Completed: return "Выполнено в срок";
-            case ExecStatus.CompletedOverdue: return "Выполнено с нарушением срока";
-            default: throw new Exception("Unknown ExecStatus");
-        }
     }
 }
