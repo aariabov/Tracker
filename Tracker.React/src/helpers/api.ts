@@ -54,16 +54,26 @@ async function parseResponse<T>(response: Response): Promise<T> {
   return isJsonResponse(response) ? response.json() : undefined;
 }
 
-async function refreshToken(): Promise<void> {
-  const requestInit = createPostRequestInit(userStore.refreshToken);
+let fetchPromise: Promise<Response> | null;
+let jsonPromise: Promise<TokenResponse> | null;
 
-  const response = await fetch("api/user/refresh-token", requestInit);
+async function refreshToken(): Promise<void> {
+  if (!fetchPromise) {
+    const requestInit = createPostRequestInit(userStore.refreshToken);
+    fetchPromise = fetch("api/user/refresh-token", requestInit);
+  }
+
+  const response = await fetchPromise;
+  fetchPromise = null;
   if (!response.ok) {
     userStore.logout();
     throw new Error(response.statusText);
   }
 
-  const data = await parseResponse<TokenResponse>(response);
+  if (!jsonPromise) jsonPromise = parseResponse<TokenResponse>(response);
+
+  const data = await jsonPromise;
+  jsonPromise = null;
   userStore.setTokens(data.token, data.refreshToken);
 }
 
