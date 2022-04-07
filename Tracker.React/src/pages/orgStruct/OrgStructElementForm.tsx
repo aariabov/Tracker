@@ -1,24 +1,30 @@
-import React, { FC, useState } from "react";
+import React, { FC } from "react";
 import { observer } from "mobx-react";
-import { Form, Input, Button, TreeSelect, Modal } from "antd";
+import { Form, Input, Button, TreeSelect, Modal, Select } from "antd";
 import { OrgStructStore } from "../../stores/OrgStructStore";
 import { OrgStructElementStore } from "./OrgStructElementStore";
+import { RolesStore } from "../roles/RolesStore";
 
 interface Props {
   orgStructStore: OrgStructStore;
+  orgStructElementStore: OrgStructElementStore;
+  rolesStore: RolesStore;
 }
 
 const OrgStructElementForm: FC<Props> = observer((props: Props) => {
-  const { orgStructStore } = props;
-  const [store] = useState(() => new OrgStructElementStore());
+  const { orgStructStore, rolesStore, orgStructElementStore: store } = props;
 
   return (
     <div>
-      <Button type="primary" onClick={store.showModal}>
+      <Button type="primary" onClick={(): void => store.showModal()}>
         Создать нового сотрудника
       </Button>
       <Modal
-        title="Создание нового сотрудника"
+        title={
+          store.isEditMode
+            ? "Редактирование сотрудника"
+            : "Создание нового сотрудника"
+        }
         visible={store.isModalVisible}
         onCancel={store.hideModal}
         footer={[
@@ -62,18 +68,20 @@ const OrgStructElementForm: FC<Props> = observer((props: Props) => {
               }
             />
           </Form.Item>
-          <Form.Item
-            label="Пароль"
-            validateStatus={store.errors?.password && "error"}
-            help={store.errors?.password}
-          >
-            <Input
-              value={store.password}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>): void =>
-                store.setPassword(e.target.value)
-              }
-            />
-          </Form.Item>
+          {!store.isEditMode && (
+            <Form.Item
+              label="Пароль"
+              validateStatus={store.errors?.password && "error"}
+              help={store.errors?.password}
+            >
+              <Input
+                value={store.password}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>): void =>
+                  store.setPassword(e.target.value)
+                }
+              />
+            </Form.Item>
+          )}
           <Form.Item
             label="Руководитель"
             validateStatus={store.errors?.bossId && "error"}
@@ -86,6 +94,22 @@ const OrgStructElementForm: FC<Props> = observer((props: Props) => {
               value={store.parentId}
               onChange={store.setParentId}
               allowClear
+            />
+          </Form.Item>
+          <Form.Item
+            label="Роли"
+            validateStatus={store.errors?.roles && "error"}
+            help={store.errors?.roles}
+          >
+            <Select
+              mode="multiple"
+              allowClear
+              value={store.roles}
+              onChange={store.setRoles}
+              options={rolesStore.roles.map((r) => ({
+                value: r.name,
+                label: r.name,
+              }))}
             />
           </Form.Item>
         </Form>

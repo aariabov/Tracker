@@ -19,14 +19,15 @@ public class JwtGenerator
         _key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key));
     }
 
-    public string CreateToken(User user, bool isUserBoss)
+    public string CreateToken(string userId, string userEmail, IEnumerable<string> userRoles, bool isUserBoss)
     {
         var claims = new List<Claim>
         {
-            new (JwtRegisteredClaimNames.NameId, user.Id),
-            new (JwtRegisteredClaimNames.Email, user.Email),
+            new (JwtRegisteredClaimNames.NameId, userId),
+            new (JwtRegisteredClaimNames.Email, userEmail),
             new ("isUserBoss", isUserBoss.ToString().ToLower())
         };
+        claims.AddRange(userRoles.Select(userRole => new Claim(ClaimTypes.Role, userRole)));
 
         var credentials = new SigningCredentials(_key, SecurityAlgorithms.HmacSha512Signature);
 

@@ -12,8 +12,15 @@ export class OrgStructStore {
       orgStructTreeData: computed,
       load: action,
     });
+  }
 
-    this.load();
+  get orgStructElementRows(): OrgStructElementRow[] {
+    const mapFunc = (element: OrgStructElement): OrgStructElementRow => ({
+      ...element,
+      children: [],
+    });
+
+    return listToTree(this.orgStructElements, mapFunc);
   }
 
   get orgStructTreeData(): TreeNode<string>[] {
@@ -40,5 +47,16 @@ export class OrgStructStore {
 export interface OrgStructElement {
   id: string;
   name: string;
+  email: string;
   parentId?: string;
+  roles: string[];
+}
+
+export interface OrgStructElementRow {
+  id: string;
+  name: string;
+  email: string;
+  parentId?: string;
+  roles: string[];
+  children: OrgStructElementRow[];
 }

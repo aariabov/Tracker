@@ -25,11 +25,19 @@ public class OrgStructController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<OrgStructElementVm>))]
     public async Task<ActionResult<IEnumerable<OrgStructElementVm>>> Get()
     {
-        var users = await _userManager.Users
-            .Select(u => new OrgStructElementVm(u.Id, u.UserName, u.BossId))
-            .ToArrayAsync();
+        var query = from user in _userManager.Users
+            orderby user.UserName
+            select new OrgStructElementVm
+            {
+                Id = user.Id,
+                Name = user.UserName,
+                Email = user.Email,
+                ParentId = user.BossId,
+                Roles = user.Roles.Select(role => role.Name)
+            };
         
-        return Ok(users);
+        var allUsers = await query.ToArrayAsync();
+        return Ok(allUsers);
     }
     
     [HttpPost]

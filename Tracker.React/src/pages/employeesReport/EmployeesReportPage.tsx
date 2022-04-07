@@ -9,12 +9,10 @@ const EmployeesReportPage: FC = observer(() => {
   const [store] = useState(() => new EmployeesReportStore());
 
   return (
-    <div className="app">
-      <Space direction="vertical" size="large">
-        <EmployeesReportFilters store={store} />
-        <EmployeesReportTable store={store} />
-      </Space>
-    </div>
+    <Space direction="vertical" size="large">
+      <EmployeesReportFilters store={store} />
+      <EmployeesReportTable store={store} />
+    </Space>
   );
 });
 

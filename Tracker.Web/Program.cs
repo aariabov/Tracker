@@ -19,7 +19,9 @@ builder.Services.AddIdentityCore<User>(o => {
     o.Password.RequireNonAlphanumeric = false;
     o.Password.RequiredLength = 1;
     o.User.AllowedUserNameCharacters = null;
-}).AddEntityFrameworkStores<AppDbContext>()
+}).AddRoles<Role>()
+    .AddRoleManager<RoleManager<Role>>()
+    .AddEntityFrameworkStores<AppDbContext>()
     .AddSignInManager<SignInManager<User>>();
 
 var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Token:TokenKey"]));
@@ -54,7 +56,15 @@ builder.Services.AddTransient<JwtGenerator>();
 
 builder.Services.AddScoped<ExecDateValidator>();
 builder.Services.AddScoped<InstructionValidator>();
-builder.Services.AddScoped<UserValidator>();
+builder.Services.AddScoped<UserBaseValidator>();
+builder.Services.AddScoped<UserCreationValidator>();
+builder.Services.AddScoped<UserUpdatingValidator>();
+builder.Services.AddScoped<UserDeletingValidator>();
+builder.Services.AddScoped<RoleCreationValidator>();
+builder.Services.AddScoped<RoleUpdatingValidator>();
+builder.Services.AddScoped<RoleDeletingValidator>();
+
+builder.Services.AddScoped<DataSeeder>();
 
 var app = builder.Build();
 
@@ -65,6 +75,10 @@ if (!app.Environment.IsDevelopment())
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
+
+using var serviceScope = app.Services.CreateScope();
+var dataSeeder = serviceScope.ServiceProvider.GetService<DataSeeder>();
+await dataSeeder.Seed();
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();

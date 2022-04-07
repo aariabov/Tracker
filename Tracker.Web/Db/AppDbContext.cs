@@ -1,10 +1,11 @@
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Tracker.Web.Domain;
 
 namespace Tracker.Web.Db;
 
-public class AppDbContext : IdentityDbContext<User>
+public class AppDbContext : IdentityDbContext<User, Role, string>
 {
     public DbSet<OrgStructElement> OrgStruct => Set<OrgStructElement>();
     public DbSet<Instruction> Instructions => Set<Instruction>();
@@ -44,5 +45,20 @@ public class AppDbContext : IdentityDbContext<User>
             .HasOne(i => i.Executor)
             .WithMany()
             .HasForeignKey(e => e.ExecutorId);
+        
+        modelBuilder.Entity<User>(b =>
+        {
+            b.HasOne<User>()
+                .WithMany()
+                .HasForeignKey(e => e.BossId);
+            
+            b.HasMany(e => e.Roles)
+                .WithMany(e => e.Users)
+                .UsingEntity<IdentityUserRole<string>>();
+            
+            b.HasOne(i => i.Boss)
+                .WithMany(i => i.Children)
+                .HasForeignKey(e => e.BossId);
+        });
     }
 }

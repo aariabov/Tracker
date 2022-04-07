@@ -7,6 +7,9 @@ public sealed class User : IdentityUser
     public string? BossId { get; set; }
     public string? RefreshToken { get; set; }
     public DateTime RefreshTokenExpiryTime { get; set; }
+    public ICollection<Role> Roles { get; set; }
+    public User? Boss { get; set; }
+    public ICollection<User> Children { get; set; }
 
     private User(){}
 
@@ -15,5 +18,10 @@ public sealed class User : IdentityUser
         UserName = name;
         Email = email;
         BossId = bossId;
+    }
+
+    public bool IsAdmin(string adminEmail)
+    {
+        return Email == adminEmail;
     }
 }

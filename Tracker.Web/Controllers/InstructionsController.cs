@@ -39,7 +39,8 @@ public class InstructionsController : ControllerBase
         var userInstructions = allInstructions
             .Where(i => i.CreatorId == userId || i.ExecutorId == userId);
         
-        var isUserBoss = await _userManager.Users.AnyAsync(u => u.BossId == userId);
+        // TODO: надо внедрять информацию об юзере через DI
+        var isUserBoss = User.FindFirstValue("isUserBoss") == "true";
 
         var instructionVms = userInstructions.Select(instruction =>
         {

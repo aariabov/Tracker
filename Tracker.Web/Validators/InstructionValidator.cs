@@ -46,7 +46,7 @@ public class InstructionValidator : AbstractValidator<InstructionRm>
     
     private async Task<bool> ExecutorExistsAsync(string executorId, CancellationToken token)
     {
-        return await _db.Users.AnyAsync(u => u.Id == executorId, token);
+        return await _userManager.Users.AnyAsync(u => u.Id == executorId, token);
     }
     
     private async Task<bool> ParentExistsAsync(int? parentId, CancellationToken token)

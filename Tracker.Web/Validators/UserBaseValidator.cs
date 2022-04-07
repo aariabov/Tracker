@@ -1,23 +1,24 @@
 using FluentValidation;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Tracker.Web.Db;
 using Tracker.Web.Domain;
 using Tracker.Web.RequestModels;
 
 namespace Tracker.Web.Validators;
 
-public class UserValidator : AbstractValidator<UserRegistrationRm>
+public class UserBaseValidator : AbstractValidator<UserBaseRm>
 {
     private readonly UserManager<User> _userManager;
+    private readonly AppDbContext _db;
     
-    public UserValidator(UserManager<User> userManager)
+    public UserBaseValidator(UserManager<User> userManager, AppDbContext db)
     {
         _userManager = userManager;
+        _db = db;
 
         const int nameMinLen = 3;
         const int nameMaxLen = 100;
-        const int pwdMinLen = 1;
-        const int pwdMaxLen = 100;
         
         RuleFor(user => user.Name)
             .Cascade(CascadeMode.Stop)
@@ -26,21 +27,26 @@ public class UserValidator : AbstractValidator<UserRegistrationRm>
         RuleFor(user => user.Email)
             .Cascade(CascadeMode.Stop)
             .NotEmpty().WithMessage("Email не может быть пустым")
-            .EmailAddress().WithMessage("Email неправильного формата")
-            .MustAsync(UniqueEmailAsync).WithMessage("Email уже существует");
-        RuleFor(user => user.Password)
-            .Cascade(CascadeMode.Stop)
-            .NotEmpty().WithMessage("Пароль не может быть пустым")
-            .Length(pwdMinLen, pwdMaxLen).WithMessage($"Пароль должен быть от {pwdMinLen} до {pwdMaxLen} символов");
+            .EmailAddress().WithMessage("Email неправильного формата");
         RuleFor(user => user.BossId)
             .MustAsync(BossExistsAsync).WithMessage("Руководитель не найден")
             .When(u => !string.IsNullOrWhiteSpace(u.BossId));
+        RuleFor(user => user.Roles)
+            .CustomAsync(MustBeValidInstruction);
     }
     
-    private async Task<bool> UniqueEmailAsync(string email, CancellationToken token)
+    private async Task MustBeValidInstruction(IEnumerable<string> roles
+        , ValidationContext<UserBaseRm> context, CancellationToken token)
     {
-        var emailExists = await _userManager.Users.AnyAsync(u => u.Email == email, token);
-        return !emailExists;
+        foreach (var role in roles)
+        {
+            var isRoleExists = await _db.Roles.AnyAsync(r => r.Name == role, token);
+            if (!isRoleExists)
+            {
+                context.AddFailure($"Роль '{role}' не найдена");
+                return;
+            }
+        }
     }
     
     private async Task<bool> BossExistsAsync(string? bossId, CancellationToken token)

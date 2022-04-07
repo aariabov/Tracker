@@ -1,5 +1,5 @@
 import { Button, DatePicker, Form, TreeSelect } from "antd";
-import React, { FC, useState } from "react";
+import React, { FC } from "react";
 import { observer } from "mobx-react";
 import { EmployeeReportStore } from "./EmployeeReportStore";
 import { OrgStructStore } from "../../stores/OrgStructStore";
@@ -8,11 +8,11 @@ const { RangePicker } = DatePicker;
 
 interface Props {
   store: EmployeeReportStore;
+  orgStructStore: OrgStructStore;
 }
 
 const EmployeeReportFilters: FC<Props> = observer((props: Props) => {
-  const [orgStructStore] = useState(() => new OrgStructStore());
-  const { store } = props;
+  const { store, orgStructStore } = props;
 
   return (
     <Form layout={"inline"} autoComplete="off">

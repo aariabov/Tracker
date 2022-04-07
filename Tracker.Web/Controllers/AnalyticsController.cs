@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Tracker.Web.Db;
 using Tracker.Web.Domain;
@@ -8,6 +9,7 @@ namespace Tracker.Web.Controllers;
 using Microsoft.AspNetCore.Mvc;
 
 [ApiController]
+[Authorize(Roles = "Admin, Analyst")]
 [Route("api/[controller]")]
 public class AnalyticsController : ControllerBase
 {

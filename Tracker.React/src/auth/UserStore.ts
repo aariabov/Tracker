@@ -4,6 +4,7 @@ interface UserInfo {
   nameid: string;
   email: string;
   isUserBoss: string;
+  role?: string[];
 }
 
 function parseJwt(token: string): UserInfo | null {
@@ -22,17 +23,19 @@ export class UserStore {
   private _token: string = "";
   private _refreshToken: string = "";
   private _email: string = "";
+  private _roles: string[] = [];
   private _isUserBoss: boolean = false;
 
   constructor() {
     makeObservable<
       UserStore,
-      "_email" | "_token" | "_refreshToken" | "_isUserBoss"
+      "_email" | "_token" | "_refreshToken" | "_isUserBoss" | "_roles"
     >(this, {
       _email: observable,
       _token: observable,
       _refreshToken: observable,
       _isUserBoss: observable,
+      _roles: observable,
       token: computed,
       email: computed,
       setTokens: action,
@@ -59,6 +62,14 @@ export class UserStore {
     return this._email;
   }
 
+  get isAdmin(): boolean {
+    return this._roles.includes("Admin");
+  }
+
+  get isAnalyst(): boolean {
+    return this._roles.includes("Analyst") || this.isAdmin;
+  }
+
   get isUserBoss(): boolean {
     return this._isUserBoss;
   }
@@ -69,6 +80,7 @@ export class UserStore {
       this._id = userInfo.nameid;
       this._email = userInfo.email;
       this._isUserBoss = userInfo.isUserBoss === "true";
+      this._roles = userInfo.role || [];
       this._token = token;
       localStorage.setItem(tokenKey, token);
     }

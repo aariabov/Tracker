@@ -1,20 +1,34 @@
-import React, { FC, useState } from "react";
+import React, { FC, useEffect, useState } from "react";
 import { observer } from "mobx-react";
-import OrgStruct from "./OrgStruct";
+import OrgStructTable from "./OrgStructTable";
 import OrgStructElementForm from "./OrgStructElementForm";
 import { Space } from "antd";
 import { OrgStructStore } from "../../stores/OrgStructStore";
+import { OrgStructElementStore } from "./OrgStructElementStore";
+import { RolesStore } from "../roles/RolesStore";
 
 const OrgStructPage: FC = observer(() => {
   const [orgStructStore] = useState(() => new OrgStructStore());
+  const [orgStructElementStore] = useState(() => new OrgStructElementStore());
+  const [rolesStore] = useState(() => new RolesStore());
+
+  useEffect(() => {
+    rolesStore.load();
+    orgStructStore.load();
+  }, []);
 
   return (
-    <div className="app">
-      <Space direction="vertical" size="large">
-        <OrgStructElementForm orgStructStore={orgStructStore} />
-        <OrgStruct orgStructStore={orgStructStore} />
-      </Space>
-    </div>
+    <Space direction="vertical" size="large" style={{ width: "70%" }}>
+      <OrgStructElementForm
+        rolesStore={rolesStore}
+        orgStructStore={orgStructStore}
+        orgStructElementStore={orgStructElementStore}
+      />
+      <OrgStructTable
+        orgStructStore={orgStructStore}
+        orgStructElementStore={orgStructElementStore}
+      />
+    </Space>
   );
 });
 
