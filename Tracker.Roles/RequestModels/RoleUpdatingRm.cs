@@ -1,4 +1,4 @@
-namespace Tracker.Web.RequestModels;
+namespace Tracker.Roles.RequestModels;
 
 public class RoleUpdatingRm : RoleCreationRm
 {

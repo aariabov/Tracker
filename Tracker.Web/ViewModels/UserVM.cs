@@ -1,3 +1,4 @@
+using Tracker.Db.Models;
 using Tracker.Web.Domain;
 
 namespace Tracker.Web.ViewModels;

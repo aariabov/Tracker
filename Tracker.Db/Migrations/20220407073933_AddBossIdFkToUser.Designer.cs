@@ -4,15 +4,15 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using Tracker.Web.Db;
+using Tracker.Db;
 
 #nullable disable
 
 namespace Tracker.Web.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20220311074544_ChangeInstructionFkToUser")]
-    partial class ChangeInstructionFkToUser
+    [Migration("20220407073933_AddBossIdFkToUser")]
+    partial class AddBossIdFkToUser
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -252,6 +252,12 @@ namespace Tracker.Web.Migrations
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("RefreshToken")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("RefreshTokenExpiryTime")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("TEXT");
 
@@ -263,6 +269,8 @@ namespace Tracker.Web.Migrations
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("BossId");
 
                     b.HasIndex("NormalizedEmail")
                         .HasDatabaseName("EmailIndex");
@@ -339,13 +347,15 @@ namespace Tracker.Web.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Tracker.Web.Domain.Instruction", null)
+                    b.HasOne("Tracker.Web.Domain.Instruction", "Parent")
                         .WithMany("Children")
                         .HasForeignKey("ParentId");
 
                     b.Navigation("Creator");
 
                     b.Navigation("Executor");
+
+                    b.Navigation("Parent");
                 });
 
             modelBuilder.Entity("Tracker.Web.Domain.OrgStructElement", b =>
@@ -353,6 +363,13 @@ namespace Tracker.Web.Migrations
                     b.HasOne("Tracker.Web.Domain.OrgStructElement", null)
                         .WithMany()
                         .HasForeignKey("ParentId");
+                });
+
+            modelBuilder.Entity("Tracker.Web.Domain.User", b =>
+                {
+                    b.HasOne("Tracker.Web.Domain.User", null)
+                        .WithMany()
+                        .HasForeignKey("BossId");
                 });
 
             modelBuilder.Entity("Tracker.Web.Domain.Instruction", b =>

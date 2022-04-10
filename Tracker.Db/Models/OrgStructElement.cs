@@ -1,5 +1,6 @@
-namespace Tracker.Web.Domain;
+namespace Tracker.Db.Models;
 
+// TODO: удалить, тк не используется
 public class OrgStructElement
 {
     public int Id { get; set; }

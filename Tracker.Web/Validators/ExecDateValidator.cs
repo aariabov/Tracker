@@ -1,7 +1,7 @@
 using System.Security.Claims;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
-using Tracker.Web.Db;
+using Tracker.Db;
 using Tracker.Web.RequestModels;
 
 namespace Tracker.Web.Validators;

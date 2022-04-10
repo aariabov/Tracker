@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 
-namespace Tracker.Web.Domain;
+namespace Tracker.Db.Models;
 
 public class Role : IdentityRole
 {

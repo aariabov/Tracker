@@ -1,10 +1,11 @@
 using FluentValidation;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Tracker.Web.Domain;
-using Tracker.Web.RequestModels;
+using Microsoft.Extensions.Configuration;
+using Tracker.Db.Models;
+using Tracker.Roles.RequestModels;
 
-namespace Tracker.Web.Validators;
+namespace Tracker.Roles.Validators;
 
 public class RoleUpdatingValidator : AbstractValidator<RoleUpdatingRm>
 {
@@ -16,7 +17,7 @@ public class RoleUpdatingValidator : AbstractValidator<RoleUpdatingRm>
         , IConfiguration config)
     {
         _roleManager = roleManager;
-        _adminRole = config.GetValue<string>("DefaultAdmin:Role");
+        _adminRole = config["DefaultAdmin:Role"];
         
         Include(roleCreationValidator);
         RuleFor(role => role)

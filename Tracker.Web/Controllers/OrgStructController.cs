@@ -2,8 +2,8 @@ using System.Linq;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Tracker.Web.Db;
-using Tracker.Web.Domain;
+using Tracker.Db;
+using Tracker.Db.Models;
 using Tracker.Web.ViewModels;
 
 namespace Tracker.Web.Controllers;

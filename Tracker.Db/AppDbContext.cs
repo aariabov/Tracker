@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using Tracker.Web.Domain;
+using Tracker.Db.Models;
 
-namespace Tracker.Web.Db;
+namespace Tracker.Db;
 
 public class AppDbContext : IdentityDbContext<User, Role, string>
 {

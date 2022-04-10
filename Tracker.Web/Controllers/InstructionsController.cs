@@ -2,8 +2,9 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Tracker.Web.Db;
-using Tracker.Web.Domain;
+using Tracker.Common;
+using Tracker.Db;
+using Tracker.Db.Models;
 using Tracker.Web.RequestModels;
 using Tracker.Web.Validators;
 using Tracker.Web.ViewModels;
@@ -15,17 +16,14 @@ namespace Tracker.Web.Controllers;
 public class InstructionsController : ControllerBase
 {
     private readonly AppDbContext _db;
-    private readonly UserManager<User> _userManager;
     private readonly InstructionValidator _instructionValidator;
     private readonly ExecDateValidator _execDateValidator;
     
     public InstructionsController(AppDbContext db
-        , UserManager<User> userManager
         , InstructionValidator instructionValidator
         , ExecDateValidator execDateValidator)
     {
         _db = db;
-        _userManager = userManager;
         _instructionValidator = instructionValidator;
         _execDateValidator = execDateValidator;
     }

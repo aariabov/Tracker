@@ -1,11 +1,9 @@
 using FluentValidation;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Tracker.Web.Db;
-using Tracker.Web.Domain;
-using Tracker.Web.RequestModels;
+using Tracker.Db;
+using Tracker.Roles.RequestModels;
 
-namespace Tracker.Web.Validators;
+namespace Tracker.Roles.Validators;
 
 public class RoleDeletingValidator : AbstractValidator<RoleDeletingRm>
 {

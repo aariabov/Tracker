@@ -1,9 +1,7 @@
 using System.Text.Json;
 using FluentValidation.Results;
-using Tracker.Web.Domain;
-using Tracker.Web.ViewModels;
 
-namespace Tracker.Web;
+namespace Tracker.Common;
 
 public static class Helpers
 {

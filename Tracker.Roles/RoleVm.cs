@@ -1,4 +1,4 @@
-namespace Tracker.Web.ViewModels;
+namespace Tracker.Roles;
 
 public class RoleVm
 {

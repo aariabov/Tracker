@@ -4,15 +4,15 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using Tracker.Web.Db;
+using Tracker.Db;
 
 #nullable disable
 
 namespace Tracker.Web.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20220328052208_AddRefreshTokenToUser")]
-    partial class AddRefreshTokenToUser
+    [Migration("20220311070858_CreateIdentityTables")]
+    partial class CreateIdentityTables
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -153,9 +153,8 @@ namespace Tracker.Web.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("CreatorId")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
+                    b.Property<int>("CreatorId")
+                        .HasColumnType("INTEGER");
 
                     b.Property<DateTime>("Deadline")
                         .HasColumnType("TEXT");
@@ -163,9 +162,8 @@ namespace Tracker.Web.Migrations
                     b.Property<DateTime?>("ExecDate")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("ExecutorId")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
+                    b.Property<int>("ExecutorId")
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -252,12 +250,6 @@ namespace Tracker.Web.Migrations
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("RefreshToken")
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("RefreshTokenExpiryTime")
-                        .HasColumnType("TEXT");
-
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("TEXT");
 
@@ -333,27 +325,25 @@ namespace Tracker.Web.Migrations
 
             modelBuilder.Entity("Tracker.Web.Domain.Instruction", b =>
                 {
-                    b.HasOne("Tracker.Web.Domain.User", "Creator")
+                    b.HasOne("Tracker.Web.Domain.OrgStructElement", "Creator")
                         .WithMany()
                         .HasForeignKey("CreatorId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Tracker.Web.Domain.User", "Executor")
+                    b.HasOne("Tracker.Web.Domain.OrgStructElement", "Executor")
                         .WithMany()
                         .HasForeignKey("ExecutorId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Tracker.Web.Domain.Instruction", "Parent")
+                    b.HasOne("Tracker.Web.Domain.Instruction", null)
                         .WithMany("Children")
                         .HasForeignKey("ParentId");
 
                     b.Navigation("Creator");
 
                     b.Navigation("Executor");
-
-                    b.Navigation("Parent");
                 });
 
             modelBuilder.Entity("Tracker.Web.Domain.OrgStructElement", b =>

@@ -1,7 +1,8 @@
 using Microsoft.AspNetCore.Identity;
-using Tracker.Web.Domain;
+using Microsoft.Extensions.Configuration;
+using Tracker.Db.Models;
 
-namespace Tracker.Web.Db;
+namespace Tracker.Db;
 
 public class DataSeeder
 {
@@ -21,10 +22,10 @@ public class DataSeeder
     public async Task Seed()
     {
         var defaultAdminSection = _config.GetSection("DefaultAdmin");
-        var adminName = defaultAdminSection.GetValue<string>("Name");
-        var adminEmail = defaultAdminSection.GetValue<string>("Email");
-        var adminPassword = defaultAdminSection.GetValue<string>("Password");
-        var adminRole = defaultAdminSection.GetValue<string>("Role");
+        var adminName = defaultAdminSection["Name"];
+        var adminEmail = defaultAdminSection["Email"];
+        var adminPassword = defaultAdminSection["Password"];
+        var adminRole = defaultAdminSection["Role"];
 
         var isAdminRoleExists = await _roleManager.RoleExistsAsync(adminRole);
         if (!isAdminRoleExists)

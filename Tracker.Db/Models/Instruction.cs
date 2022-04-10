@@ -1,4 +1,6 @@
-namespace Tracker.Web.Domain;
+using Tracker.Common;
+
+namespace Tracker.Db.Models;
 
 public class Instruction
 {
@@ -14,6 +16,7 @@ public class Instruction
     public Instruction? Parent { get; set; }
     public ICollection<Instruction> Children { get; set; } = new List<Instruction>();
 
+    // TODO: убрать логику
     public ExecStatus Status
     {
         get

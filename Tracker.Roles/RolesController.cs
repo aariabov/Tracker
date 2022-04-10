@@ -1,16 +1,15 @@
-using System.Net;
-using System.Security.Cryptography;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Tracker.Web.Db;
-using Tracker.Web.Domain;
-using Tracker.Web.RequestModels;
-using Tracker.Web.Validators;
-using Tracker.Web.ViewModels;
+using Tracker.Common;
+using Tracker.Db;
+using Tracker.Db.Models;
+using Tracker.Roles.RequestModels;
+using Tracker.Roles.Validators;
 
-namespace Tracker.Web.Controllers;
+namespace Tracker.Roles;
 
 [Authorize(Roles = "Admin")]
 [ApiController]

@@ -2,7 +2,9 @@ using System.Security.Claims;
 using FluentValidation;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Tracker.Web.Db;
+using Tracker.Common;
+using Tracker.Db;
+using Tracker.Db.Models;
 using Tracker.Web.Domain;
 using Tracker.Web.RequestModels;
 
