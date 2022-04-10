@@ -60,7 +60,7 @@ let jsonPromise: Promise<TokenResponse> | null;
 async function refreshToken(): Promise<void> {
   if (!fetchPromise) {
     const requestInit = createPostRequestInit(userStore.refreshToken);
-    fetchPromise = fetch("api/user/refresh-token", requestInit);
+    fetchPromise = fetch("api/users/refresh-token", requestInit);
   }
 
   const response = await fetchPromise;

@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Tracker.Common;
 using Tracker.Db;
-using Tracker.Web.Domain;
 using Tracker.Web.RequestModels;
 using Tracker.Web.ViewModels;
 

@@ -7,7 +7,6 @@ namespace Tracker.Db;
 
 public class AppDbContext : IdentityDbContext<User, Role, string>
 {
-    public DbSet<OrgStructElement> OrgStruct => Set<OrgStructElement>();
     public DbSet<Instruction> Instructions => Set<Instruction>();
     
     public AppDbContext(DbContextOptions options) : base(options) { }
@@ -15,16 +14,6 @@ public class AppDbContext : IdentityDbContext<User, Role, string>
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
-        
-        modelBuilder.Entity<OrgStructElement>()   
-            .Property(p => p.Name)   
-            .HasColumnType("nvarchar")
-            .HasMaxLength(255);
-
-        modelBuilder.Entity<OrgStructElement>()
-            .HasOne<OrgStructElement>()
-            .WithMany()
-            .HasForeignKey(e => e.ParentId);
         
         modelBuilder.Entity<Instruction>()   
             .Property(p => p.Name)   

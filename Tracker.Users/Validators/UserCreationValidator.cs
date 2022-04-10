@@ -2,10 +2,9 @@ using FluentValidation;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Tracker.Db.Models;
-using Tracker.Web.Domain;
-using Tracker.Web.RequestModels;
+using Tracker.Users.RequestModels;
 
-namespace Tracker.Web.Validators;
+namespace Tracker.Users.Validators;
 
 public class UserCreationValidator : AbstractValidator<UserRegistrationRm>
 {

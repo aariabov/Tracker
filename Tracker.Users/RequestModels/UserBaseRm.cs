@@ -1,4 +1,4 @@
-namespace Tracker.Web.RequestModels;
+namespace Tracker.Users.RequestModels;
 
 public class UserBaseRm
 {

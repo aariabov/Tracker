@@ -1,21 +1,21 @@
-using System.Net;
 using System.Security.Cryptography;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Tracker.Common;
 using Tracker.Db.Models;
-using Tracker.Web.Domain;
-using Tracker.Web.RequestModels;
-using Tracker.Web.Validators;
-using Tracker.Web.ViewModels;
+using Tracker.Users.RequestModels;
+using Tracker.Users.Validators;
+using Tracker.Users.ViewModels;
 
-namespace Tracker.Web.Controllers;
+namespace Tracker.Users;
 
 [ApiController]
 [Route("api/[controller]")]
-public class UserController : ControllerBase
+public class UsersController : ControllerBase
 {
     private readonly UserManager<User> _userManager;
     private readonly SignInManager<User> _signInManager;
@@ -26,7 +26,7 @@ public class UserController : ControllerBase
     
     private readonly int _refreshTokenValidityInDays;
 
-    public UserController(UserManager<User> userManager
+    public UsersController(UserManager<User> userManager
         , IConfiguration config
         , SignInManager<User> signInManager
         , JwtGenerator jwtGenerator
@@ -41,7 +41,26 @@ public class UserController : ControllerBase
         _userUpdatingValidator = userUpdatingValidator;
         _userDeletingValidator = userDeletingValidator;
 
-        _refreshTokenValidityInDays = config.GetValue<int>("Token:RefreshTokenValidityInDays");
+        _refreshTokenValidityInDays = Convert.ToInt32(config["Token:RefreshTokenValidityInDays"]);
+    }
+
+    [HttpGet]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<OrgStructElementVm>))]
+    public async Task<ActionResult<IEnumerable<OrgStructElementVm>>> GetAllUsers()
+    {
+        var query = from user in _userManager.Users
+            orderby user.UserName
+            select new OrgStructElementVm
+            {
+                Id = user.Id,
+                Name = user.UserName,
+                Email = user.Email,
+                ParentId = user.BossId,
+                Roles = user.Roles.Select(role => role.Name)
+            };
+        
+        var allUsers = await query.ToArrayAsync();
+        return Ok(allUsers);
     }
 
     [AllowAnonymous]

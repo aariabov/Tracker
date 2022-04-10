@@ -8,7 +8,8 @@ using Microsoft.IdentityModel.Tokens;
 using Tracker.Db;
 using Tracker.Db.Models;
 using Tracker.Roles.Validators;
-using Tracker.Web.Domain;
+using Tracker.Users;
+using Tracker.Users.Validators;
 using Tracker.Web.Validators;
 
 var builder = WebApplication.CreateBuilder(args);

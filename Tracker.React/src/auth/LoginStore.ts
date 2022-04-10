@@ -62,7 +62,7 @@ export class LoginStore {
 
     try {
       const response = await post<LoginBody, TokenResponse>(
-        "api/user/login",
+        "api/users/login",
         body
       );
       userStore.setTokens(response.token, response.refreshToken);

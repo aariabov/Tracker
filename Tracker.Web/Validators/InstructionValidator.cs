@@ -5,7 +5,6 @@ using Microsoft.EntityFrameworkCore;
 using Tracker.Common;
 using Tracker.Db;
 using Tracker.Db.Models;
-using Tracker.Web.Domain;
 using Tracker.Web.RequestModels;
 
 namespace Tracker.Web.Validators;

@@ -34,6 +34,7 @@
     <ItemGroup>
       <ProjectReference Include="..\Tracker.Db\Tracker.Db.csproj" />
       <ProjectReference Include="..\Tracker.Roles\Tracker.Roles.csproj" />
+      <ProjectReference Include="..\Tracker.Users\Tracker.Users.csproj" />
     </ItemGroup>
 
 </Project>

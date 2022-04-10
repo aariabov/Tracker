@@ -124,7 +124,7 @@ export class OrgStructElementStore {
     };
 
     const result = await post<DeletingBody, ModelErrors<Errors>>(
-      "api/user/delete",
+      "api/users/delete",
       body
     );
 
@@ -156,7 +156,7 @@ export class OrgStructElementStore {
     };
 
     const result = await post<CreationBody, ModelErrors<Errors>>(
-      "api/user/register",
+      "api/users/register",
       body
     );
 
@@ -173,7 +173,7 @@ export class OrgStructElementStore {
     };
 
     const result = await post<UpdatingBody, ModelErrors<Errors>>(
-      "api/user/update",
+      "api/users/update",
       body
     );
 

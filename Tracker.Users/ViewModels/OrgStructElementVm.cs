@@ -1,6 +1,4 @@
-using Tracker.Web.Domain;
-
-namespace Tracker.Web.ViewModels;
+namespace Tracker.Users.ViewModels;
 
 public class OrgStructElementVm
 {

@@ -40,7 +40,7 @@ export class OrgStructStore {
   };
 
   load = async (): Promise<void> => {
-    this.orgStructElements = await get<OrgStructElement[]>("api/OrgStruct");
+    this.orgStructElements = await get<OrgStructElement[]>("api/users");
   };
 }
 

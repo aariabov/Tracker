@@ -1,4 +1,4 @@
-namespace Tracker.Web.ViewModels;
+namespace Tracker.Users.ViewModels;
 
 public class TokensVm
 {

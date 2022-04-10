@@ -1,5 +1,3 @@
-using Tracker.Web.Domain;
-
 namespace Tracker.Web.ViewModels;
 
 public class EmployeesReportRowVm
