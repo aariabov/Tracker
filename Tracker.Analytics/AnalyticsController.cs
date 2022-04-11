@@ -1,12 +1,13 @@
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Tracker.Analytics.RequestModels;
+using Tracker.Analytics.ViewModels;
 using Tracker.Common;
 using Tracker.Db;
-using Tracker.Web.RequestModels;
-using Tracker.Web.ViewModels;
 
-namespace Tracker.Web.Controllers;
-using Microsoft.AspNetCore.Mvc;
+namespace Tracker.Analytics;
 
 [ApiController]
 [Authorize(Roles = "Admin, Analyst")]

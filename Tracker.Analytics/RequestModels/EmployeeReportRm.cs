@@ -1,4 +1,4 @@
-namespace Tracker.Web.RequestModels;
+namespace Tracker.Analytics.RequestModels;
 
 public class EmployeeReportRm
 {

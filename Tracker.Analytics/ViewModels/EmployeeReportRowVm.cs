@@ -1,6 +1,6 @@
 using Tracker.Common;
 
-namespace Tracker.Web.ViewModels;
+namespace Tracker.Analytics.ViewModels;
 
 public class EmployeeReportRowVm
 {
