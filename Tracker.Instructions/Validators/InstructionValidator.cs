@@ -1,13 +1,13 @@
-using System.Security.Claims;
 using FluentValidation;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Tracker.Common;
 using Tracker.Db;
 using Tracker.Db.Models;
-using Tracker.Web.RequestModels;
+using Tracker.Instructions.RequestModels;
 
-namespace Tracker.Web.Validators;
+namespace Tracker.Instructions.Validators;
 
 public class InstructionValidator : AbstractValidator<InstructionRm>
 {

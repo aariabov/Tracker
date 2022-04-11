@@ -1,10 +1,11 @@
 using System.Security.Claims;
 using FluentValidation;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Tracker.Db;
-using Tracker.Web.RequestModels;
+using Tracker.Instructions.RequestModels;
 
-namespace Tracker.Web.Validators;
+namespace Tracker.Instructions.Validators;
 
 public class ExecDateValidator: AbstractValidator<ExecDateRm>
 {

@@ -1,15 +1,15 @@
 using System.Security.Claims;
-using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Tracker.Common;
 using Tracker.Db;
 using Tracker.Db.Models;
-using Tracker.Web.RequestModels;
-using Tracker.Web.Validators;
-using Tracker.Web.ViewModels;
+using Tracker.Instructions.RequestModels;
+using Tracker.Instructions.Validators;
+using Tracker.Instructions.ViewModels;
 
-namespace Tracker.Web.Controllers;
+namespace Tracker.Instructions;
 
 [ApiController]
 [Route("api/[controller]")]

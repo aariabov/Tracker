@@ -1,7 +1,4 @@
-using System.ComponentModel.DataAnnotations;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
-
-namespace Tracker.Web.RequestModels;
+namespace Tracker.Instructions.RequestModels;
 
 public class InstructionRm
 {

@@ -1,4 +1,4 @@
-namespace Tracker.Web.RequestModels;
+namespace Tracker.Instructions.RequestModels;
 
 public class ExecDateRm
 {

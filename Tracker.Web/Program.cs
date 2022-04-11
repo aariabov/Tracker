@@ -7,10 +7,10 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Tracker.Db;
 using Tracker.Db.Models;
+using Tracker.Instructions.Validators;
 using Tracker.Roles.Validators;
 using Tracker.Users;
 using Tracker.Users.Validators;
-using Tracker.Web.Validators;
 
 var builder = WebApplication.CreateBuilder(args);
 

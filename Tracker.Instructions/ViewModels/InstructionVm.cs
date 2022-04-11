@@ -1,8 +1,7 @@
-using AutoMapper;
 using Tracker.Common;
 using Tracker.Db.Models;
 
-namespace Tracker.Web.ViewModels;
+namespace Tracker.Instructions.ViewModels;
 
 public class InstructionVm
 {
