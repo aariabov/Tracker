@@ -12,6 +12,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\Tracker.Db\Tracker.Db.csproj" />
+      <ProjectReference Include="..\Tracker.Instructions\Tracker.Instructions.csproj" />
     </ItemGroup>
 
 </Project>

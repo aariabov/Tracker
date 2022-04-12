@@ -1,4 +1,4 @@
-using Tracker.Common;
+using Tracker.Instructions;
 
 namespace Tracker.Analytics.ViewModels;
 

@@ -1,9 +1,8 @@
-using Tracker.Common;
 using Tracker.Db.Models;
 
 namespace Tracker.Instructions.ViewModels;
 
-public class InstructionVm
+public class InstructionTreeItemVm
 {
     public int Id { get; set; }
     public string Name { get; set; } = string.Empty;
@@ -13,13 +12,10 @@ public class InstructionVm
     public DateTime Deadline { get; set; }
     public DateTime? ExecDate { get; set; }
     public string Status { get; set; }
-    public bool CanCreateChild { get; set; }
-    public bool CanBeExecuted { get; set; }
     
-    public static InstructionVm Create(Instruction instruction, ExecStatus status
-        , bool canCreateChild, bool canBeExecuted)
+    public static InstructionTreeItemVm Create(Instruction instruction, ExecStatus status)
     {
-        return new InstructionVm
+        return new InstructionTreeItemVm
         {
             Id = instruction.Id
             , Name = instruction.Name
@@ -29,8 +25,6 @@ public class InstructionVm
             , Deadline = instruction.Deadline
             , ExecDate = instruction.ExecDate
             , Status = status.GetString()
-            , CanCreateChild = canCreateChild
-            , CanBeExecuted = canBeExecuted
         };
     }
 }

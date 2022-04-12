@@ -6,6 +6,7 @@ using Tracker.Analytics.RequestModels;
 using Tracker.Analytics.ViewModels;
 using Tracker.Common;
 using Tracker.Db;
+using Tracker.Instructions;
 
 namespace Tracker.Analytics;
 
@@ -15,10 +16,12 @@ namespace Tracker.Analytics;
 public class AnalyticsController : ControllerBase
 {
     private readonly AppDbContext _db;
+    private readonly IInstructionsService _instructionsService;
 
-    public AnalyticsController(AppDbContext db)
+    public AnalyticsController(AppDbContext db, IInstructionsService instructionsService)
     {
         _db = db;
+        _instructionsService = instructionsService;
     }
 
     [HttpPost("employee-report")]
@@ -28,9 +31,10 @@ public class AnalyticsController : ControllerBase
     {
         var allInstructions = await _db.Instructions.ToArrayAsync();
         var filteredInstructions = allInstructions
-            .Where(i => i.ExecutorId == reportRm.ExecutorId)
-            .Where(i => i.Deadline.Date >= reportRm.StartDate.Date)
-            .Where(i => i.Deadline.Date <= reportRm.EndDate.Date);
+            .Where(i =>
+                i.ExecutorId == reportRm.ExecutorId &&
+                i.Deadline.Date >= reportRm.StartDate.Date &&
+                i.Deadline.Date <= reportRm.EndDate.Date);
         
         var allStatuses = new ExecStatus[]
         {
@@ -40,10 +44,14 @@ public class AnalyticsController : ControllerBase
             ExecStatus.CompletedOverdue
         };
         
-        var reportRows = allStatuses.GroupJoin(filteredInstructions
-            , s => s, i => i.Status, (s, i) => new EmployeeReportRowVm(s, i.Count()));
+        var reportRows = 
+            from status in allStatuses
+            join instruction in filteredInstructions
+                on status equals _instructionsService.GetStatus(instruction)
+                into instructions
+            select new EmployeeReportRowVm(status, instructions.Count());
         
-        return Ok(reportRows);
+        return Ok(reportRows.ToArray());
     }
 
     [HttpPost("employees-report")]
@@ -53,20 +61,27 @@ public class AnalyticsController : ControllerBase
     {
         var allInstructions = await _db.Instructions.Include(i => i.Executor).ToArrayAsync();
         var filteredInstructions = allInstructions
-            .Where(i => i.Deadline.Date >= reportRm.StartDate.Date)
-            .Where(i => i.Deadline.Date <= reportRm.EndDate.Date);
-
-        var reportRows = filteredInstructions
-            .GroupBy(i => i.Executor)
-            .Select(g => new EmployeesReportRowVm(
-                id: g.Key.Id
-                , executor: g.Key.UserName
-                , inWorkCount: g.Count(i => i.Status == ExecStatus.InWork)
-                , inWorkOverdueCount: g.Count(i => i.Status == ExecStatus.InWorkOverdue)
-                , completedCount: g.Count(i => i.Status == ExecStatus.Completed)
-                , completedOverdueCount: g.Count(i => i.Status == ExecStatus.CompletedOverdue)))
-            .OrderBy(r => r.Executor);
+            .Where(i =>
+                i.Deadline.Date >= reportRm.StartDate.Date &&
+                i.Deadline.Date <= reportRm.EndDate.Date);
         
-        return Ok(reportRows);
+        var statusInfos = filteredInstructions.Select(i => new
+        {
+            Executor = i.Executor, 
+            Status = _instructionsService.GetStatus(i)
+        });
+
+        var reportRows = from statusInfo in statusInfos
+            group statusInfo by statusInfo.Executor into g
+            orderby g.Key.UserName
+            select new EmployeesReportRowVm(
+                id: g.Key.Id, 
+                executor: g.Key.UserName,
+                inWorkCount: g.Count(i => i.Status == ExecStatus.InWork),
+                inWorkOverdueCount: g.Count(i => i.Status == ExecStatus.InWorkOverdue), 
+                completedCount: g.Count(i => i.Status == ExecStatus.Completed), 
+                completedOverdueCount: g.Count(i => i.Status == ExecStatus.CompletedOverdue));
+        
+        return Ok(reportRows.ToArray());
     }
 }

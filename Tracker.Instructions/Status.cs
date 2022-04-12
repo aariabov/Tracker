@@ -1,6 +1,5 @@
-namespace Tracker.Common;
+namespace Tracker.Instructions;
 
-// TODO: относится к поручениям - убрать отсюда
 public enum ExecStatus
 {
     InWork = 1,

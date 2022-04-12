@@ -2,7 +2,6 @@ using FluentValidation;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Tracker.Common;
 using Tracker.Db;
 using Tracker.Db.Models;
 using Tracker.Instructions.RequestModels;
@@ -14,13 +13,15 @@ public class InstructionValidator : AbstractValidator<InstructionRm>
     private readonly AppDbContext _db;
     private readonly UserManager<User> _userManager;
     private readonly IHttpContextAccessor _httpContext;
+    private readonly IInstructionsService _instructionsService;
     
     public InstructionValidator(AppDbContext db, UserManager<User> userManager
-        , IHttpContextAccessor httpContext)
+        , IHttpContextAccessor httpContext, IInstructionsService instructionsService)
     {
         _db = db;
         _userManager = userManager;
         _httpContext = httpContext;
+        _instructionsService = instructionsService;
 
         const int nameMinLen = 3;
         const int nameMaxLen = 100;
@@ -58,7 +59,8 @@ public class InstructionValidator : AbstractValidator<InstructionRm>
     private async Task<bool> BeNotExecutedAsync(int? parentId, CancellationToken token)
     {
         var allInstructions = await _db.Instructions.ToArrayAsync(token);
-        var status = allInstructions.Single(i => i.Id == parentId).Status;
+        var parentInstruction = allInstructions.Single(i => i.Id == parentId);
+        var status = _instructionsService.GetStatus(parentInstruction);
         return status is ExecStatus.InWork or ExecStatus.InWorkOverdue;
     }
     

@@ -11,11 +11,15 @@ public class ExecDateValidator: AbstractValidator<ExecDateRm>
 {
     private readonly AppDbContext _db;
     private readonly IHttpContextAccessor _httpContext;
+    private readonly IInstructionsService _instructionsService;
     
-    public ExecDateValidator(AppDbContext db, IHttpContextAccessor httpContext)
+    public ExecDateValidator(AppDbContext db
+        , IHttpContextAccessor httpContext
+        , IInstructionsService instructionsService)
     {
         _db = db;
         _httpContext = httpContext;
+        _instructionsService = instructionsService;
         RuleFor(rm => rm.InstructionId)
             .Cascade(CascadeMode.Stop)
             .NotEmpty().WithMessage("Идентификатор поручения не может быть пустым")
@@ -49,7 +53,7 @@ public class ExecDateValidator: AbstractValidator<ExecDateRm>
             return;
         }
 
-        if (!instruction.CanBeExecuted(userId))
+        if (!_instructionsService.CanBeExecuted(instruction, userId))
         {
             context.AddFailure("Поручение не может быть исполнено");
             return;

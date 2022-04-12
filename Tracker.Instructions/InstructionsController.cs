@@ -18,14 +18,17 @@ public class InstructionsController : ControllerBase
     private readonly AppDbContext _db;
     private readonly InstructionValidator _instructionValidator;
     private readonly ExecDateValidator _execDateValidator;
+    private readonly IInstructionsService _instructionsService;
     
     public InstructionsController(AppDbContext db
         , InstructionValidator instructionValidator
-        , ExecDateValidator execDateValidator)
+        , ExecDateValidator execDateValidator
+        , IInstructionsService instructionsService)
     {
         _db = db;
         _instructionValidator = instructionValidator;
         _execDateValidator = execDateValidator;
+        _instructionsService = instructionsService;
     }
 
     [HttpGet]
@@ -42,18 +45,19 @@ public class InstructionsController : ControllerBase
 
         var instructionVms = userInstructions.Select(instruction =>
         {
-            var canCreateChild = instruction.CanUserCreateChild(userId, isUserBoss);
-            var canBeExecuted = instruction.CanBeExecuted(userId);
-            return InstructionVm.Create(instruction, canCreateChild, canBeExecuted);
+            var canCreateChild = _instructionsService.CanUserCreateChild(instruction, userId, isUserBoss);
+            var canBeExecuted = _instructionsService.CanBeExecuted(instruction, userId);
+            var status = _instructionsService.GetStatus(instruction);
+            return InstructionVm.Create(instruction, status, canCreateChild, canBeExecuted);
         });
         
         return Ok(instructionVms);
     }
 
     [HttpGet("{id:int}")]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<InstructionVm>))]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<InstructionTreeItemVm>))]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult<IEnumerable<InstructionVm>>> GetTreeInstruction(int id)
+    public async Task<ActionResult<IEnumerable<InstructionTreeItemVm>>> GetTreeInstruction(int id)
     {
         // Функции и процедуры не поддерживаются в SQLite
         // SQL не может содержать связанные данные, но можно потом добавить Include
@@ -73,10 +77,15 @@ public class InstructionsController : ControllerBase
         if (instruction is null)
             return NotFound();
         
-        var rootInstruction = instruction.GetRoot();
-        var instructions = rootInstruction.GetAllChildren();
-        var result = InstructionVm.CreateCollection(instructions);
-        return Ok(result);
+        var rootInstruction = _instructionsService.GetRoot(instruction);
+        var instructions = _instructionsService.GetAllChildren(rootInstruction);
+        var instructionTreeItemVms = instructions.Select(currentInstruction =>
+        {
+            var status = _instructionsService.GetStatus(currentInstruction);
+            return InstructionTreeItemVm.Create(currentInstruction, status);
+        });
+        
+        return Ok(instructionTreeItemVms);
     }
 
     [HttpPost("create")]
@@ -113,9 +122,8 @@ public class InstructionsController : ControllerBase
         if (!validationResult.IsValid)
             return Ok(validationResult.Errors.Format());
         
-        var userId = GetCurrentUserId();
         var instruction = _db.Instructions.Single(i => i.Id == execDateRm.InstructionId);
-        instruction.SetExecDate(execDateRm.ExecDate, userId);
+        instruction.ExecDate = execDateRm.ExecDate;
         await _db.SaveChangesAsync();
         return Ok();
     }

@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Tracker.Db;
 using Tracker.Db.Models;
+using Tracker.Instructions;
 using Tracker.Instructions.Validators;
 using Tracker.Roles.Validators;
 using Tracker.Users;
@@ -56,6 +57,8 @@ builder.Services.AddControllers(option =>
 });
 
 builder.Services.AddTransient<JwtGenerator>();
+
+builder.Services.AddScoped<IInstructionsService, InstructionsService>();
 
 builder.Services.AddScoped<ExecDateValidator>();
 builder.Services.AddScoped<InstructionValidator>();
