@@ -27,7 +27,7 @@ public class ExecDateValidator: AbstractValidator<ExecDateRm>
         RuleFor(rm => rm.ExecDate)
             .Cascade(CascadeMode.Stop)
             .NotEmpty().WithMessage("Дата исполнения не может быть пустой")
-            .Must(execDate => execDate.Date == DateTime.Today).WithMessage("Дата исполнения должна быть сегодня");
+            .Must(execDate => execDate.Date == DateTime.UtcNow.Date).WithMessage("Дата исполнения должна быть сегодня");
     }
     
     private async Task MustBeValidInstruction(int id, ValidationContext<ExecDateRm> context, CancellationToken token)

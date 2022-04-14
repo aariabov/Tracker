@@ -170,7 +170,7 @@ public class UsersController : ControllerBase
         var refreshToken = GenerateRefreshToken();
         
         user.RefreshToken = refreshToken;
-        user.RefreshTokenExpiryTime = DateTime.Now.AddDays(_refreshTokenValidityInDays);
+        user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(_refreshTokenValidityInDays);
         await _userManager.UpdateAsync(user);
         
         return Ok(new TokensVm(token, refreshToken));
@@ -184,7 +184,7 @@ public class UsersController : ControllerBase
     {
         var user = await _userManager.Users.SingleOrDefaultAsync(u => u.RefreshToken == refreshToken);
         
-        if (user is null || user.RefreshTokenExpiryTime < DateTime.Now)
+        if (user is null || user.RefreshTokenExpiryTime < DateTime.UtcNow)
             return Unauthorized();
         
         var token = await CreateToken(user);
@@ -212,10 +212,10 @@ public class UsersController : ControllerBase
 
     private async Task<string> CreateToken(User user)
     {
-        var userRolesTask = _userManager.GetRolesAsync(user: user);
-        var isUserBossTask = _userManager.Users.AnyAsync(predicate: u => u.BossId == user.Id);
-        var userRoles = await userRolesTask;
-        var isUserBoss = await isUserBossTask;
+        // ошибка при параллельном выполнении запросов
+        // https://docs.microsoft.com/en-us/ef/core/dbcontext-configuration/#avoiding-dbcontext-threading-issues
+        var userRoles = await _userManager.GetRolesAsync(user: user);
+        var isUserBoss = await _userManager.Users.AnyAsync(predicate: u => u.BossId == user.Id);
         var token = _jwtGenerator.CreateToken(userId: user.Id
             , userEmail: user.Email
             , userRoles: userRoles

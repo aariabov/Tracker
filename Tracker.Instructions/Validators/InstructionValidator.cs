@@ -37,7 +37,7 @@ public class InstructionValidator : AbstractValidator<InstructionRm>
         RuleFor(instruction => instruction.Deadline)
             .Cascade(CascadeMode.Stop)
             .NotNull().WithMessage("Дедлайн не может быть пустым")
-            .GreaterThanOrEqualTo(DateTime.Today).WithMessage("Дедлайн должен быть больше или равно сегодня");
+            .GreaterThanOrEqualTo(DateTime.UtcNow.Date).WithMessage("Дедлайн должен быть больше или равно сегодня");
         RuleFor(instruction => instruction.ParentId)
             .Cascade(CascadeMode.Stop)
             .MustAsync(ParentExistsAsync).WithMessage("Родительское поручение не найдено")

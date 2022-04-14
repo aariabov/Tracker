@@ -15,7 +15,8 @@ using Tracker.Users.Validators;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlite("Data Source=tracker.db"));
+var connectionString = builder.Configuration.GetConnectionString("PostgresConnection");
+builder.Services.AddDbContext<AppDbContext>(options => options.UseNpgsql(connectionString).UseSnakeCaseNamingConvention());
 builder.Services.AddIdentityCore<User>(o => {
     o.Password.RequireDigit = false;
     o.Password.RequireLowercase = false;

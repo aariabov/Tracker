@@ -82,7 +82,7 @@ public class InstructionsService : IInstructionsService
 
     private ExecStatus GetInWorkStatus(Instruction instruction)
     {
-        return DateTime.Today > instruction.Deadline ? ExecStatus.InWorkOverdue : ExecStatus.InWork;
+        return DateTime.UtcNow.Date > instruction.Deadline ? ExecStatus.InWorkOverdue : ExecStatus.InWork;
     }
 
     private ExecStatus GetCompletedStatus(Instruction instruction)
