@@ -3,9 +3,8 @@ const webpack = require("webpack");
 const Dotenv = require("dotenv-webpack");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 
-module.exports = {
+const config = {
   entry: "./src/index.tsx",
-  mode: "development",
   output: {
     filename: "bundle.js",
     path: path.join(__dirname, "/dist"),
@@ -16,7 +15,7 @@ module.exports = {
     historyApiFallback: true,
     proxy: {
       "/api": {
-        target: "https://localhost:44302/",
+        target: "https://localhost:7006/",
         secure: false,
       },
     },
@@ -53,6 +52,15 @@ module.exports = {
     new HtmlWebpackPlugin({
       template: "./src/index.html",
     }),
-    new Dotenv(),
   ],
+};
+
+module.exports = (env, argv) => {
+  config.plugins.push(
+    new Dotenv({
+      path: `./.env.${argv.mode}`,
+    })
+  );
+
+  return config;
 };

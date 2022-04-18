@@ -90,7 +90,9 @@ else
 }
 
 using var serviceScope = app.Services.CreateScope();
-var dataSeeder = serviceScope.ServiceProvider.GetService<DataSeeder>();
+var dbContext = serviceScope.ServiceProvider.GetRequiredService<AppDbContext>();
+var dataSeeder = serviceScope.ServiceProvider.GetRequiredService<DataSeeder>();
+await dbContext.Database.MigrateAsync();
 await dataSeeder.Seed();
 
 app.UseHttpsRedirection();
