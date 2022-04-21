@@ -24,5 +24,4 @@ export class RolesStore {
 export interface Role {
   id: string;
   name: string;
-  canBeDeleted: boolean;
 }

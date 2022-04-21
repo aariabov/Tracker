@@ -1,17 +1,16 @@
 using FluentValidation;
-using Microsoft.EntityFrameworkCore;
-using Tracker.Db;
 using Tracker.Roles.RequestModels;
 
-namespace Tracker.Roles.Validators;
+namespace Tracker.Roles.Validators.FluentValidators;
 
-public class RoleDeletingValidator : AbstractValidator<RoleDeletingRm>
+public class RoleDeletingFluentValidator : AbstractValidator<RoleDeletingRm>
 {
-    private readonly AppDbContext _db;
+    private readonly IRoleRepo _roleRepo;
     
-    public RoleDeletingValidator(AppDbContext db)
+    public RoleDeletingFluentValidator(IRoleRepo roleRepo)
     {
-        _db = db;
+        _roleRepo = roleRepo;
+        
         RuleFor(rm => rm.Id)
             .Cascade(CascadeMode.Stop)
             .NotEmpty().WithMessage("Идентификатор роли не может быть пустым")
@@ -20,14 +19,14 @@ public class RoleDeletingValidator : AbstractValidator<RoleDeletingRm>
     
     private async Task MustBeValid(string roleId, ValidationContext<RoleDeletingRm> context, CancellationToken token)
     {
-        var role = await _db.Roles.SingleOrDefaultAsync(r => r.Id == roleId, token);
+        var role = await _roleRepo.GetRoleById(roleId);
         if (role is null)
         {
             context.AddFailure($"Роль с идентификатором {roleId} не найдена");
             return;
         }
 
-        var isAnyUserBelongToRole = await _db.UserRoles.AnyAsync(r => r.RoleId == roleId, token);
+        var isAnyUserBelongToRole = await _roleRepo.IsAnyUserBelongToRole(roleId);
         if (isAnyUserBelongToRole)
         {
             context.AddFailure($"Пользователи используют роль '{role.Name}'");

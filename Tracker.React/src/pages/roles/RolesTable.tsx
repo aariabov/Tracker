@@ -54,11 +54,9 @@ const RolesTable: FC<Props> = observer((props: Props) => {
           />
           <Table.Column<Role>
             width="10%"
-            render={(_: string, record: Role): ReactNode =>
-              record.canBeDeleted && (
-                <a onClick={(): void => showConfirmModal(record)}>Удалить</a>
-              )
-            }
+            render={(_: string, record: Role): ReactNode => (
+              <a onClick={(): void => showConfirmModal(record)}>Удалить</a>
+            )}
           />
         </Table>
       ) : (

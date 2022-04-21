@@ -9,6 +9,7 @@ using Tracker.Db;
 using Tracker.Db.Models;
 using Tracker.Instructions;
 using Tracker.Instructions.Validators;
+using Tracker.Roles;
 using Tracker.Roles.Validators;
 using Tracker.Users;
 using Tracker.Users.Validators;
@@ -67,9 +68,10 @@ builder.Services.AddScoped<UserBaseValidator>();
 builder.Services.AddScoped<UserCreationValidator>();
 builder.Services.AddScoped<UserUpdatingValidator>();
 builder.Services.AddScoped<UserDeletingValidator>();
-builder.Services.AddScoped<RoleCreationValidator>();
-builder.Services.AddScoped<RoleUpdatingValidator>();
-builder.Services.AddScoped<RoleDeletingValidator>();
+
+builder.Services.AddScoped<RolesService>();
+builder.Services.AddScoped<RoleValidationService>();
+builder.Services.AddScoped<IRoleRepo, RoleRepo>();
 
 builder.Services.AddScoped<DataSeeder>();
 builder.Services.AddSwaggerGen();
