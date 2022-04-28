@@ -23,7 +23,7 @@ public class RoleValidationService
         if (validationResult.IsValid)
             return Result.Ok();
             
-        return Result.Errors<string>(validationResult.Errors.FormatErrors());
+        return Result.Errors<string>(validationResult.Errors.Format());
     }
 
     public async Task<Result> ValidateUpdatingModelAsync(RoleUpdatingRm roleUpdatingRm)
@@ -34,7 +34,7 @@ public class RoleValidationService
         if (validationResult.IsValid)
             return Result.Ok();
             
-        return Result.Errors<string>(validationResult.Errors.FormatErrors());
+        return Result.Errors<string>(validationResult.Errors.Format());
     }
 
     public async Task<Result> ValidateDeletingModelAsync(RoleDeletingRm roleDeletingRm)
@@ -44,6 +44,6 @@ public class RoleValidationService
         if (validationResult.IsValid)
             return Result.Ok();
             
-        return Result.Errors<string>(validationResult.Errors.FormatErrors());
+        return Result.Errors<string>(validationResult.Errors.Format());
     }
 }

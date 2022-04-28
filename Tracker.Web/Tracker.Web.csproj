@@ -30,6 +30,10 @@
     <ItemGroup>
       <Compile Remove="Domain\AuthOptions.cs" />
     </ItemGroup>
+    
+    <ItemGroup>
+      <InternalsVisibleTo Include="Tracker.IntegrationTests" />
+    </ItemGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\Tracker.Analytics\Tracker.Analytics.csproj" />

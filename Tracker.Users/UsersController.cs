@@ -1,14 +1,8 @@
-using System.Security.Cryptography;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Tracker.Common;
-using Tracker.Db.Models;
 using Tracker.Users.RequestModels;
-using Tracker.Users.Validators;
 using Tracker.Users.ViewModels;
 
 namespace Tracker.Users;
@@ -17,49 +11,20 @@ namespace Tracker.Users;
 [Route("api/[controller]")]
 public class UsersController : ControllerBase
 {
-    private readonly UserManager<User> _userManager;
-    private readonly SignInManager<User> _signInManager;
-    private readonly JwtGenerator _jwtGenerator;
-    private readonly UserCreationValidator _userCreationValidator;
-    private readonly UserUpdatingValidator _userUpdatingValidator;
-    private readonly UserDeletingValidator _userDeletingValidator;
-    
-    private readonly int _refreshTokenValidityInDays;
+    private readonly UsersService _usersService;
+    private readonly TokensService _tokensService;
 
-    public UsersController(UserManager<User> userManager
-        , IConfiguration config
-        , SignInManager<User> signInManager
-        , JwtGenerator jwtGenerator
-        , UserCreationValidator userCreationValidator
-        , UserUpdatingValidator userUpdatingValidator
-        , UserDeletingValidator userDeletingValidator)
+    public UsersController(UsersService usersService, TokensService tokensService)
     {
-        _userManager = userManager;
-        _signInManager = signInManager;
-        _jwtGenerator = jwtGenerator;
-        _userCreationValidator = userCreationValidator;
-        _userUpdatingValidator = userUpdatingValidator;
-        _userDeletingValidator = userDeletingValidator;
-
-        _refreshTokenValidityInDays = Convert.ToInt32(config["Token:RefreshTokenValidityInDays"]);
+        _usersService = usersService;
+        _tokensService = tokensService;
     }
 
     [HttpGet]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<OrgStructElementVm>))]
     public async Task<ActionResult<IEnumerable<OrgStructElementVm>>> GetAllUsers()
     {
-        var query = from user in _userManager.Users
-            orderby user.UserName
-            select new OrgStructElementVm
-            {
-                Id = user.Id,
-                Name = user.UserName,
-                Email = user.Email,
-                ParentId = user.BossId,
-                Roles = user.Roles.Select(role => role.Name)
-            };
-        
-        var allUsers = await query.ToArrayAsync();
+        var allUsers = await _usersService.GetAllUsersAsync();
         return Ok(allUsers);
     }
 
@@ -67,113 +32,52 @@ public class UsersController : ControllerBase
     [HttpPost("register")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(string))]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ModelErrorsVm))]
-    [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(IEnumerable<IdentityError>))]
     public async Task<ActionResult> RegisterAsync([FromBody]UserRegistrationRm userRm)
     {
-        var validationResult = await _userCreationValidator.ValidateAsync(userRm);
-        if (!validationResult.IsValid)
-            return Ok(validationResult.Errors.Format());
-        
-        var newUser = new User(userRm.Name, userRm.Email, userRm.BossId);
-        var result = await _userManager.CreateAsync(newUser, userRm.Password);
-        if (!result.Succeeded) 
-            return BadRequest(result.Errors);
+        var result = await _usersService.RegisterAsync(userRm);
+        if (result.IsSuccess)
+            return Ok(result.Value);
 
-        if (userRm.Roles.Any())
-        {
-            var rolesResult = await _userManager.AddToRolesAsync(newUser, userRm.Roles);
-            if (!rolesResult.Succeeded) 
-                return BadRequest(result.Errors);
-        }
-        
-        return Ok(newUser.Id);
+        return Ok(new ModelErrorsVm(result));
     }
 
     [HttpPost("update")]
     [Authorize(Roles = "Admin")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ModelErrorsVm))]
-    [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(IEnumerable<IdentityError>))]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult<string>> UpdateRole([FromBody]UserUpdatingRm userUpdatingRm)
+    public async Task<ActionResult> UpdateUserAsync([FromBody]UserUpdatingRm userUpdatingRm)
     {
-        var validationResult = await _userUpdatingValidator.ValidateAsync(userUpdatingRm);
-        if (!validationResult.IsValid)
-            return Ok(validationResult.Errors.Format());
+        var result = await _usersService.UpdateUserAsync(userUpdatingRm);
+        if (result.IsSuccess)
+            return Ok();
 
-        var updatedUser = await _userManager.FindByIdAsync(userUpdatingRm.Id);
-        if (updatedUser is null)
-            return NotFound();
-        
-        updatedUser.UserName = userUpdatingRm.Name;
-        updatedUser.Email = userUpdatingRm.Email;
-        updatedUser.BossId = userUpdatingRm.BossId;
-        
-        var result = await _userManager.UpdateAsync(updatedUser);
-        if (!result.Succeeded)
-            return BadRequest(result.Errors);
-
-        var userRoles = await _userManager.GetRolesAsync(updatedUser);
-        var addedRoles = userUpdatingRm.Roles.Except(userRoles);
-        var removedRoles = userRoles.Except(userUpdatingRm.Roles);
- 
-        var roleAddingResult = await _userManager.AddToRolesAsync(updatedUser, addedRoles);
-        if (!roleAddingResult.Succeeded)
-            return BadRequest(roleAddingResult.Errors);
-        
-        var roleRemovingResult = await _userManager.RemoveFromRolesAsync(updatedUser, removedRoles);
-        if (!roleRemovingResult.Succeeded)
-            return BadRequest(roleRemovingResult.Errors);
-        
-        return Ok();
+        return Ok(new ModelErrorsVm(result));
     }
 
     [HttpPost("delete")]
     [Authorize(Roles = "Admin")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ModelErrorsVm))]
-    [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(IEnumerable<IdentityError>))]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult<string>> DeleteUser([FromBody]UserDeletingRm userDeletingRm)
+    public async Task<ActionResult<string>> DeleteUserAsync([FromBody]UserDeletingRm userDeletingRm)
     {
-        var validationResult = await _userDeletingValidator.ValidateAsync(userDeletingRm);
-        if (!validationResult.IsValid)
-            return Ok(validationResult.Errors.Format());
-
-        var deletedUser = await _userManager.FindByIdAsync(userDeletingRm.Id);
-        if (deletedUser is null)
-            return NotFound();
-        
-        var result = await _userManager.DeleteAsync(deletedUser);
-        if (result.Succeeded)
+        var result = await _usersService.DeleteUserAsync(userDeletingRm);
+        if (result.IsSuccess)
             return Ok();
 
-        return BadRequest(result.Errors);
+        return Ok(new ModelErrorsVm(result));
     }
     
     [AllowAnonymous]
     [HttpPost("login")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(TokensVm))]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<TokensVm>> LoginAsync(LoginVM loginVm)
     {
-        var user = await _userManager.FindByEmailAsync(loginVm.Email);
-        if (user is null)
-            return NotFound();
-        
-        var result = await _signInManager.CheckPasswordSignInAsync(user, loginVm.Password, false);
-        if (!result.Succeeded) 
-            return Unauthorized();
+        var result = await _tokensService.LoginAsync(loginVm);
+        if (result.IsSuccess)
+            return Ok(result.Value);
 
-        var token = await CreateToken(user);
-        var refreshToken = GenerateRefreshToken();
-        
-        user.RefreshToken = refreshToken;
-        user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(_refreshTokenValidityInDays);
-        await _userManager.UpdateAsync(user);
-        
-        return Ok(new TokensVm(token, refreshToken));
+        return Unauthorized(new ModelErrorsVm(result));
     }
 
     [AllowAnonymous]
@@ -182,52 +86,18 @@ public class UsersController : ControllerBase
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult<TokensVm>> RefreshToken([FromBody]string refreshToken)
     {
-        var user = await _userManager.Users.SingleOrDefaultAsync(u => u.RefreshToken == refreshToken);
-        
-        if (user is null || user.RefreshTokenExpiryTime < DateTime.UtcNow)
-            return Unauthorized();
-        
-        var token = await CreateToken(user);
-        var newRefreshToken = GenerateRefreshToken();
-        
-        user.RefreshToken = newRefreshToken;
-        await _userManager.UpdateAsync(user);
-        
-        return Ok(new TokensVm(token, newRefreshToken));
+        var result = await _tokensService.RefreshTokenAsync(refreshToken);
+        if (result.IsSuccess)
+            return Ok(result.Value);
+
+        return Unauthorized(new ModelErrorsVm(result));
     }
     
     [HttpPost("revoke")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult> Revoke()
     {
-        var user = await _userManager.GetUserAsync(HttpContext.User);
-        if (user is null)
-            return NotFound();
-        
-        user.RefreshToken = null;
-        await _userManager.UpdateAsync(user);
+        await _tokensService.RevokeAsync(HttpContext.User);
         return NoContent();
-    }
-
-    private async Task<string> CreateToken(User user)
-    {
-        // ошибка при параллельном выполнении запросов
-        // https://docs.microsoft.com/en-us/ef/core/dbcontext-configuration/#avoiding-dbcontext-threading-issues
-        var userRoles = await _userManager.GetRolesAsync(user: user);
-        var isUserBoss = await _userManager.Users.AnyAsync(predicate: u => u.BossId == user.Id);
-        var token = _jwtGenerator.CreateToken(userId: user.Id
-            , userEmail: user.Email
-            , userRoles: userRoles
-            , isUserBoss: isUserBoss);
-        return token;
-    }
-    
-    private static string GenerateRefreshToken()
-    {
-        var randomNumber = new byte[64];
-        using var rng = RandomNumberGenerator.Create();
-        rng.GetBytes(randomNumber);
-        return Convert.ToBase64String(randomNumber);
     }
 }

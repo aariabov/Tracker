@@ -95,7 +95,7 @@ public class InstructionsController : ControllerBase
     {
         var validationResult = await _instructionValidator.ValidateAsync(instructionRm);
         if (!validationResult.IsValid)
-            return Ok(validationResult.Errors.Format());
+            return Ok(new ModelErrorsVm(Result.Errors(validationResult.Errors.Format())));
         
         var userId = GetCurrentUserId();
         var newInstruction = new Instruction
@@ -120,7 +120,7 @@ public class InstructionsController : ControllerBase
     {
         var validationResult = await _execDateValidator.ValidateAsync(execDateRm);
         if (!validationResult.IsValid)
-            return Ok(validationResult.Errors.Format());
+            return Ok(new ModelErrorsVm(Result.Errors(validationResult.Errors.Format())));
         
         var instruction = _db.Instructions.Single(i => i.Id == execDateRm.InstructionId);
         instruction.ExecDate = execDateRm.ExecDate;

@@ -37,7 +37,7 @@ public class RolesController : ControllerBase
         if (result.IsSuccess)
             return Ok(result.Value);
 
-        return Ok(new ModelErrorsVm(result.ValidationErrors));
+        return Ok(new ModelErrorsVm(result));
     }
 
     [HttpPost("update")]
@@ -49,7 +49,7 @@ public class RolesController : ControllerBase
         if (result.IsSuccess)
             return Ok();
 
-        return Ok(new ModelErrorsVm(result.ValidationErrors));
+        return Ok(new ModelErrorsVm(result));
     }
 
     [HttpPost("delete")]
@@ -61,6 +61,6 @@ public class RolesController : ControllerBase
         if (result.IsSuccess)
             return Ok();
 
-        return Ok(new ModelErrorsVm(result.ValidationErrors));
+        return Ok(new ModelErrorsVm(result));
     }
 }

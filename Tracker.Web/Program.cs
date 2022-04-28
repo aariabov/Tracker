@@ -64,14 +64,15 @@ builder.Services.AddScoped<IInstructionsService, InstructionsService>();
 
 builder.Services.AddScoped<ExecDateValidator>();
 builder.Services.AddScoped<InstructionValidator>();
-builder.Services.AddScoped<UserBaseValidator>();
-builder.Services.AddScoped<UserCreationValidator>();
-builder.Services.AddScoped<UserUpdatingValidator>();
-builder.Services.AddScoped<UserDeletingValidator>();
 
 builder.Services.AddScoped<RolesService>();
 builder.Services.AddScoped<RoleValidationService>();
 builder.Services.AddScoped<IRoleRepo, RoleRepo>();
+
+builder.Services.AddScoped<UsersService>();
+builder.Services.AddScoped<TokensService>();
+builder.Services.AddScoped<UserValidationService>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
 
 builder.Services.AddScoped<DataSeeder>();
 builder.Services.AddSwaggerGen();
@@ -109,3 +110,5 @@ app.MapControllerRoute(
 app.UseExceptionHandler(app.Environment.IsDevelopment() ? "/error-development" : "/error");
 
 app.Run();
+
+public partial class Program { }

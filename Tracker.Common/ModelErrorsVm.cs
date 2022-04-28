@@ -2,10 +2,16 @@ namespace Tracker.Common;
 
 public class ModelErrorsVm
 {
-    public Dictionary<string, string> ModelErrors { get; }
+    public IEnumerable<string> CommonErrors { get; set; }
+    public Dictionary<string, string> ModelErrors { get; set; }
 
-    public ModelErrorsVm(Dictionary<string, string> modelErrors)
+    public ModelErrorsVm(Result result)
     {
-        ModelErrors = modelErrors;
+        ModelErrors = result.ValidationErrors;
+        CommonErrors = result.CommonValidationErrors;
+    }
+
+    public ModelErrorsVm()
+    {
     }
 }

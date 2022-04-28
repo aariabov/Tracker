@@ -39,8 +39,7 @@ public class RolesService
         if (result.Succeeded)
             return Result.Ok(newRole.Id);
         
-        var errors = result.Errors.Select(e => e.Description);
-        throw new Exception(string.Join(", ", errors));
+        throw new Exception(result.Errors.Join());
     }
 
     public async Task<Result> UpdateRole(RoleUpdatingRm roleUpdatingRm)
@@ -55,8 +54,7 @@ public class RolesService
         if (result.Succeeded)
             return Result.Ok();
         
-        var errors = result.Errors.Select(e => e.Description);
-        throw new Exception(string.Join(", ", errors));
+        throw new Exception(result.Errors.Join());
     }
 
     public async Task<Result> DeleteRole(RoleDeletingRm roleDeletingRm)
@@ -70,7 +68,6 @@ public class RolesService
         if (result.Succeeded)
             return Result.Ok();
         
-        var errors = result.Errors.Select(e => e.Description);
-        throw new Exception(string.Join(", ", errors));
+        throw new Exception(result.Errors.Join());
     }
 }

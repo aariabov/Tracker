@@ -1,21 +1,15 @@
 using FluentValidation;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using Tracker.Db;
-using Tracker.Db.Models;
 using Tracker.Users.RequestModels;
 
-namespace Tracker.Users.Validators;
+namespace Tracker.Users.Validators.FluentValidators;
 
 public class UserBaseValidator : AbstractValidator<UserBaseRm>
 {
-    private readonly UserManager<User> _userManager;
-    private readonly AppDbContext _db;
+    private readonly IUserRepository _userRepository;
     
-    public UserBaseValidator(UserManager<User> userManager, AppDbContext db)
+    public UserBaseValidator(IUserRepository userRepository)
     {
-        _userManager = userManager;
-        _db = db;
+        _userRepository = userRepository;
 
         const int nameMinLen = 3;
         const int nameMaxLen = 100;
@@ -40,7 +34,7 @@ public class UserBaseValidator : AbstractValidator<UserBaseRm>
     {
         foreach (var role in roles)
         {
-            var isRoleExists = await _db.Roles.AnyAsync(r => r.Name == role, token);
+            var isRoleExists = await _userRepository.IsRoleExistsAsync(role);
             if (!isRoleExists)
             {
                 context.AddFailure($"Роль '{role}' не найдена");
@@ -51,6 +45,6 @@ public class UserBaseValidator : AbstractValidator<UserBaseRm>
     
     private async Task<bool> BossExistsAsync(string? bossId, CancellationToken token)
     {
-        return await _userManager.Users.AnyAsync(u => u.Id == bossId, token);
+        return await _userRepository.IsUserExistsAsync(bossId!);
     }
 }

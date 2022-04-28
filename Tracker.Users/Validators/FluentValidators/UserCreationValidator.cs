@@ -1,18 +1,15 @@
 using FluentValidation;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using Tracker.Db.Models;
 using Tracker.Users.RequestModels;
 
-namespace Tracker.Users.Validators;
+namespace Tracker.Users.Validators.FluentValidators;
 
 public class UserCreationValidator : AbstractValidator<UserRegistrationRm>
 {
-    private readonly UserManager<User> _userManager;
+    private readonly IUserRepository _userRepository;
     
-    public UserCreationValidator(UserBaseValidator userBaseValidator, UserManager<User> userManager)
+    public UserCreationValidator(UserBaseValidator userBaseValidator, IUserRepository userRepository)
     {
-        _userManager = userManager;
+        _userRepository = userRepository;
         
         const int pwdMinLen = 1;
         const int pwdMaxLen = 100;
@@ -28,7 +25,7 @@ public class UserCreationValidator : AbstractValidator<UserRegistrationRm>
     
     private async Task<bool> UniqueEmailAsync(string email, CancellationToken token)
     {
-        var emailExists = await _userManager.Users.AnyAsync(u => u.Email == email, token);
+        var emailExists = await _userRepository.IsEmailExistsAsync(email);
         return !emailExists;
     }
 }
