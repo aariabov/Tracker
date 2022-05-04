@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Tracker.Common;
 using Tracker.Db.Models;
@@ -13,14 +14,17 @@ public class UsersService
     private readonly UserManager<User> _userManager;
     private readonly UserValidationService _userValidationService;
     private readonly IUserRepository _userRepository;
+    private readonly IHttpContextAccessor _httpContextAccessor;
 
     public UsersService(UserManager<User> userManager
         , UserValidationService userValidationService
-        , IUserRepository userRepository)
+        , IUserRepository userRepository
+        , IHttpContextAccessor httpContextAccessor)
     {
         _userManager = userManager;
         _userValidationService = userValidationService;
         _userRepository = userRepository;
+        _httpContextAccessor = httpContextAccessor;
     }
 
     public async Task<OrgStructElementVm[]> GetAllUsersAsync()
@@ -38,19 +42,19 @@ public class UsersService
         return await _userRepository.GetUserByRefreshToken(refreshToken);
     }
 
-    public async Task<User?> GetUserByClaimsPrincipalAsync(ClaimsPrincipal principal)
-    {
-        return await _userManager.GetUserAsync(principal);
-    }
-
     public async Task<string[]> GetUserRolesAsync(User user)
     {
         return (await _userManager.GetRolesAsync(user)).ToArray();
     }
 
-    public async Task<bool> HasUserChildrenAsync(User user)
+    public async Task<bool> HasUserChildrenAsync(string userId)
     {
-        return await _userRepository.HasChildren(user.Id);
+        return await _userRepository.HasChildren(userId);
+    }
+
+    public async Task<bool> IsUserExistsAsync(string userId)
+    {
+        return await _userRepository.IsUserExistsAsync(userId);
     }
     
     public async Task<Result<string>> RegisterAsync(UserRegistrationRm userRm)
@@ -127,5 +131,20 @@ public class UsersService
             throw new Exception(result.Errors.Join());
 
         return Result.Ok();
+    }
+
+    public string GetCurrentUserId()
+    {
+        var userId = _httpContextAccessor.HttpContext!.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        //var user = await _userManager.GetUserAsync(HttpContext.User);
+        if (userId is null)
+            throw new Exception("User not found");
+
+        return userId;
+    }
+
+    public async Task<User> GetCurrentUser()
+    {
+        return await _userManager.GetUserAsync(_httpContextAccessor.HttpContext!.User);
     }
 }

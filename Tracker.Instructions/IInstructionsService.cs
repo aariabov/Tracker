@@ -1,12 +1,13 @@
-using Tracker.Db.Models;
+using Tracker.Common;
+using Tracker.Instructions.RequestModels;
+using Tracker.Instructions.ViewModels;
 
 namespace Tracker.Instructions;
 
 public interface IInstructionsService
 {
-    ExecStatus GetStatus(Instruction instruction);
-    bool CanBeExecuted(Instruction instruction, string userId);
-    bool CanUserCreateChild(Instruction instruction, string userId, bool isUserBoss);
-    Instruction GetRoot(Instruction instruction);
-    IEnumerable<Instruction> GetAllChildren(Instruction instruction);
+    Task<InstructionVm[]> GetUserInstructionsAsync();
+    Task<InstructionTreeItemVm[]> GetTreeInstructionAsync(int id);
+    Task<Result<int>> CreateInstructionAsync(InstructionRm instructionRm);
+    Task<Result> SetExecDateAsync(ExecDateRm execDateRm);
 }

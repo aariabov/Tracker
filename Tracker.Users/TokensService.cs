@@ -63,9 +63,9 @@ public class TokensService
         return Result.Ok(new TokensVm(token, newRefreshToken));
     }
     
-    public async Task RevokeAsync(ClaimsPrincipal principal)
+    public async Task RevokeAsync()
     {
-        var user = await _userService.GetUserByClaimsPrincipalAsync(principal);
+        var user = await _userService.GetCurrentUser();
         if (user is null)
             throw new Exception("User not found");
         
@@ -78,7 +78,7 @@ public class TokensService
         // ошибка при параллельном выполнении запросов
         // https://docs.microsoft.com/en-us/ef/core/dbcontext-configuration/#avoiding-dbcontext-threading-issues
         var userRoles = await _userService.GetUserRolesAsync(user);
-        var isUserBoss = await _userService.HasUserChildrenAsync(user);
+        var isUserBoss = await _userService.HasUserChildrenAsync(user.Id);
         var token = _jwtGenerator.CreateToken(userId: user.Id
             , userEmail: user.Email
             , userRoles: userRoles

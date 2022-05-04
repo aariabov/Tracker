@@ -1,25 +1,23 @@
-using System.Security.Claims;
 using FluentValidation;
-using Microsoft.AspNetCore.Http;
-using Microsoft.EntityFrameworkCore;
-using Tracker.Db;
 using Tracker.Instructions.RequestModels;
+using Tracker.Users;
 
-namespace Tracker.Instructions.Validators;
+namespace Tracker.Instructions.Validators.FluentValidators;
 
-public class ExecDateValidator: AbstractValidator<ExecDateRm>
+internal class ExecDateValidator: AbstractValidator<ExecDateRm>
 {
-    private readonly AppDbContext _db;
-    private readonly IHttpContextAccessor _httpContext;
-    private readonly IInstructionsService _instructionsService;
+    private readonly IInstructionsRepository _instructionsRepository;
+    private readonly UsersService _usersService;
+    private readonly IInstructionStatusService _statusService;
     
-    public ExecDateValidator(AppDbContext db
-        , IHttpContextAccessor httpContext
-        , IInstructionsService instructionsService)
+    public ExecDateValidator(IInstructionsRepository instructionsRepository
+        , UsersService usersService
+        , IInstructionStatusService statusService)
     {
-        _db = db;
-        _httpContext = httpContext;
-        _instructionsService = instructionsService;
+        _instructionsRepository = instructionsRepository;
+        _usersService = usersService;
+        _statusService = statusService;
+
         RuleFor(rm => rm.InstructionId)
             .Cascade(CascadeMode.Stop)
             .NotEmpty().WithMessage("Идентификатор поручения не может быть пустым")
@@ -32,8 +30,8 @@ public class ExecDateValidator: AbstractValidator<ExecDateRm>
     
     private async Task MustBeValidInstruction(int id, ValidationContext<ExecDateRm> context, CancellationToken token)
     {
-        var userId = _httpContext.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier);
-        var allInstructions = await _db.Instructions.ToArrayAsync(token);
+        var userId = _usersService.GetCurrentUserId();
+        var allInstructions = await _instructionsRepository.GetAllInstructionsAsync();
         var instruction = allInstructions.SingleOrDefault(i => i.Id == id);
         if (instruction is null)
         {
@@ -53,9 +51,9 @@ public class ExecDateValidator: AbstractValidator<ExecDateRm>
             return;
         }
 
-        if (!_instructionsService.CanBeExecuted(instruction, userId))
+        if (_statusService.AnyChildInWork(instruction))
         {
-            context.AddFailure("Поручение не может быть исполнено");
+            context.AddFailure("У поручения есть не исполненные дочерние поручения");
             return;
         }
     }

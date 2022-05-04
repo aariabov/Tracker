@@ -1,27 +1,22 @@
 using FluentValidation;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using Tracker.Db;
-using Tracker.Db.Models;
 using Tracker.Instructions.RequestModels;
+using Tracker.Users;
 
-namespace Tracker.Instructions.Validators;
+namespace Tracker.Instructions.Validators.FluentValidators;
 
-public class InstructionValidator : AbstractValidator<InstructionRm>
+internal class InstructionValidator : AbstractValidator<InstructionRm>
 {
-    private readonly AppDbContext _db;
-    private readonly UserManager<User> _userManager;
-    private readonly IHttpContextAccessor _httpContext;
-    private readonly IInstructionsService _instructionsService;
+    private readonly IInstructionsRepository _instructionsRepository;
+    private readonly UsersService _usersService;
+    private readonly IInstructionStatusService _statusService;
     
-    public InstructionValidator(AppDbContext db, UserManager<User> userManager
-        , IHttpContextAccessor httpContext, IInstructionsService instructionsService)
+    public InstructionValidator(IInstructionsRepository instructionsRepository
+        , UsersService usersService
+        , IInstructionStatusService statusService)
     {
-        _db = db;
-        _userManager = userManager;
-        _httpContext = httpContext;
-        _instructionsService = instructionsService;
+        _instructionsRepository = instructionsRepository;
+        _usersService = usersService;
+        _statusService = statusService;
 
         const int nameMinLen = 3;
         const int nameMaxLen = 100;
@@ -48,27 +43,27 @@ public class InstructionValidator : AbstractValidator<InstructionRm>
     
     private async Task<bool> ExecutorExistsAsync(string executorId, CancellationToken token)
     {
-        return await _userManager.Users.AnyAsync(u => u.Id == executorId, token);
+        return await _usersService.IsUserExistsAsync(executorId);
     }
     
     private async Task<bool> ParentExistsAsync(int? parentId, CancellationToken token)
     {
-        return await _db.Instructions.AnyAsync(u => u.Id == parentId, token);
+        return await _instructionsRepository.IsInstructionExistsAsync(parentId!.Value);
     }
     
     private async Task<bool> BeNotExecutedAsync(int? parentId, CancellationToken token)
     {
-        var allInstructions = await _db.Instructions.ToArrayAsync(token);
+        var allInstructions = await _instructionsRepository.GetAllInstructionsAsync();
         var parentInstruction = allInstructions.Single(i => i.Id == parentId);
-        var status = _instructionsService.GetStatus(parentInstruction);
+        var status = _statusService.GetStatus(parentInstruction);
         return status is ExecStatus.InWork or ExecStatus.InWorkOverdue;
     }
     
     private async Task<bool> BeCreatedByMyBossAsync(int? parentId, CancellationToken token)
     {
-        var currentUser = await _userManager.GetUserAsync(_httpContext.HttpContext?.User);
-        var parentInstruction = _db.Instructions.Single(i => i.Id == parentId);
-        return parentInstruction.CreatorId == currentUser.BossId &&
-               parentInstruction.ExecutorId == currentUser.Id;
+        var currentUser = await _usersService.GetCurrentUser();
+        var parentInstruction = await _instructionsRepository.GetInstructionByIdAsync(parentId!.Value);
+        return parentInstruction!.CreatorId == currentUser.BossId &&
+               parentInstruction!.ExecutorId == currentUser.Id;
     }
 }

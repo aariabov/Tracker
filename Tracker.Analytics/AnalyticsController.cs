@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Tracker.Analytics.RequestModels;
 using Tracker.Analytics.ViewModels;
-using Tracker.Common;
 using Tracker.Db;
 using Tracker.Instructions;
 
@@ -16,12 +15,12 @@ namespace Tracker.Analytics;
 public class AnalyticsController : ControllerBase
 {
     private readonly AppDbContext _db;
-    private readonly IInstructionsService _instructionsService;
+    private readonly IInstructionStatusService _statusService;
 
-    public AnalyticsController(AppDbContext db, IInstructionsService instructionsService)
+    public AnalyticsController(AppDbContext db, IInstructionStatusService statusService)
     {
         _db = db;
-        _instructionsService = instructionsService;
+        _statusService = statusService;
     }
 
     [HttpPost("employee-report")]
@@ -47,7 +46,7 @@ public class AnalyticsController : ControllerBase
         var reportRows = 
             from status in allStatuses
             join instruction in filteredInstructions
-                on status equals _instructionsService.GetStatus(instruction)
+                on status equals _statusService.GetStatus(instruction)
                 into instructions
             select new EmployeeReportRowVm(status, instructions.Count());
         
@@ -68,7 +67,7 @@ public class AnalyticsController : ControllerBase
         var statusInfos = filteredInstructions.Select(i => new
         {
             Executor = i.Executor, 
-            Status = _instructionsService.GetStatus(i)
+            Status = _statusService.GetStatus(i)
         });
 
         var reportRows = from statusInfo in statusInfos

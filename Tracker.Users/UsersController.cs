@@ -97,7 +97,7 @@ public class UsersController : ControllerBase
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     public async Task<ActionResult> Revoke()
     {
-        await _tokensService.RevokeAsync(HttpContext.User);
+        await _tokensService.RevokeAsync();
         return NoContent();
     }
 }

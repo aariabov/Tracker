@@ -61,9 +61,9 @@ builder.Services.AddControllers(option =>
 builder.Services.AddTransient<JwtGenerator>();
 
 builder.Services.AddScoped<IInstructionsService, InstructionsService>();
-
-builder.Services.AddScoped<ExecDateValidator>();
-builder.Services.AddScoped<InstructionValidator>();
+builder.Services.AddScoped<IInstructionStatusService, InstructionStatusService>();
+builder.Services.AddScoped<IInstructionsRepository, InstructionsRepository>();
+builder.Services.AddScoped<InstructionValidationService>();
 
 builder.Services.AddScoped<RolesService>();
 builder.Services.AddScoped<RoleValidationService>();
