@@ -17,7 +17,7 @@ public class RoleRepo : IRoleRepo
     {
         return await _roleManager.Roles
             .OrderBy(r => r.Name)
-            .Select(r => new RoleVm(r.Id, r.Name))
+            .Select(r => new RoleVm(r))
             .ToArrayAsync();
     }
 

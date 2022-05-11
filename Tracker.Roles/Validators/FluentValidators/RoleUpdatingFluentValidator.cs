@@ -42,5 +42,11 @@ public class RoleUpdatingFluentValidator : AbstractValidator<RoleUpdatingRm>
             context.AddFailure(nameof(RoleUpdatingRm.Name), "Роль 'Admin' нельзя редактировать");
             return;
         }
+
+        if (role.ConcurrencyStamp != roleRm.ConcurrencyStamp)
+        {
+            context.AddFailure(nameof(RoleUpdatingRm.Name), "Роль была изменена, обновите страницу и попробуйте заново");
+            return;
+        }
     }
 }

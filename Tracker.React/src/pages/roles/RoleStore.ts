@@ -5,6 +5,7 @@ import { Role } from "./RolesStore";
 export class RoleStore {
   private _id: string | undefined = undefined;
   private _name: string = "";
+  private _concurrencyStamp: string = "";
 
   private _errors: Errors | undefined = undefined;
 
@@ -52,6 +53,7 @@ export class RoleStore {
     if (role) {
       this._id = role.id;
       this._name = role.name;
+      this._concurrencyStamp = role.concurrencyStamp;
     }
 
     if (this._errors) this._errors = undefined;
@@ -108,6 +110,7 @@ export class RoleStore {
     const body: UpdatingBody = {
       id: this._id!,
       name: this._name,
+      concurrencyStamp: this._concurrencyStamp
     };
 
     const result = await post<UpdatingBody, ModelErrors<Errors>>(
@@ -125,6 +128,7 @@ interface CreationBody {
 
 interface UpdatingBody extends CreationBody {
   id: string;
+  concurrencyStamp: string;
 }
 
 interface DeletingBody {
