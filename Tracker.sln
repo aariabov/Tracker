@@ -20,6 +20,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tracker.UnitTests", "Tracke
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tracker.IntegrationTests", "Tracker.IntegrationTests\Tracker.IntegrationTests.csproj", "{FC309FDD-6214-4747-A4F2-7D2FE29C8C2A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tracker.Audit", "Tracker.Audit\Tracker.Audit.csproj", "{A4CE9A43-3F7E-4563-8484-A068DBAF5CB0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -62,6 +64,10 @@ Global
 		{FC309FDD-6214-4747-A4F2-7D2FE29C8C2A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FC309FDD-6214-4747-A4F2-7D2FE29C8C2A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FC309FDD-6214-4747-A4F2-7D2FE29C8C2A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A4CE9A43-3F7E-4563-8484-A068DBAF5CB0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A4CE9A43-3F7E-4563-8484-A068DBAF5CB0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A4CE9A43-3F7E-4563-8484-A068DBAF5CB0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A4CE9A43-3F7E-4563-8484-A068DBAF5CB0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{E24AE00A-7F03-49AE-83B5-7EFDCDE1E2C8} = {750E8E79-A193-4952-8DF5-2D95C40D5AC8}

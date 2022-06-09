@@ -9,6 +9,7 @@
     <ItemGroup>
       <PackageReference Include="EFCore.NamingConventions" Version="6.0.0" />
       <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="6.0.1" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="6.0.1" />
       <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="6.0.1" />
       <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="6.0.1">
         <PrivateAssets>all</PrivateAssets>
@@ -28,6 +29,10 @@
       <Reference Include="Microsoft.Extensions.Configuration, Version=6.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60">
         <HintPath>..\..\..\Program Files\dotnet\shared\Microsoft.AspNetCore.App\6.0.1\Microsoft.Extensions.Configuration.dll</HintPath>
       </Reference>
+    </ItemGroup>
+
+    <ItemGroup>
+      <Compile Remove="UnitOfWorks\UnitOfWorkManager.cs" />
     </ItemGroup>
 
 </Project>

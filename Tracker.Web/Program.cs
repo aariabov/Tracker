@@ -5,8 +5,11 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Tracker.Audit;
 using Tracker.Db;
 using Tracker.Db.Models;
+using Tracker.Db.Transactions;
+using Tracker.Db.UnitOfWorks;
 using Tracker.Instructions;
 using Tracker.Instructions.Validators;
 using Tracker.Roles;
@@ -71,9 +74,15 @@ builder.Services.AddScoped<IRoleRepo, RoleRepo>();
 
 builder.Services.AddScoped<UsersService>();
 builder.Services.AddScoped<TokensService>();
-builder.Services.AddScoped<UserValidationService>();
+builder.Services.AddScoped<IUserValidationService, UserValidationService>();
+builder.Services.AddScoped<IUserManagerService, UserManagerService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 
+builder.Services.AddScoped<IAuditService, AuditService>();
+builder.Services.AddScoped<IAuditRepository, AuditRepository>();
+
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+builder.Services.AddScoped<ITransactionManager, TransactionManager>();
 builder.Services.AddScoped<DataSeeder>();
 builder.Services.AddSwaggerGen();
 

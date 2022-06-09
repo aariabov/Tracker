@@ -7,7 +7,7 @@ using Tracker.Users.Validators.FluentValidators;
 namespace Tracker.Users.Validators;
 
 // TODO: покрыть юнит тестами
-public class UserValidationService
+public class UserValidationService : IUserValidationService
 {
     private readonly IUserRepository _userRepository;
     private readonly AppDbContext _db;

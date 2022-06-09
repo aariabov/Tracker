@@ -8,6 +8,7 @@ namespace Tracker.Db;
 public class AppDbContext : IdentityDbContext<User, Role, string>
 {
     public DbSet<Instruction> Instructions => Set<Instruction>();
+    public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
 
     public AppDbContext(DbContextOptions options) : base(options) { }
 
@@ -56,6 +57,13 @@ public class AppDbContext : IdentityDbContext<User, Role, string>
             b.HasIndex(u => u.NormalizedUserName).HasDatabaseName("user_name_index").IsUnique();
             b.HasIndex(u => u.NormalizedEmail).HasDatabaseName("email_index");
             b.ToTable("asp_net_users");
+        });
+        
+        modelBuilder.Entity<AuditLog>(b =>
+        {
+            b.HasOne(i => i.User)
+                .WithMany()
+                .HasForeignKey(e => e.UserId);
         });
     }
 }

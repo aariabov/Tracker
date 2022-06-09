@@ -1,8 +1,10 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
+using Tracker.Audit;
 using Tracker.Common;
 using Tracker.Db.Models;
+using Tracker.Db.Transactions;
+using Tracker.Db.UnitOfWorks;
 using Tracker.Users.RequestModels;
 using Tracker.Users.Validators;
 using Tracker.Users.ViewModels;
@@ -11,20 +13,29 @@ namespace Tracker.Users;
 
 public class UsersService
 {
-    private readonly UserManager<User> _userManager;
-    private readonly UserValidationService _userValidationService;
+    private readonly IUserManagerService _userManagerService;
+    private readonly IUserValidationService _userValidationService;
     private readonly IUserRepository _userRepository;
     private readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly ITransactionManager _transactionManager;
+    private readonly IAuditService _auditService;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public UsersService(UserManager<User> userManager
-        , UserValidationService userValidationService
+    public UsersService(IUserManagerService userManagerService
+        , IUserValidationService userValidationService
         , IUserRepository userRepository
-        , IHttpContextAccessor httpContextAccessor)
+        , IHttpContextAccessor httpContextAccessor
+        , ITransactionManager transactionManager
+        , IAuditService auditService
+        , IUnitOfWork unitOfWork)
     {
-        _userManager = userManager;
+        _userManagerService = userManagerService;
         _userValidationService = userValidationService;
         _userRepository = userRepository;
         _httpContextAccessor = httpContextAccessor;
+        _transactionManager = transactionManager;
+        _auditService = auditService;
+        _unitOfWork = unitOfWork;
     }
 
     public async Task<OrgStructElementVm[]> GetAllUsersAsync()
@@ -44,7 +55,7 @@ public class UsersService
 
     public async Task<string[]> GetUserRolesAsync(User user)
     {
-        return (await _userManager.GetRolesAsync(user)).ToArray();
+        return (await _userManagerService.GetRolesAsync(user)).ToArray();
     }
 
     public async Task<bool> HasUserChildrenAsync(string userId)
@@ -59,59 +70,82 @@ public class UsersService
     
     public async Task<Result<string>> RegisterAsync(UserRegistrationRm userRm)
     {
-        var validationResult = await _userValidationService.ValidateRegistrationModelAsync(userRm);
-        if (!validationResult.IsSuccess)
-            return Result.Errors<string>(validationResult.ValidationErrors);
-        
-        var newUser = new User(userRm.Name, userRm.Email, userRm.BossId);
-        var result = await _userManager.CreateAsync(newUser, userRm.Password);
-        if (!result.Succeeded)
-            throw new Exception(result.Errors.Join());
-
-        if (userRm.Roles.Any())
+        using var transaction = _transactionManager.BeginTransaction();
+        try
         {
-            var rolesResult = await _userManager.AddToRolesAsync(newUser, userRm.Roles);
-            if (!rolesResult.Succeeded)
-                throw new Exception(rolesResult.Errors.Join());
-        }
+            var validationResult = await _userValidationService.ValidateRegistrationModelAsync(userRm);
+            if (!validationResult.IsSuccess)
+                return Result.Errors<string>(validationResult.ValidationErrors);
         
-        return Result.Ok(newUser.Id);
+            var newUser = new User(userRm.Name, userRm.Email, userRm.BossId);
+            var result = await _userManagerService.CreateAsync(newUser, userRm.Password);
+            if (!result.Succeeded)
+                throw new Exception(result.Errors.Join());
+        
+            _auditService.LogAsync(AuditType.Create, newUser.Id, newUser.GetType().Name, GetCurrentUserId());
+            
+            if (userRm.Roles.Any())
+            {
+                var rolesResult = await _userManagerService.AddToRolesAsync(newUser, userRm.Roles);
+                if (!rolesResult.Succeeded)
+                    throw new Exception(rolesResult.Errors.Join());
+            }
+
+            await _unitOfWork.SaveChangesAsync();
+            await transaction.CommitAsync();
+            return Result.Ok(newUser.Id);
+        }
+        catch
+        {
+            await transaction.RollbackAsync();
+            throw;
+        }
     }
     
     public async Task<Result> UpdateUserAsync(UserUpdatingRm userUpdatingRm)
     {
-        var validationResult = await _userValidationService.ValidateUpdatingModelAsync(userUpdatingRm);
-        if (!validationResult.IsSuccess)
-            return Result.Errors<string>(validationResult.ValidationErrors);
+        using var transaction = _transactionManager.BeginTransaction();
+        try
+        {
+            var validationResult = await _userValidationService.ValidateUpdatingModelAsync(userUpdatingRm);
+            if (!validationResult.IsSuccess)
+                return Result.Errors<string>(validationResult.ValidationErrors);
 
-        var updatedUser = await _userManager.FindByIdAsync(userUpdatingRm.Id);
-        if (updatedUser is null)
-            throw new Exception($"User with id {userUpdatingRm.Id} not found");
+            var updatedUser = await _userManagerService.FindByIdAsync(userUpdatingRm.Id);
+            if (updatedUser is null)
+                throw new Exception($"User with id {userUpdatingRm.Id} not found");
         
-        updatedUser.UserName = userUpdatingRm.Name;
-        updatedUser.Email = userUpdatingRm.Email;
-        updatedUser.BossId = userUpdatingRm.BossId;
+            updatedUser.UserName = userUpdatingRm.Name;
+            updatedUser.Email = userUpdatingRm.Email;
+            updatedUser.BossId = userUpdatingRm.BossId;
 
-        await UpdateUserAsync(updatedUser);
+            await UpdateUserAsync(updatedUser);
 
-        var userRoles = await _userManager.GetRolesAsync(updatedUser);
-        var addedRoles = userUpdatingRm.Roles.Except(userRoles);
-        var removedRoles = userRoles.Except(userUpdatingRm.Roles);
+            var userRoles = await _userManagerService.GetRolesAsync(updatedUser);
+            var addedRoles = userUpdatingRm.Roles.Except(userRoles);
+            var removedRoles = userRoles.Except(userUpdatingRm.Roles);
  
-        var roleAddingResult = await _userManager.AddToRolesAsync(updatedUser, addedRoles);
-        if (!roleAddingResult.Succeeded)
-            throw new Exception(roleAddingResult.Errors.Join());
+            var roleAddingResult = await _userManagerService.AddToRolesAsync(updatedUser, addedRoles);
+            if (!roleAddingResult.Succeeded)
+                throw new Exception(roleAddingResult.Errors.Join());
         
-        var roleRemovingResult = await _userManager.RemoveFromRolesAsync(updatedUser, removedRoles);
-        if (!roleRemovingResult.Succeeded)
-            throw new Exception(roleRemovingResult.Errors.Join());
+            var roleRemovingResult = await _userManagerService.RemoveFromRolesAsync(updatedUser, removedRoles);
+            if (!roleRemovingResult.Succeeded)
+                throw new Exception(roleRemovingResult.Errors.Join());
         
-        return Result.Ok();
+            await transaction.CommitAsync();
+            return Result.Ok();
+        }
+        catch
+        {
+            await transaction.RollbackAsync();
+            throw;
+        }
     }
     
     public async Task UpdateUserAsync(User updatedUser)
     {
-        var result = await _userManager.UpdateAsync(updatedUser);
+        var result = await _userManagerService.UpdateAsync(updatedUser);
         if (!result.Succeeded)
             throw new Exception(result.Errors.Join());
     }
@@ -122,11 +156,11 @@ public class UsersService
         if (!validationResult.IsSuccess)
             return Result.Errors<string>(validationResult.ValidationErrors);
 
-        var deletedUser = await _userManager.FindByIdAsync(userDeletingRm.Id);
+        var deletedUser = await _userManagerService.FindByIdAsync(userDeletingRm.Id);
         if (deletedUser is null)
             throw new Exception($"User with id {userDeletingRm.Id} not found");
         
-        var result = await _userManager.DeleteAsync(deletedUser);
+        var result = await _userManagerService.DeleteAsync(deletedUser);
         if (!result.Succeeded)
             throw new Exception(result.Errors.Join());
 
@@ -145,6 +179,6 @@ public class UsersService
 
     public async Task<User> GetCurrentUser()
     {
-        return await _userManager.GetUserAsync(_httpContextAccessor.HttpContext!.User);
+        return await _userManagerService.GetUserAsync(_httpContextAccessor.HttpContext!.User);
     }
 }
