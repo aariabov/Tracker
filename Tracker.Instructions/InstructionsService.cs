@@ -47,23 +47,18 @@ public class InstructionsService : IInstructionsService
     
     public async Task<InstructionTreeItemVm[]> GetTreeInstructionAsync(int id)
     {
-        // Функции и процедуры не поддерживаются в SQLite
         // SQL не может содержать связанные данные, но можно потом добавить Include
         // К CTE нельзя добавить экстеншены типа Include, можно только к запросам, которые начинаются с select
         // Можно рекурсивно вытягивать всех детей, но будет много запросов
         // Можно вытянуть все записи (все дети уже будут привязаны), взять родительское поручение,
         // и рекурсивно преобразовать в плоский список - подойдет только для маленьких иерархий
         
-        // Итого
-        // пока можно просто вытянуть все записи
-        // потом, на нормальной базе можно создать функцию и использовать CTE
-        // если нужна будет производительность то использовать Closure, Enumeration paths или Nested sets - 
-        // во всех случаях будет гемор с пересчетом, но Closure понятнее
+        // сейчас иерархия загружается с помощью CTE
+        // в планах добавить Closure, Enumeration paths и Nested sets
         
-        var allInstructions = await _instructionsRepository.GetAllInstructionsAsync();
-        var instruction = allInstructions.SingleOrDefault(i => i.Id == id);
+        var instruction = await _instructionsRepository.GetInstructionTreeAsync(id);
         if (instruction is null)
-            throw new Exception($"User with id {id} not found");
+            throw new Exception($"Instruction with id {id} not found");
         
         var rootInstruction = GetRoot(instruction);
         var instructions = GetAllChildren(rootInstruction);
