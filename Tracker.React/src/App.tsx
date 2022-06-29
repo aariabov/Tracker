@@ -12,6 +12,7 @@ import EmployeesReportPage from "./pages/employeesReport/EmployeesReportPage";
 import RolesPage from "./pages/roles/RolesPage";
 import { userStore } from "./auth/UserStore";
 import Title from "antd/lib/typography/Title";
+import UtilsPage from "./pages/utils/UtilsPage";
 
 const AdminRoutes: FC = observer(() => {
   if (userStore.isAdmin) return <Outlet />;
@@ -34,6 +35,7 @@ const App: FC = observer(() => {
             <Route path="/" element={<AdminRoutes />}>
               <Route path="org-struct" element={<OrgStructPage />} />
               <Route path="roles" element={<RolesPage />} />
+              <Route path="utils" element={<UtilsPage />} />
             </Route>
             <Route path="/" element={<AnalystRoutes />}>
               <Route path="employee-report" element={<EmployeeReportPage />} />

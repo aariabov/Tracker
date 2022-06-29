@@ -9,6 +9,8 @@ namespace Tracker.Instructions;
 
 public class InstructionsService : IInstructionsService
 {
+    public const char TreePathDelimiter = '/';
+    
     private readonly InstructionValidationService _instructionValidationService;
     private readonly IInstructionsRepository _instructionsRepository;
     private readonly UsersService _usersService;
@@ -71,6 +73,7 @@ public class InstructionsService : IInstructionsService
         return instructionTreeItemVms.ToArray();
     }
     
+    // TODO: можно написать юнит тест
     public async Task<Result<int>> CreateInstructionAsync(InstructionRm instructionRm)
     {
         var validationResult = await _instructionValidationService.ValidateInstructionAsync(instructionRm);
@@ -89,9 +92,23 @@ public class InstructionsService : IInstructionsService
 
         _instructionsRepository.CreateInstruction(newInstruction);
         await _instructionsRepository.SaveChangesAsync();
+        
+        await UpdateTreePath();
+        await _instructionsRepository.SaveChangesAsync();
         return Result.Ok(newInstruction.Id);
+
+        async Task UpdateTreePath()
+        {
+            var treePath = newInstruction.Id.ToString();
+            if (instructionRm.ParentId.HasValue)
+            {
+                var parentInstruction = await _instructionsRepository.GetInstructionByIdAsync(instructionRm.ParentId.Value);
+                treePath = $"{parentInstruction.TreePath}{TreePathDelimiter}{newInstruction.Id}";
+            }
+            newInstruction.TreePath = treePath;
+        }
     }
-    
+
     public async Task<Result> SetExecDateAsync(ExecDateRm execDateRm)
     {
         var validationResult = await _instructionValidationService.ValidateExecDateAsync(execDateRm);
@@ -107,7 +124,35 @@ public class InstructionsService : IInstructionsService
         await _instructionsRepository.SaveChangesAsync();
         return Result.Ok();
     }
-    
+
+    // TODO: можно написать юнит тест
+    public async Task RecalculateAllTreePaths()
+    {
+        await _instructionsRepository.UpdateAllTreePathsToNullAsync();
+        
+        var rootInstructionIds = await _instructionsRepository.GetRootInstructionIdsAsync();
+        foreach (var rootInstructionId in rootInstructionIds)
+        {
+            // для персчета обязательно используем GetInstructionTreeByCteAsync,
+            // тк он работает с id/parentId, а они всегда актуальные
+            var instructionTree = await _instructionsRepository.GetInstructionTreeByCteAsync(rootInstructionId);
+            UpdateTreePaths(instructionTree);
+            _instructionsRepository.UpdateInstruction(instructionTree);
+            await _instructionsRepository.SaveChangesAsync();
+        }
+        
+        void UpdateTreePaths(Instruction rootInstruction)
+        {
+            var instructions = GetAllChildren(rootInstruction);
+            foreach (var currentInstruction in instructions)
+            {
+                currentInstruction.TreePath = currentInstruction.Parent is null
+                    ? currentInstruction.Id.ToString()
+                    : $"{currentInstruction.Parent.TreePath}{TreePathDelimiter}{currentInstruction.Id}";
+            }
+        }
+    }
+
     private IEnumerable<Instruction> GetAllChildren(Instruction instruction)
     {
         var stack = new Stack<Instruction>();

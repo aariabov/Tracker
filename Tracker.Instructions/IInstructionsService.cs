@@ -10,4 +10,5 @@ public interface IInstructionsService
     Task<InstructionTreeItemVm[]> GetTreeInstructionAsync(int id);
     Task<Result<int>> CreateInstructionAsync(InstructionRm instructionRm);
     Task<Result> SetExecDateAsync(ExecDateRm execDateRm);
+    Task RecalculateAllTreePaths();
 }

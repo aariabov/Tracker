@@ -11,6 +11,8 @@ using Tracker.Db.Models;
 using Tracker.Db.Transactions;
 using Tracker.Db.UnitOfWorks;
 using Tracker.Instructions;
+using Tracker.Instructions.Interfaces;
+using Tracker.Instructions.Repositories;
 using Tracker.Instructions.Validators;
 using Tracker.Roles;
 using Tracker.Roles.Validators;
@@ -66,6 +68,8 @@ builder.Services.AddTransient<JwtGenerator>();
 builder.Services.AddScoped<IInstructionsService, InstructionsService>();
 builder.Services.AddScoped<IInstructionStatusService, InstructionStatusService>();
 builder.Services.AddScoped<IInstructionsRepository, InstructionsRepository>();
+// builder.Services.AddScoped<IInstructionsTreeRepository, InstructionsTreeRepositoryCte>();
+builder.Services.AddScoped<IInstructionsTreeRepository, InstructionsTreeRepositoryPath>();
 builder.Services.AddScoped<InstructionValidationService>();
 
 builder.Services.AddScoped<RolesService>();

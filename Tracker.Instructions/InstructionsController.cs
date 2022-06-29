@@ -56,4 +56,12 @@ public class InstructionsController : ControllerBase
 
         return Ok(new ModelErrorsVm(result));
     }
+    
+    [HttpPost("recalculate-all-tree-paths")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<ActionResult> RecalculateAllTreePaths()
+    {
+        await _instructionsService.RecalculateAllTreePaths();
+        return Ok();
+    }
 }

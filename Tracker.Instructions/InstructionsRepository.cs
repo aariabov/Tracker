@@ -1,16 +1,27 @@
 using Microsoft.EntityFrameworkCore;
 using Tracker.Db;
 using Tracker.Db.Models;
+using Tracker.Instructions.Interfaces;
+using Tracker.Instructions.Repositories;
 
 namespace Tracker.Instructions;
 
 public class InstructionsRepository : IInstructionsRepository
 {
     private readonly AppDbContext _db;
+    private readonly IInstructionsTreeRepository _treeRepository;
+    
+    // CTE Repository нужен для пересчета данных для быстрой работы с иерархиями
+    // для способа Enumeration Paths надо пересчитать tree_path
+    // для способа Closure надо пересчитать closure table
+    // для способа Nested sets надо пересчитать все коэффициенты
+    private readonly InstructionsTreeRepositoryCte _cteRepository;
 
-    public InstructionsRepository(AppDbContext db)
+    public InstructionsRepository(AppDbContext db, IInstructionsTreeRepository treeRepository)
     {
         _db = db;
+        _treeRepository = treeRepository;
+        _cteRepository = new InstructionsTreeRepositoryCte(db);
     }
 
     public async Task<Instruction[]> GetAllInstructionsAsync()
@@ -21,6 +32,14 @@ public class InstructionsRepository : IInstructionsRepository
             .ToArrayAsync();
     }
 
+    public async Task<int[]> GetRootInstructionIdsAsync()
+    {
+        return await _db.Instructions
+            .Where(i => i.ParentId == null)
+            .Select(i => i.Id)
+            .ToArrayAsync();
+    }
+
     public async Task<Instruction?> GetInstructionByIdAsync(int instructionId)
     {
         return await _db.Instructions.SingleOrDefaultAsync(i => i.Id == instructionId);
@@ -28,30 +47,15 @@ public class InstructionsRepository : IInstructionsRepository
 
     public async Task<Instruction> GetInstructionTreeAsync(int instructionId)
     {
-        var rootId = await GetTreeRootId(instructionId);
-
-        FormattableString cte = @$"
-WITH RECURSIVE r AS (
-   SELECT instructions.*, 1 AS level
-   FROM instructions
-   WHERE id = {rootId}
-
-   UNION ALL
-
-   SELECT org.*, r.level + 1 AS level
-   FROM instructions org
-      JOIN r ON org.parent_id = r.id
-)
-
-SELECT * FROM r";
+        var instructionTree = await _treeRepository.GetTreeInstructionsAsync(instructionId);
         
-        // получаем дерево поручений из бд, делаем привязки parent/children - получаем плоский список с привязками
-        var instructionTree = await _db.Instructions.FromSqlInterpolated(cte)
-            .Include(i => i.Creator)
-            .Include(i => i.Executor)
-            .ToArrayAsync();
-
         // возвращаем поручение, которое запрашивали, но уже со всеми parent/children
+        return instructionTree.Single(i => i.Id == instructionId);
+    }
+
+    public async Task<Instruction> GetInstructionTreeByCteAsync(int instructionId)
+    {
+        var instructionTree = await _cteRepository.GetTreeInstructionsAsync(instructionId);
         return instructionTree.Single(i => i.Id == instructionId);
     }
 
@@ -70,29 +74,10 @@ SELECT * FROM r";
         return await _db.Instructions.AnyAsync(u => u.Id == instructionId);
     }
 
-    public async Task SaveChangesAsync() => await _db.SaveChangesAsync();
-
-    private async Task<int> GetTreeRootId(int instructionId)
+    public async Task UpdateAllTreePathsToNullAsync()
     {
-        FormattableString cte = @$"
-WITH RECURSIVE r AS (
-   SELECT id, name, parent_id, 1 AS level
-   FROM instructions
-   WHERE id = {instructionId}
-
-   UNION ALL
-
-   SELECT i.id, i.name, i.parent_id, r.level + 1 AS level
-   FROM instructions i
-      JOIN r ON i.id = r.parent_id
-)
-
-SELECT * FROM r ORDER BY level desc LIMIT 1";
-        
-        var rootInstructionId = await _db.Instructions.FromSqlInterpolated(cte)
-            .Select(i => i.Id)
-            .SingleAsync();
-
-        return rootInstructionId;
+        await _db.Database.ExecuteSqlRawAsync("update instructions set tree_path = null");
     }
+
+    public async Task SaveChangesAsync() => await _db.SaveChangesAsync();
 }

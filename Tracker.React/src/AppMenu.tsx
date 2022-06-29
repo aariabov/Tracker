@@ -52,6 +52,7 @@ const AppMenu: FC = observer(() => {
     const children = [
       new MenuItem("org-struct", "Оргструктура"),
       new MenuItem("roles", "Роли"),
+      new MenuItem("utils", "Утилиты"),
     ];
 
     menu.push(new SubMenuItem("admin", "Админка", children));
