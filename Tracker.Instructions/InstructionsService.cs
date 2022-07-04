@@ -93,20 +93,26 @@ public class InstructionsService : IInstructionsService
         _instructionsRepository.CreateInstruction(newInstruction);
         await _instructionsRepository.SaveChangesAsync();
         
-        await UpdateTreePath();
+        await UpdateInstructionTreePath(newInstruction);
+        await UpdateInstructionClosure(newInstruction.Id, newInstruction.ParentId);
         await _instructionsRepository.SaveChangesAsync();
         return Result.Ok(newInstruction.Id);
-
-        async Task UpdateTreePath()
+    }
+    
+    private async Task UpdateInstructionClosure(int id, int? parentId)
+    {
+        await _instructionsRepository.UpdateInstructionClosureAsync(id, parentId);
+    }
+    
+    private async Task UpdateInstructionTreePath(Instruction instruction)
+    {
+        var treePath = instruction.Id.ToString();
+        if (instruction.ParentId.HasValue)
         {
-            var treePath = newInstruction.Id.ToString();
-            if (instructionRm.ParentId.HasValue)
-            {
-                var parentInstruction = await _instructionsRepository.GetInstructionByIdAsync(instructionRm.ParentId.Value);
-                treePath = $"{parentInstruction.TreePath}{TreePathDelimiter}{newInstruction.Id}";
-            }
-            newInstruction.TreePath = treePath;
+            var parentInstruction = await _instructionsRepository.GetInstructionByIdAsync(instruction.ParentId.Value);
+            treePath = $"{parentInstruction.TreePath}{TreePathDelimiter}{instruction.Id}";
         }
+        instruction.TreePath = treePath;
     }
 
     public async Task<Result> SetExecDateAsync(ExecDateRm execDateRm)
@@ -151,6 +157,11 @@ public class InstructionsService : IInstructionsService
                     : $"{currentInstruction.Parent.TreePath}{TreePathDelimiter}{currentInstruction.Id}";
             }
         }
+    }
+
+    public async Task RecalculateAllClosureTable()
+    {
+        await _instructionsRepository.RecalculateAllInstructionsClosuresAsync();
     }
 
     private IEnumerable<Instruction> GetAllChildren(Instruction instruction)

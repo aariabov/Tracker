@@ -64,4 +64,12 @@ public class InstructionsController : ControllerBase
         await _instructionsService.RecalculateAllTreePaths();
         return Ok();
     }
+    
+    [HttpPost("recalculate-all-closure-table")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<ActionResult> RecalculateAllClosureTable()
+    {
+        await _instructionsService.RecalculateAllClosureTable();
+        return Ok();
+    }
 }

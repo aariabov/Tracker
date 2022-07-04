@@ -69,7 +69,8 @@ builder.Services.AddScoped<IInstructionsService, InstructionsService>();
 builder.Services.AddScoped<IInstructionStatusService, InstructionStatusService>();
 builder.Services.AddScoped<IInstructionsRepository, InstructionsRepository>();
 // builder.Services.AddScoped<IInstructionsTreeRepository, InstructionsTreeRepositoryCte>();
-builder.Services.AddScoped<IInstructionsTreeRepository, InstructionsTreeRepositoryPath>();
+// builder.Services.AddScoped<IInstructionsTreeRepository, InstructionsTreeRepositoryPath>();
+builder.Services.AddScoped<IInstructionsTreeRepository, InstructionsTreeRepositoryClosure>();
 builder.Services.AddScoped<InstructionValidationService>();
 
 builder.Services.AddScoped<RolesService>();

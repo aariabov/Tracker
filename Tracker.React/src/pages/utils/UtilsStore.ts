@@ -11,6 +11,14 @@ export class UtilsStore {
             run: async () => {
                 await post("api/instructions/recalculate-all-tree-paths", undefined);
             }
+        },
+        {
+            id: 2,
+            name: "Полный пересчет closure table для иерархий поручений",
+            status: Status.Pending,
+            run: async () => {
+                await post("api/instructions/recalculate-all-closure-table", undefined);
+            }
         }
     ];
 

@@ -16,12 +16,17 @@ public class InstructionsRepository : IInstructionsRepository
     // для способа Closure надо пересчитать closure table
     // для способа Nested sets надо пересчитать все коэффициенты
     private readonly InstructionsTreeRepositoryCte _cteRepository;
+    
+    // нужен, чтобы держать closure table в актуальном состоянии, независимо от способа работы с иерархиями,
+    // чтобы можно было переключать способы без полного пересчета
+    private readonly InstructionsTreeRepositoryClosure _closureRepository;
 
     public InstructionsRepository(AppDbContext db, IInstructionsTreeRepository treeRepository)
     {
         _db = db;
         _treeRepository = treeRepository;
         _cteRepository = new InstructionsTreeRepositoryCte(db);
+        _closureRepository = new InstructionsTreeRepositoryClosure(db);
     }
 
     public async Task<Instruction[]> GetAllInstructionsAsync()
@@ -77,6 +82,16 @@ public class InstructionsRepository : IInstructionsRepository
     public async Task UpdateAllTreePathsToNullAsync()
     {
         await _db.Database.ExecuteSqlRawAsync("update instructions set tree_path = null");
+    }
+
+    public async Task RecalculateAllInstructionsClosuresAsync()
+    {
+        await _closureRepository.RecalculateAllInstructionsClosuresAsync();
+    }
+
+    public async Task UpdateInstructionClosureAsync(int id, int? parentId)
+    {
+        await _closureRepository.UpdateInstructionClosureAsync(id, parentId);
     }
 
     public async Task SaveChangesAsync() => await _db.SaveChangesAsync();

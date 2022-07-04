@@ -11,4 +11,5 @@ public interface IInstructionsService
     Task<Result<int>> CreateInstructionAsync(InstructionRm instructionRm);
     Task<Result> SetExecDateAsync(ExecDateRm execDateRm);
     Task RecalculateAllTreePaths();
+    Task RecalculateAllClosureTable();
 }

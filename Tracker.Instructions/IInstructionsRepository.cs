@@ -26,5 +26,7 @@ public interface IInstructionsRepository
     void UpdateInstruction(Instruction instruction);
     Task<bool> IsInstructionExistsAsync(int instructionId);
     Task UpdateAllTreePathsToNullAsync();
+    Task RecalculateAllInstructionsClosuresAsync();
+    Task UpdateInstructionClosureAsync(int id, int? parentId);
     Task SaveChangesAsync();
 }

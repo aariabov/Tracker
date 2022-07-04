@@ -8,6 +8,7 @@ namespace Tracker.Db;
 public class AppDbContext : IdentityDbContext<User, Role, string>
 {
     public DbSet<Instruction> Instructions => Set<Instruction>();
+    public DbSet<InstructionClosure> InstructionsClosures => Set<InstructionClosure>();
     public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
 
     public AppDbContext(DbContextOptions options) : base(options) { }
@@ -38,6 +39,19 @@ public class AppDbContext : IdentityDbContext<User, Role, string>
             b.HasOne(i => i.Executor)
                 .WithMany()
                 .HasForeignKey(e => e.ExecutorId);
+        });
+        
+        modelBuilder.Entity<InstructionClosure>(b =>
+        {
+            b.HasKey(i => new { i.ParentId, i.Id });
+            
+            b.HasOne<Instruction>()
+                .WithMany()
+                .HasForeignKey(e => e.ParentId);
+            
+            b.HasOne<Instruction>()
+                .WithMany()
+                .HasForeignKey(e => e.Id);
         });
         
         modelBuilder.Entity<User>(b =>
