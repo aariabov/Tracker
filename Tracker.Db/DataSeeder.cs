@@ -22,6 +22,7 @@ public class DataSeeder
     public async Task Seed()
     {
         var defaultAdminSection = _config.GetSection("DefaultAdmin");
+        var adminId = defaultAdminSection["Id"];
         var adminName = defaultAdminSection["Name"];
         var adminEmail = defaultAdminSection["Email"];
         var adminPassword = defaultAdminSection["Password"];
@@ -38,7 +39,7 @@ public class DataSeeder
         var admin = await _userManager.FindByEmailAsync(adminEmail);
         if(admin is null)
         {
-            var adminUser = new User(adminName , adminEmail, bossId: null);
+            var adminUser = new User(adminName , adminEmail, bossId: null) { Id = adminId };
             var createdAdmin = await _userManager.CreateAsync(adminUser, adminPassword);
             if (createdAdmin.Succeeded)
             {
