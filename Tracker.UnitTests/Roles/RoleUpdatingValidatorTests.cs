@@ -175,15 +175,16 @@ public class RoleUpdatingValidatorTests
         var config = new ConfigurationBuilder().AddInMemoryCollection(myConfig).Build();
         const string roleName = "4242";
         const string roleId = "42";
+        const string concurrencyStamp = "42";
         var stubRoleManager = new Mock<IRoleRepo>();
         stubRoleManager
             .Setup(m => m.RoleExistsAsync(roleName))
             .ReturnsAsync(false);
         stubRoleManager
             .Setup(m => m.GetRoleById(roleId))
-            .ReturnsAsync(new Role(roleName));
+            .ReturnsAsync(new Role(roleName) { ConcurrencyStamp = concurrencyStamp });
         
-        var roleUpdatingModel = new RoleUpdatingRm { Id = roleId, Name = roleName };
+        var roleUpdatingModel = new RoleUpdatingRm { Id = roleId, Name = roleName, ConcurrencyStamp = concurrencyStamp };
         var expected = Result.Ok();
         var sut = new RoleValidationService(stubRoleManager.Object, config);
         
