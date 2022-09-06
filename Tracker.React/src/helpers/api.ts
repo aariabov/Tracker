@@ -114,7 +114,7 @@ export async function get<T>(path: string): Promise<T> {
     },
   };
 
-  return makeRequest<T>(BACKEND_URL + path, requestInit);
+  return makeRequest<T>(path, requestInit);
 }
 
 export async function post<TBody, TRes = void>(
@@ -122,5 +122,5 @@ export async function post<TBody, TRes = void>(
   bodyObj: TBody
 ): Promise<TRes> {
   const requestInit = createPostRequestInit(bodyObj);
-  return makeRequest<TRes>(BACKEND_URL + path, requestInit);
+  return makeRequest<TRes>(path, requestInit);
 }

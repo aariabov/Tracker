@@ -39,7 +39,13 @@ public class DataSeeder
         var admin = await _userManager.FindByEmailAsync(adminEmail);
         if(admin is null)
         {
-            var adminUser = new User(adminName , adminEmail, bossId: null) { Id = adminId };
+            var adminUser = new User(adminName , adminEmail, bossId: null);
+            if (!string.IsNullOrEmpty(adminId))
+            {
+                // надо для интеграционных тестов, чтоб записать в claims
+                adminUser.Id = adminId;
+            }
+            
             var createdAdmin = await _userManager.CreateAsync(adminUser, adminPassword);
             if (createdAdmin.Succeeded)
             {
