@@ -5,7 +5,8 @@ namespace Tracker.Users;
 
 public interface IUserRepository
 {
-    Task<OrgStructElementVm[]> GetAllUsers();
+    Task<OrgStructElementVm[]> GetOrgStructVm();
+    Task<User[]> GetAllUsers();
     Task<User?> GetUserById(string userId);
     Task<User?> GetUserByEmail(string email);
     Task<User?> GetUserByRefreshToken(string refreshToken);

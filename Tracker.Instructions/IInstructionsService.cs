@@ -1,4 +1,5 @@
 using Tracker.Common;
+using Tracker.Db.Models;
 using Tracker.Instructions.RequestModels;
 using Tracker.Instructions.ViewModels;
 
@@ -8,8 +9,8 @@ public interface IInstructionsService
 {
     Task<InstructionVm[]> GetUserInstructionsAsync();
     Task<InstructionTreeItemVm[]> GetTreeInstructionAsync(int id);
-    Task<Result<int>> CreateInstructionAsync(InstructionRm instructionRm);
-    Task<Result> SetExecDateAsync(ExecDateRm execDateRm);
+    Task<Result<int>> CreateInstructionAsync(InstructionRm instructionRm, User creator, DateTime today);
+    Task<Result> SetExecDateAsync(ExecDateRm execDateRm, string executorId, DateTime today);
     Task RecalculateAllTreePaths();
     Task RecalculateAllClosureTable();
 }

@@ -9,7 +9,7 @@ public sealed class User : IdentityUser
     public DateTime RefreshTokenExpiryTime { get; set; }
     public ICollection<Role> Roles { get; set; }
     public User? Boss { get; set; }
-    public ICollection<User> Children { get; set; }
+    public ICollection<User>? Children { get; set; }
 
     public User(){}
 

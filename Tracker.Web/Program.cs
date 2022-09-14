@@ -66,6 +66,7 @@ builder.Services.AddControllers(option =>
 builder.Services.AddTransient<JwtGenerator>();
 
 builder.Services.AddScoped<IInstructionsService, InstructionsService>();
+builder.Services.AddScoped<IInstructionGeneratorService, InstructionGeneratorService>();
 builder.Services.AddScoped<IInstructionStatusService, InstructionStatusService>();
 builder.Services.AddScoped<IInstructionsRepository, InstructionsRepository>();
 // builder.Services.AddScoped<IInstructionsTreeRepository, InstructionsTreeRepositoryCte>();

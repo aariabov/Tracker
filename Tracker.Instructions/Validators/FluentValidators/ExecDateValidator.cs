@@ -1,59 +1,70 @@
 using FluentValidation;
 using Tracker.Instructions.RequestModels;
-using Tracker.Users;
 
 namespace Tracker.Instructions.Validators.FluentValidators;
 
 internal class ExecDateValidator: AbstractValidator<ExecDateRm>
 {
     private readonly IInstructionsRepository _instructionsRepository;
-    private readonly UsersService _usersService;
     private readonly IInstructionStatusService _statusService;
+    private readonly string _executorId;
     
     public ExecDateValidator(IInstructionsRepository instructionsRepository
-        , UsersService usersService
-        , IInstructionStatusService statusService)
+        , IInstructionStatusService statusService
+        , string executorId
+        , DateTime today)
     {
         _instructionsRepository = instructionsRepository;
-        _usersService = usersService;
         _statusService = statusService;
+        _executorId = executorId;
 
-        RuleFor(rm => rm.InstructionId)
+        RuleFor(rm => rm)
             .Cascade(CascadeMode.Stop)
             .NotEmpty().WithMessage("Идентификатор поручения не может быть пустым")
             .CustomAsync(MustBeValidInstruction);
         RuleFor(rm => rm.ExecDate)
             .Cascade(CascadeMode.Stop)
             .NotEmpty().WithMessage("Дата исполнения не может быть пустой")
-            .Must(execDate => execDate.Date == DateTime.UtcNow.Date).WithMessage("Дата исполнения должна быть сегодня");
+            .Must(execDate => execDate.Date == today.Date).WithMessage("Дата исполнения должна быть сегодня");
     }
     
-    private async Task MustBeValidInstruction(int id, ValidationContext<ExecDateRm> context, CancellationToken token)
+    private async Task MustBeValidInstruction(ExecDateRm execDateRm, ValidationContext<ExecDateRm> context, CancellationToken token)
     {
-        var userId = _usersService.GetCurrentUserId();
-        var allInstructions = await _instructionsRepository.GetAllInstructionsAsync();
-        var instruction = allInstructions.SingleOrDefault(i => i.Id == id);
+        var id = execDateRm.InstructionId;
+        if (id < 1)
+        {
+            context.AddFailure(nameof(ExecDateRm.InstructionId), "Идентификатор поручения не может быть пустым");
+            return;
+        }
+        
+        var instruction = await _instructionsRepository.GetInstructionTreeAsync(id);
         if (instruction is null)
         {
-            context.AddFailure($"Поручение с идентификатором {id} не найдено");
+            context.AddFailure(nameof(ExecDateRm.InstructionId), $"Поручение с идентификатором {id} не найдено");
             return;
         }
 
-        if (instruction.ExecutorId != userId)
+        if (instruction.ExecutorId != _executorId)
         {
-            context.AddFailure("Вы не являетесь исполнителем этого поручения");
+            context.AddFailure(nameof(ExecDateRm.InstructionId), "Вы не являетесь исполнителем этого поручения");
             return;
         }
 
         if (instruction.ExecDate is not null)   
         {
-            context.AddFailure("Поручение уже исполнено");
+            context.AddFailure(nameof(ExecDateRm.InstructionId), "Поручение уже исполнено");
             return;
         }
 
         if (_statusService.AnyChildInWork(instruction))
         {
-            context.AddFailure("У поручения есть не исполненные дочерние поручения");
+            context.AddFailure(nameof(ExecDateRm.InstructionId), "У поручения есть не исполненные дочерние поручения");
+            return;
+        }
+
+        if (_statusService.GetMaxChildrenExecDate(instruction) > execDateRm.ExecDate)
+        {
+            context.AddFailure(nameof(ExecDateRm.ExecDate), "Дата исполнения должна быть больше или равна дат исполнения дочерних поручений");
             return;
         }
     }

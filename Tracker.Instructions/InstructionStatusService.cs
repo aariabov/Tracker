@@ -21,6 +21,15 @@ public class InstructionStatusService : IInstructionStatusService
         return anyChildInWork;
     }
 
+    public DateTime? GetMaxChildrenExecDate(Instruction instruction)
+    {
+        var instructions = Helpers.GetAllChildren(instruction).Where(i => i.Id != instruction.Id).ToArray();
+        if (instructions.Any(i => i.ExecDate is null))
+            return null;
+
+        return instructions.Max(i => i.ExecDate);
+    }
+
     private ExecStatus GetStatusDespiteChildren(Instruction instruction)
     {
         return instruction.ExecDate is null

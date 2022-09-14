@@ -1,4 +1,5 @@
 using FluentValidation;
+using Tracker.Db.Models;
 using Tracker.Instructions.RequestModels;
 using Tracker.Users;
 
@@ -9,14 +10,18 @@ internal class InstructionValidator : AbstractValidator<InstructionRm>
     private readonly IInstructionsRepository _instructionsRepository;
     private readonly UsersService _usersService;
     private readonly IInstructionStatusService _statusService;
-    
+    private readonly User _creator;
+
     public InstructionValidator(IInstructionsRepository instructionsRepository
         , UsersService usersService
-        , IInstructionStatusService statusService)
+        , IInstructionStatusService statusService
+        , User creator
+        , DateTime today)
     {
         _instructionsRepository = instructionsRepository;
         _usersService = usersService;
         _statusService = statusService;
+        _creator = creator;
 
         const int nameMinLen = 3;
         const int nameMaxLen = 100;
@@ -32,7 +37,7 @@ internal class InstructionValidator : AbstractValidator<InstructionRm>
         RuleFor(instruction => instruction.Deadline)
             .Cascade(CascadeMode.Stop)
             .NotNull().WithMessage("Дедлайн не может быть пустым")
-            .GreaterThanOrEqualTo(DateTime.UtcNow.Date).WithMessage("Дедлайн должен быть больше или равно сегодня");
+            .GreaterThanOrEqualTo(today.Date).WithMessage("Дедлайн должен быть больше или равно сегодня");
         RuleFor(instruction => instruction.ParentId)
             .Cascade(CascadeMode.Stop)
             .MustAsync(ParentExistsAsync).WithMessage("Родительское поручение не найдено")
@@ -53,17 +58,15 @@ internal class InstructionValidator : AbstractValidator<InstructionRm>
     
     private async Task<bool> BeNotExecutedAsync(int? parentId, CancellationToken token)
     {
-        var allInstructions = await _instructionsRepository.GetAllInstructionsAsync();
-        var parentInstruction = allInstructions.Single(i => i.Id == parentId);
+        var parentInstruction = await _instructionsRepository.GetInstructionTreeAsync(parentId.Value);
         var status = _statusService.GetStatus(parentInstruction);
         return status is ExecStatus.InWork or ExecStatus.InWorkOverdue;
     }
     
     private async Task<bool> BeCreatedByMyBossAsync(int? parentId, CancellationToken token)
     {
-        var currentUser = await _usersService.GetCurrentUser();
         var parentInstruction = await _instructionsRepository.GetInstructionByIdAsync(parentId!.Value);
-        return parentInstruction!.CreatorId == currentUser.BossId &&
-               parentInstruction!.ExecutorId == currentUser.Id;
+        return parentInstruction!.CreatorId == _creator.BossId &&
+               parentInstruction!.ExecutorId == _creator.Id;
     }
 }

@@ -17,7 +17,7 @@ public class UserRepository : IUserRepository
         _db = db;
     }
 
-    public async Task<OrgStructElementVm[]> GetAllUsers()
+    public async Task<OrgStructElementVm[]> GetOrgStructVm()
     {
         var query = from user in _userManager.Users
             orderby user.UserName
@@ -32,6 +32,11 @@ public class UserRepository : IUserRepository
         
         var allUsers = await query.ToArrayAsync();
         return allUsers;
+    }
+
+    public async Task<User[]> GetAllUsers()
+    {
+        return await _userManager.Users.ToArrayAsync();
     }
 
     public async Task<User?> GetUserById(string userId)

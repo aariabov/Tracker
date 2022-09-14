@@ -1,4 +1,5 @@
 using Tracker.Common;
+using Tracker.Db.Models;
 using Tracker.Instructions.RequestModels;
 using Tracker.Instructions.Validators.FluentValidators;
 using Tracker.Users;
@@ -20,9 +21,9 @@ public class InstructionValidationService
         _statusService = statusService;
     }
 
-    public async Task<Result> ValidateInstructionAsync(InstructionRm instructionRm)
+    public async Task<Result> ValidateInstructionAsync(InstructionRm instructionRm, User creator, DateTime today)
     {
-        var validator = new InstructionValidator(_instructionsRepository, _usersService, _statusService);
+        var validator = new InstructionValidator(_instructionsRepository, _usersService, _statusService, creator, today);
         var validationResult = await validator.ValidateAsync(instructionRm);
         if (validationResult.IsValid)
             return Result.Ok();
@@ -30,9 +31,9 @@ public class InstructionValidationService
         return Result.Errors<string>(validationResult.Errors.Format());
     }
     
-    public async Task<Result> ValidateExecDateAsync(ExecDateRm execDateRm)
+    public async Task<Result> ValidateExecDateAsync(ExecDateRm execDateRm, string executorId, DateTime today)
     {
-        var validator = new ExecDateValidator(_instructionsRepository, _usersService, _statusService);
+        var validator = new ExecDateValidator(_instructionsRepository, _statusService, executorId, today);
         var validationResult = await validator.ValidateAsync(execDateRm);
         if (validationResult.IsValid)
             return Result.Ok();

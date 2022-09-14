@@ -19,6 +19,14 @@ export class UtilsStore {
             run: async () => {
                 await post("api/instructions/recalculate-all-closure-table", undefined);
             }
+        },
+        {
+            id: 3,
+            name: "Генерация поручений",
+            status: Status.Pending,
+            run: async () => {
+                await post("api/instructions/generate-instructions", undefined);
+            }
         }
     ];
 

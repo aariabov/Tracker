@@ -63,7 +63,7 @@ public class InstructionsService : IInstructionsService
             throw new Exception($"Instruction with id {id} not found");
         
         var rootInstruction = GetRoot(instruction);
-        var instructions = GetAllChildren(rootInstruction);
+        var instructions = Helpers.GetAllChildren(rootInstruction);
         var instructionTreeItemVms = instructions.Select(currentInstruction =>
         {
             var status = _statusService.GetStatus(currentInstruction);
@@ -74,20 +74,19 @@ public class InstructionsService : IInstructionsService
     }
     
     // TODO: можно написать юнит тест
-    public async Task<Result<int>> CreateInstructionAsync(InstructionRm instructionRm)
+    public async Task<Result<int>> CreateInstructionAsync(InstructionRm instructionRm, User creator, DateTime today)
     {
-        var validationResult = await _instructionValidationService.ValidateInstructionAsync(instructionRm);
+        var validationResult = await _instructionValidationService.ValidateInstructionAsync(instructionRm, creator, today);
         if (!validationResult.IsSuccess)
             return Result.Errors<int>(validationResult.ValidationErrors);
 
-        var userId = _usersService.GetCurrentUserId();
         var newInstruction = new Instruction
         {
             Name = instructionRm.Name,
-            CreatorId = userId,
+            CreatorId = creator.Id,
             ExecutorId = instructionRm.ExecutorId,
             ParentId = instructionRm.ParentId,
-            Deadline = instructionRm.Deadline
+            Deadline = instructionRm.Deadline.Date
         };
 
         _instructionsRepository.CreateInstruction(newInstruction);
@@ -115,9 +114,9 @@ public class InstructionsService : IInstructionsService
         instruction.TreePath = treePath;
     }
 
-    public async Task<Result> SetExecDateAsync(ExecDateRm execDateRm)
+    public async Task<Result> SetExecDateAsync(ExecDateRm execDateRm, string executorId, DateTime today)
     {
-        var validationResult = await _instructionValidationService.ValidateExecDateAsync(execDateRm);
+        var validationResult = await _instructionValidationService.ValidateExecDateAsync(execDateRm, executorId, today);
         if (!validationResult.IsSuccess)
             return Result.Errors<int>(validationResult.ValidationErrors);
         
@@ -125,7 +124,7 @@ public class InstructionsService : IInstructionsService
         if (instruction is null)
             throw new Exception($"Instruction with id {execDateRm.InstructionId} not found");
         
-        instruction.ExecDate = execDateRm.ExecDate;
+        instruction.ExecDate = execDateRm.ExecDate.Date;
         _instructionsRepository.UpdateInstruction(instruction);
         await _instructionsRepository.SaveChangesAsync();
         return Result.Ok();
@@ -149,7 +148,7 @@ public class InstructionsService : IInstructionsService
         
         void UpdateTreePaths(Instruction rootInstruction)
         {
-            var instructions = GetAllChildren(rootInstruction);
+            var instructions = Helpers.GetAllChildren(rootInstruction);
             foreach (var currentInstruction in instructions)
             {
                 currentInstruction.TreePath = currentInstruction.Parent is null
@@ -162,29 +161,6 @@ public class InstructionsService : IInstructionsService
     public async Task RecalculateAllClosureTable()
     {
         await _instructionsRepository.RecalculateAllInstructionsClosuresAsync();
-    }
-
-    private IEnumerable<Instruction> GetAllChildren(Instruction instruction)
-    {
-        var stack = new Stack<Instruction>();
-        stack.Push(instruction);
-        while(stack.Count > 0)
-        {
-            var current = stack.Pop();
-            yield return current;
-            foreach(var child in current.Children)
-                stack.Push(child);
-        }
-        
-        // реализация рекурсией - понятнее, но медленее и затратнее
-        // var result = new List<Instruction> { instruction };
-        // foreach (var child in instruction.Children)
-        // {
-        //     var children = GetAllChildren(child);
-        //     result.AddRange(children);
-        // }
-        //
-        // return result;
     }
 
     private Instruction GetRoot(Instruction instruction)

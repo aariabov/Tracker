@@ -40,6 +40,11 @@ public class UsersService
 
     public async Task<OrgStructElementVm[]> GetAllUsersAsync()
     {
+        return await _userRepository.GetOrgStructVm();
+    }
+
+    public async Task<User[]> GetUsersTreeAsync()
+    {
         return await _userRepository.GetAllUsers();
     }
 

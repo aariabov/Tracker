@@ -1,8 +1,10 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Tracker.Common;
 using Tracker.Instructions.RequestModels;
 using Tracker.Instructions.ViewModels;
+using Tracker.Users;
 
 namespace Tracker.Instructions;
 
@@ -11,10 +13,16 @@ namespace Tracker.Instructions;
 public class InstructionsController : ControllerBase
 {
     private readonly IInstructionsService _instructionsService;
+    private readonly IInstructionGeneratorService _instructionGeneratorService;
+    private readonly UsersService _usersService;
     
-    public InstructionsController(IInstructionsService instructionsService)
+    public InstructionsController(IInstructionsService instructionsService,
+        IInstructionGeneratorService instructionGeneratorService,
+        UsersService usersService)
     {
         _instructionsService = instructionsService;
+        _instructionGeneratorService = instructionGeneratorService;
+        _usersService = usersService;
     }
 
     [HttpGet]
@@ -38,7 +46,8 @@ public class InstructionsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ModelErrorsVm))]
     public async Task<ActionResult<int>> CreateInstruction([FromBody]InstructionRm instructionRm)
     {
-        var result = await _instructionsService.CreateInstructionAsync(instructionRm);
+        var user = await _usersService.GetCurrentUser();
+        var result = await _instructionsService.CreateInstructionAsync(instructionRm, user, DateTime.UtcNow);
         if (result.IsSuccess)
             return Ok(result.Value);
 
@@ -50,7 +59,8 @@ public class InstructionsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ModelErrorsVm))]
     public async Task<ActionResult> SetExecDate([FromBody] ExecDateRm execDateRm)
     {
-        var result = await _instructionsService.SetExecDateAsync(execDateRm);
+        var userId = _usersService.GetCurrentUserId();
+        var result = await _instructionsService.SetExecDateAsync(execDateRm, userId, DateTime.UtcNow);
         if (result.IsSuccess)
             return Ok();
 
@@ -58,6 +68,7 @@ public class InstructionsController : ControllerBase
     }
     
     [HttpPost("recalculate-all-tree-paths")]
+    [Authorize(Roles = "Admin")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<ActionResult> RecalculateAllTreePaths()
     {
@@ -66,10 +77,20 @@ public class InstructionsController : ControllerBase
     }
     
     [HttpPost("recalculate-all-closure-table")]
+    [Authorize(Roles = "Admin")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<ActionResult> RecalculateAllClosureTable()
     {
         await _instructionsService.RecalculateAllClosureTable();
+        return Ok();
+    }
+    
+    [HttpPost("generate-instructions")]
+    [Authorize(Roles = "Admin")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<ActionResult> GenerateInstructions()
+    {
+        await _instructionGeneratorService.GenerateInstructions();
         return Ok();
     }
 }
