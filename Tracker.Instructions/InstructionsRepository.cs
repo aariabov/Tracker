@@ -29,12 +29,9 @@ public class InstructionsRepository : IInstructionsRepository
         _closureRepository = new InstructionsTreeRepositoryClosure(db);
     }
 
-    public async Task<Instruction[]> GetAllInstructionsAsync()
+    public async Task<Instruction[]> GetUserInstructionsWithDescendantsAsync(string userId)
     {
-        return await _db.Instructions
-            .Include(i => i.Creator)
-            .Include(i => i.Executor)
-            .ToArrayAsync();
+        return await _treeRepository.GetUserInstructionsWithDescendantsAsync(userId);
     }
 
     public async Task<int[]> GetRootInstructionIdsAsync()

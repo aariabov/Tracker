@@ -4,7 +4,13 @@ namespace Tracker.Instructions;
 
 public interface IInstructionsRepository
 {
-    Task<Instruction[]> GetAllInstructionsAsync();
+    /// <summary>
+    /// Получить все поручения пользователя и их потомков
+    /// </summary>
+    /// <param name="userId"></param>
+    /// <returns></returns>
+    Task<Instruction[]> GetUserInstructionsWithDescendantsAsync(string userId);
+    
     Task<int[]> GetRootInstructionIdsAsync();
     Task<Instruction?> GetInstructionByIdAsync(int instructionId);
     

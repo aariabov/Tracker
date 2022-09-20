@@ -38,4 +38,23 @@ public class InstructionsTreeRepositoryPath : IInstructionsTreeRepository
 
         return instructionTree;
     }
+
+    public async Task<Instruction[]> GetUserInstructionsWithDescendantsAsync(string userId)
+    {
+        return await _db.Instructions
+            .Include(i => i.Creator)
+            .Include(i => i.Executor)
+            .Where(i => _db.Instructions
+                .Any(i0 => (i0.CreatorId == userId || i0.ExecutorId == userId) && i.TreePath.Contains(i0.TreePath)))
+            .ToArrayAsync();
+        
+        // query syntax way
+        // var query = from i in _db.Instructions.Include(i => i.Creator).Include(i => i.Executor)
+        //     let isInstructionBelongsTree = _db.Instructions
+        //         .Any(ui => (ui.CreatorId == userId || ui.ExecutorId == userId) && i.TreePath.Contains(ui.TreePath))
+        //     where isInstructionBelongsTree
+        //     select i;
+        //
+        // return await query.ToArrayAsync();
+    }
 }

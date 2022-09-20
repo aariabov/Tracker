@@ -25,6 +25,19 @@ public class InstructionsTreeRepositoryClosure : IInstructionsTreeRepository
             .ToArrayAsync();
     }
 
+    public async Task<Instruction[]> GetUserInstructionsWithDescendantsAsync(string userId)
+    {
+        var ids = _db.Instructions
+            .Where(i => i.CreatorId == userId || i.ExecutorId == userId)
+            .Select(i => i.Id);
+        
+        return await _db.Instructions
+            .Include(i => i.Creator)
+            .Include(i => i.Executor)
+            .Where(i => _db.InstructionsClosures.Where(ic => ids.Contains(ic.ParentId)).Select(ic => ic.Id).Contains(i.Id))
+            .ToArrayAsync();
+    }
+
     public async Task RecalculateAllInstructionsClosuresAsync()
     {
         await DeleteFromInstructionsClosuresAsync();

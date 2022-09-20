@@ -30,8 +30,8 @@ public class InstructionsService : IInstructionsService
     public async Task<InstructionVm[]> GetUserInstructionsAsync()
     {
         var userId = _usersService.GetCurrentUserId();
-        var allInstructions = await _instructionsRepository.GetAllInstructionsAsync();
-        var userInstructions = allInstructions
+        var allUserInstructions = await _instructionsRepository.GetUserInstructionsWithDescendantsAsync(userId);
+        var userInstructions = allUserInstructions
             .Where(i => i.CreatorId == userId || i.ExecutorId == userId);
         
         var isUserBoss = await _usersService.HasUserChildrenAsync(userId);
