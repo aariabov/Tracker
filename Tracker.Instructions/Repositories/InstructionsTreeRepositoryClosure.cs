@@ -25,17 +25,27 @@ public class InstructionsTreeRepositoryClosure : IInstructionsTreeRepository
             .ToArrayAsync();
     }
 
-    public async Task<Instruction[]> GetUserInstructionsWithDescendantsAsync(string userId)
+    public async Task<Instruction[]> GetUserInstructionsWithDescendantsAsync(string userId, int page, int perPage, Sort sort)
     {
-        var ids = _db.Instructions
-            .Where(i => i.CreatorId == userId || i.ExecutorId == userId)
+        var sortedInstruction = _db.Instructions
+            .Where(i => (i.CreatorId == userId && i.ParentId == null) || i.ExecutorId == userId);
+
+        sortedInstruction = Helpers.AddSort(sortedInstruction, sort);
+
+        var ids = sortedInstruction
+            .Skip((page - 1) * perPage)
+            .Take(perPage)
             .Select(i => i.Id);
-        
-        return await _db.Instructions
+
+        var instructions = _db.Instructions
             .Include(i => i.Creator)
             .Include(i => i.Executor)
-            .Where(i => _db.InstructionsClosures.Where(ic => ids.Contains(ic.ParentId)).Select(ic => ic.Id).Contains(i.Id))
-            .ToArrayAsync();
+            .Where(i => _db.InstructionsClosures.Where(ic => ids.Contains(ic.ParentId)).Select(ic => ic.Id)
+                .Contains(i.Id));
+
+        instructions = Helpers.AddSort(instructions, sort);
+
+        return await instructions.ToArrayAsync();
     }
 
     public async Task RecalculateAllInstructionsClosuresAsync()

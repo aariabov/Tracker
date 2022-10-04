@@ -39,22 +39,25 @@ public class InstructionsTreeRepositoryPath : IInstructionsTreeRepository
         return instructionTree;
     }
 
-    public async Task<Instruction[]> GetUserInstructionsWithDescendantsAsync(string userId)
+    public async Task<Instruction[]> GetUserInstructionsWithDescendantsAsync(string userId, int page, int perPage, Sort sort)
     {
-        return await _db.Instructions
+        var sortedInstruction = _db.Instructions
+            .Where(i => (i.CreatorId == userId && i.ParentId == null) || i.ExecutorId == userId);
+
+        sortedInstruction = Helpers.AddSort(sortedInstruction, sort);
+        
+        var treePaths = sortedInstruction
+            .Skip((page - 1) * perPage)
+            .Take(perPage)
+            .Select(i => i.TreePath);
+        
+        var instructions = _db.Instructions
             .Include(i => i.Creator)
             .Include(i => i.Executor)
-            .Where(i => _db.Instructions
-                .Any(i0 => (i0.CreatorId == userId || i0.ExecutorId == userId) && i.TreePath.Contains(i0.TreePath)))
-            .ToArrayAsync();
+            .Where(i => treePaths.Any(treePath => i.TreePath.Contains(treePath)));
         
-        // query syntax way
-        // var query = from i in _db.Instructions.Include(i => i.Creator).Include(i => i.Executor)
-        //     let isInstructionBelongsTree = _db.Instructions
-        //         .Any(ui => (ui.CreatorId == userId || ui.ExecutorId == userId) && i.TreePath.Contains(ui.TreePath))
-        //     where isInstructionBelongsTree
-        //     select i;
-        //
-        // return await query.ToArrayAsync();
+        instructions = Helpers.AddSort(instructions, sort);
+
+        return await instructions.ToArrayAsync();
     }
 }

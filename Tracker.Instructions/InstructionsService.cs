@@ -27,10 +27,10 @@ public class InstructionsService : IInstructionsService
         _statusService = statusService;
     }
 
-    public async Task<InstructionVm[]> GetUserInstructionsAsync()
+    public async Task<InstructionVm[]> GetUserInstructionsAsync(int page, int perPage, Sort sort)
     {
         var userId = _usersService.GetCurrentUserId();
-        var allUserInstructions = await _instructionsRepository.GetUserInstructionsWithDescendantsAsync(userId);
+        var allUserInstructions = await _instructionsRepository.GetUserInstructionsWithDescendantsAsync(userId, page, perPage, sort);
         var userInstructions = allUserInstructions
             .Where(i => i.CreatorId == userId || i.ExecutorId == userId);
         
@@ -161,6 +161,13 @@ public class InstructionsService : IInstructionsService
     public async Task RecalculateAllClosureTable()
     {
         await _instructionsRepository.RecalculateAllInstructionsClosuresAsync();
+    }
+
+    public async Task<int> GetTotalUserInstructionsAsync()
+    {
+        var userId = _usersService.GetCurrentUserId();
+        var total = await _instructionsRepository.GetTotalUserInstructionsAsync(userId);
+        return total;
     }
 
     private Instruction GetRoot(Instruction instruction)

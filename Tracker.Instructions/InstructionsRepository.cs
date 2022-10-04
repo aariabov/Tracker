@@ -29,9 +29,9 @@ public class InstructionsRepository : IInstructionsRepository
         _closureRepository = new InstructionsTreeRepositoryClosure(db);
     }
 
-    public async Task<Instruction[]> GetUserInstructionsWithDescendantsAsync(string userId)
+    public async Task<Instruction[]> GetUserInstructionsWithDescendantsAsync(string userId, int page, int perPage, Sort sort)
     {
-        return await _treeRepository.GetUserInstructionsWithDescendantsAsync(userId);
+        return await _treeRepository.GetUserInstructionsWithDescendantsAsync(userId, page, perPage, sort);
     }
 
     public async Task<int[]> GetRootInstructionIdsAsync()
@@ -89,6 +89,12 @@ public class InstructionsRepository : IInstructionsRepository
     public async Task UpdateInstructionClosureAsync(int id, int? parentId)
     {
         await _closureRepository.UpdateInstructionClosureAsync(id, parentId);
+    }
+
+    public async Task<int> GetTotalUserInstructionsAsync(string userId)
+    {
+        return await _db.Instructions
+            .CountAsync(i => (i.CreatorId == userId && i.ParentId == null) || i.ExecutorId == userId);
     }
 
     public async Task SaveChangesAsync() => await _db.SaveChangesAsync();

@@ -27,10 +27,19 @@ public class InstructionsController : ControllerBase
 
     [HttpGet]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<InstructionVm>))]
-    public async Task<ActionResult<IEnumerable<InstructionVm>>> GetUserInstructions()
+    public async Task<ActionResult<IEnumerable<InstructionVm>>> GetUserInstructions(int page, int perPage, string sort = "name")
     {
-        var instructionVms = await _instructionsService.GetUserInstructionsAsync();
+        var sortEnum = Helpers.GetSort(sort);
+        var instructionVms = await _instructionsService.GetUserInstructionsAsync(page, perPage, sortEnum);
         return Ok(instructionVms);
+    }
+
+    [HttpGet("total")]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(int))]
+    public async Task<ActionResult<IEnumerable<InstructionVm>>> GetTotalUserInstructions()
+    {
+        var total = await _instructionsService.GetTotalUserInstructionsAsync();
+        return Ok(total);
     }
 
     [HttpGet("{id:int}")]

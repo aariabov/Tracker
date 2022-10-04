@@ -9,7 +9,7 @@ public interface IInstructionsRepository
     /// </summary>
     /// <param name="userId"></param>
     /// <returns></returns>
-    Task<Instruction[]> GetUserInstructionsWithDescendantsAsync(string userId);
+    Task<Instruction[]> GetUserInstructionsWithDescendantsAsync(string userId, int page, int perPage, Sort sort);
     
     Task<int[]> GetRootInstructionIdsAsync();
     Task<Instruction?> GetInstructionByIdAsync(int instructionId);
@@ -34,5 +34,6 @@ public interface IInstructionsRepository
     Task UpdateAllTreePathsToNullAsync();
     Task RecalculateAllInstructionsClosuresAsync();
     Task UpdateInstructionClosureAsync(int id, int? parentId);
+    Task<int> GetTotalUserInstructionsAsync(string userId);
     Task SaveChangesAsync();
 }

@@ -7,10 +7,11 @@ namespace Tracker.Instructions;
 
 public interface IInstructionsService
 {
-    Task<InstructionVm[]> GetUserInstructionsAsync();
+    Task<InstructionVm[]> GetUserInstructionsAsync(int page, int perPage, Sort sort);
     Task<InstructionTreeItemVm[]> GetTreeInstructionAsync(int id);
     Task<Result<int>> CreateInstructionAsync(InstructionRm instructionRm, User creator, DateTime today);
     Task<Result> SetExecDateAsync(ExecDateRm execDateRm, string executorId, DateTime today);
     Task RecalculateAllTreePaths();
     Task RecalculateAllClosureTable();
+    Task<int> GetTotalUserInstructionsAsync();
 }

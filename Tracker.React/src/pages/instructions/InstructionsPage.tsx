@@ -13,6 +13,7 @@ const InstructionsPage: FC = observer(() => {
   const { instructionsStore, orgStructStore } = useContext(StoreContext);
   useEffect(() => {
     orgStructStore.load();
+    instructionsStore.getTotalInstructions();
     instructionsStore.load();
   }, []);
 

@@ -38,4 +38,36 @@ public static class Helpers
         //
         // return result;
     }
+
+    internal static Sort GetSort(string sort)=>
+        sort switch
+        {
+            "name" => Sort.NameAsc,
+            "-name" => Sort.NameDesc,
+            "creatorName" => Sort.CreatorAsc,
+            "-creatorName" => Sort.CreatorDesc,
+            "executorName" => Sort.ExecutorAsc,
+            "-executorName" => Sort.ExecutorDesc,
+            "deadline" => Sort.DeadlineAsc,
+            "-deadline" => Sort.DeadlineDesc,
+            "execDate" => Sort.ExecDateAsc,
+            "-execDate" => Sort.ExecDateDesc,
+            _ => throw new ArgumentException("Invalid sort string", nameof(sort)),
+        };
+    
+    internal static IOrderedQueryable<Instruction> AddSort(IQueryable<Instruction> instructions, Sort sort)=>
+        sort switch
+        {
+            Sort.NameAsc => instructions.OrderBy(i => i.Name),
+            Sort.NameDesc => instructions.OrderByDescending(i => i.Name),
+            Sort.CreatorAsc => instructions.OrderBy(i => i.Creator.UserName),
+            Sort.CreatorDesc => instructions.OrderByDescending(i => i.Creator.UserName),
+            Sort.ExecutorAsc => instructions.OrderBy(i => i.Executor.UserName),
+            Sort.ExecutorDesc => instructions.OrderByDescending(i => i.Executor.UserName),
+            Sort.DeadlineAsc => instructions.OrderBy(i => i.Deadline),
+            Sort.DeadlineDesc => instructions.OrderByDescending(i => i.Deadline),
+            Sort.ExecDateAsc => instructions.OrderBy(i => i.ExecDate),
+            Sort.ExecDateDesc => instructions.OrderByDescending(i => i.ExecDate),
+            _ => throw new ArgumentException("Unknown sort", nameof(sort))
+        };
 }

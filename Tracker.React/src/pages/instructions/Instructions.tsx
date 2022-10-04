@@ -1,8 +1,9 @@
-import { Modal, Table } from "antd";
+import { Modal, Table, TablePaginationConfig } from "antd";
 import { observer } from "mobx-react";
 import React, { FC, ReactNode, useContext } from "react";
 import { InstructionRow } from "./stores/InstructionsStore";
 import { StoreContext } from "./InstructionsPage";
+import { SortOrder } from "antd/lib/table/interface";
 
 const Instructions: FC = observer(() => {
   const { instructionsStore, instructionStore, fullInstructionStore } =
@@ -28,6 +29,17 @@ const Instructions: FC = observer(() => {
     instructionStore.showModal();
   };
 
+  const pagingConfig: TablePaginationConfig = {
+    pageSize: instructionsStore.perPage,
+    total: instructionsStore.totalInstructions,
+    current: instructionsStore.page,
+    showSizeChanger: true,
+    pageSizeOptions: ["5", "10", "50", "100"]
+  }
+
+  const sortOrder = (colKey: string): SortOrder | undefined =>
+    instructionsStore.sortedInfo.columnKey === colKey ? instructionsStore.sortedInfo.order : null;
+
   return (
     <>
       {dataWasLoaded ? (
@@ -36,10 +48,16 @@ const Instructions: FC = observer(() => {
           dataSource={instructionsStore.instructionsRows}
           rowKey="id"
           defaultExpandAllRows
+          pagination={pagingConfig}
+          showSorterTooltip={false}
+          onChange={instructionsStore.onChange}
         >
           <Table.Column<InstructionRow>
-            title="Поручение"
+            key="name"
             dataIndex="name"
+            title="Поручение"
+            sorter={true}
+            sortOrder={sortOrder("name")}
             render={(text: string, record: InstructionRow): ReactNode => (
               <a
                 onClick={(): Promise<void> =>
@@ -51,27 +69,39 @@ const Instructions: FC = observer(() => {
             )}
           />
           <Table.Column<InstructionRow>
-            title="Создатель"
+            key="creatorName"
             dataIndex="creatorName"
+            title="Создатель"
             width="10%"
+            sorter={true}
+            sortOrder={sortOrder('creatorName')}
           />
           <Table.Column<InstructionRow>
-            title="Исполнитель"
+            key="executorName"
             dataIndex="executorName"
+            title="Исполнитель"
             width="10%"
+            sorter={true}
+            sortOrder={sortOrder('executorName')}
           />
           <Table.Column<InstructionRow>
-            title="Дэдлайн"
+            key="deadline"
             dataIndex="deadline"
+            title="Дэдлайн"
             width="10%"
+            sorter={true}
+            sortOrder={sortOrder('deadline')}
             render={(deadline: string): ReactNode =>
               new Date(deadline).toLocaleDateString("ru-RU")
             }
           />
           <Table.Column<InstructionRow>
-            title="Дата исполнения"
+            key="execDate"
             dataIndex="execDate"
+            title="Дата исполнения"
             width="10%"
+            sorter={true}
+            sortOrder={sortOrder('execDate')}
             render={(execDate: string): ReactNode =>
               execDate ? new Date(execDate).toLocaleDateString("ru-RU") : ""
             }
