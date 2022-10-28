@@ -1,12 +1,13 @@
-﻿using Tracker.Db.Models;
+﻿using Tracker.Common;
+using Tracker.Common.Progress;
+using Tracker.Db.Models;
 using Tracker.Instructions.RequestModels;
 using Tracker.Users;
 
 namespace Tracker.Instructions;
 
-public class InstructionGeneratorService : IInstructionGeneratorService
+public class InstructionGeneratorService
 {
-    private const int GenerationCount = 100;
     private const int MinPastDaysFromToday = -365;
     private const int MaxDeadlineDaysFromToday = 10;
     private const int MaxDaysFromParentDeadline = 4;
@@ -19,21 +20,23 @@ public class InstructionGeneratorService : IInstructionGeneratorService
     
     private readonly UsersService _usersService;
     private readonly IInstructionsService _instructionsService;
+    private readonly Progress _progress;
     private readonly Random _random;
 
-    public InstructionGeneratorService(UsersService usersService, IInstructionsService instructionsService)
+    public InstructionGeneratorService(UsersService usersService, IInstructionsService instructionsService, Progress progress)
     {
         _usersService = usersService;
         _instructionsService = instructionsService;
+        _progress = progress;
         _random = new Random();
     }
 
-    public async Task GenerateInstructions()
+    public async Task RunJob(ClientSocketRm socket, GenerationRm model, int taskId)
     {
         var allUsers = await _usersService.GetUsersTreeAsync();
         var bosses = allUsers.Where(u => u.Children != null && u.Children.Any()).ToArray();
 
-        for (var i = 1; i < GenerationCount; i++)
+        for (var i = 1; i < model.Total; i++)
         {
             // рандомно выбираем создателя, исполнителя, день создания(pastDay) и deadline поручения
             var bossIdx = _random.Next(0, bosses.Length);
@@ -54,6 +57,8 @@ public class InstructionGeneratorService : IInstructionGeneratorService
             {
                 await Delegate(executor, res.Value, i.ToString(), pastDay, deadline);
             }
+            
+            _progress.NotifyClient(i, model.Total, socket, frequency: 1, taskId);
         }
     }
 

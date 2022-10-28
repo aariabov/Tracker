@@ -9,22 +9,23 @@ namespace Tracker.Instructions;
 
 public class InstructionsService : IInstructionsService
 {
-    public const char TreePathDelimiter = '/';
-    
     private readonly InstructionValidationService _instructionValidationService;
     private readonly IInstructionsRepository _instructionsRepository;
     private readonly UsersService _usersService;
     private readonly IInstructionStatusService _statusService;
+    private readonly TreePathsService _treePathsService;
 
     public InstructionsService(InstructionValidationService instructionValidationService
         , IInstructionsRepository instructionsRepository
         , UsersService usersService
-        , IInstructionStatusService statusService)
+        , IInstructionStatusService statusService
+        , TreePathsService treePathsService)
     {
         _instructionValidationService = instructionValidationService;
         _instructionsRepository = instructionsRepository;
         _usersService = usersService;
         _statusService = statusService;
+        _treePathsService = treePathsService;
     }
 
     public async Task<InstructionVm[]> GetUserInstructionsAsync(int page, int perPage, Sort sort)
@@ -92,7 +93,7 @@ public class InstructionsService : IInstructionsService
         _instructionsRepository.CreateInstruction(newInstruction);
         await _instructionsRepository.SaveChangesAsync();
         
-        await UpdateInstructionTreePath(newInstruction);
+        await _treePathsService.UpdateInstructionTreePath(newInstruction);
         await UpdateInstructionClosure(newInstruction.Id, newInstruction.ParentId);
         await _instructionsRepository.SaveChangesAsync();
         return Result.Ok(newInstruction.Id);
@@ -101,17 +102,6 @@ public class InstructionsService : IInstructionsService
     private async Task UpdateInstructionClosure(int id, int? parentId)
     {
         await _instructionsRepository.UpdateInstructionClosureAsync(id, parentId);
-    }
-    
-    private async Task UpdateInstructionTreePath(Instruction instruction)
-    {
-        var treePath = instruction.Id.ToString();
-        if (instruction.ParentId.HasValue)
-        {
-            var parentInstruction = await _instructionsRepository.GetInstructionByIdAsync(instruction.ParentId.Value);
-            treePath = $"{parentInstruction.TreePath}{TreePathDelimiter}{instruction.Id}";
-        }
-        instruction.TreePath = treePath;
     }
 
     public async Task<Result> SetExecDateAsync(ExecDateRm execDateRm, string executorId, DateTime today)
@@ -128,34 +118,6 @@ public class InstructionsService : IInstructionsService
         _instructionsRepository.UpdateInstruction(instruction);
         await _instructionsRepository.SaveChangesAsync();
         return Result.Ok();
-    }
-
-    // TODO: можно написать юнит тест
-    public async Task RecalculateAllTreePaths()
-    {
-        await _instructionsRepository.UpdateAllTreePathsToNullAsync();
-        
-        var rootInstructionIds = await _instructionsRepository.GetRootInstructionIdsAsync();
-        foreach (var rootInstructionId in rootInstructionIds)
-        {
-            // для персчета обязательно используем GetInstructionTreeByCteAsync,
-            // тк он работает с id/parentId, а они всегда актуальные
-            var instructionTree = await _instructionsRepository.GetInstructionTreeByCteAsync(rootInstructionId);
-            UpdateTreePaths(instructionTree);
-            _instructionsRepository.UpdateInstruction(instructionTree);
-            await _instructionsRepository.SaveChangesAsync();
-        }
-        
-        void UpdateTreePaths(Instruction rootInstruction)
-        {
-            var instructions = Helpers.GetAllChildren(rootInstruction);
-            foreach (var currentInstruction in instructions)
-            {
-                currentInstruction.TreePath = currentInstruction.Parent is null
-                    ? currentInstruction.Id.ToString()
-                    : $"{currentInstruction.Parent.TreePath}{TreePathDelimiter}{currentInstruction.Id}";
-            }
-        }
     }
 
     public async Task RecalculateAllClosureTable()

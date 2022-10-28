@@ -12,6 +12,7 @@ public interface IInstructionsRepository
     Task<Instruction[]> GetUserInstructionsWithDescendantsAsync(string userId, int page, int perPage, Sort sort);
     
     Task<int[]> GetRootInstructionIdsAsync();
+    Task<int> GetRootInstructionCountAsync();
     Task<Instruction?> GetInstructionByIdAsync(int instructionId);
     
     /// <summary>

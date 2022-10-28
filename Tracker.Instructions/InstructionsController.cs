@@ -1,7 +1,9 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Tracker.Common;
+using Tracker.Common.Progress;
 using Tracker.Instructions.RequestModels;
 using Tracker.Instructions.ViewModels;
 using Tracker.Users;
@@ -13,16 +15,22 @@ namespace Tracker.Instructions;
 public class InstructionsController : ControllerBase
 {
     private readonly IInstructionsService _instructionsService;
-    private readonly IInstructionGeneratorService _instructionGeneratorService;
+    private readonly InstructionGeneratorService _instructionGeneratorService;
     private readonly UsersService _usersService;
+    private readonly Progress _progress;
+    private readonly TreePathsService _treePathsService;
     
     public InstructionsController(IInstructionsService instructionsService,
-        IInstructionGeneratorService instructionGeneratorService,
-        UsersService usersService)
+        InstructionGeneratorService instructionGeneratorService,
+        UsersService usersService,
+        Progress progress,
+        TreePathsService treePathsService)
     {
         _instructionsService = instructionsService;
         _instructionGeneratorService = instructionGeneratorService;
         _usersService = usersService;
+        _progress = progress;
+        _treePathsService = treePathsService;
     }
 
     [HttpGet]
@@ -79,9 +87,9 @@ public class InstructionsController : ControllerBase
     [HttpPost("recalculate-all-tree-paths")]
     [Authorize(Roles = "Admin")]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    public async Task<ActionResult> RecalculateAllTreePaths()
+    public async Task<ActionResult> RecalculateAllTreePaths(ProgressRm model)
     {
-        await _instructionsService.RecalculateAllTreePaths();
+        await _treePathsService.RunJob(model.SocketInfo, model.TaskId);
         return Ok();
     }
     
@@ -97,9 +105,9 @@ public class InstructionsController : ControllerBase
     [HttpPost("generate-instructions")]
     [Authorize(Roles = "Admin")]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    public async Task<ActionResult> GenerateInstructions()
+    public async Task<ActionResult> GenerateInstructions(ProgressRm<GenerationRm> model)
     {
-        await _instructionGeneratorService.GenerateInstructions();
+        await _instructionGeneratorService.RunJob(model.SocketInfo, model.Pars, model.TaskId);
         return Ok();
     }
 }

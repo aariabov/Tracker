@@ -17,6 +17,7 @@ const config = {
       "/api": {
         target: "https://localhost:7006/",
         secure: false,
+        ws: true,
       },
     },
   },

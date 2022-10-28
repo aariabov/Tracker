@@ -1,7 +1,8 @@
 import React, { FC, ReactNode, useState } from "react";
 import { observer } from "mobx-react";
-import { Table, Typography } from "antd";
-import { UtilsStore, Util } from "./UtilsStore";
+import { Progress, Table, Typography } from "antd";
+import { Util, ProgressableUtil } from "./Util";
+import { UtilsStore } from "./UtilsStore";
 import { Status } from "./Status";
 
 const { Text } = Typography;
@@ -18,13 +19,22 @@ const UtilsPage: FC = observer(() => {
       <Table.Column<Util> title="Название" dataIndex="name" />
       <Table.Column<Util>
         width="10%"
-        render={(_: string, record: Util): ReactNode =>
-        (record.status === Status.Processing ?
+        render={(_: string, util: Util): ReactNode =>
+        (util.status === Status.Processing ?
           <Text disabled>Запустить</Text> :
-          <a onClick={(): Promise<void> => utilsStore.run(record)}>Запустить</a>
+          <a onClick={(): Promise<void> => util.run()}>Запустить</a>
         )}
       />
-      <Table.Column<Util> title="Статус" dataIndex="status" />
+      <Table.Column<Util>
+        title="Статус"
+        dataIndex="status"
+        width="10%"
+        render={(_: string, util: Util): ReactNode =>
+        (util instanceof ProgressableUtil && util.status === Status.Processing ?
+          <Progress percent={util.progress} size="small" status="active" /> :
+          <Text>{util.status}</Text>)
+        }
+      />
     </Table>
   );
 });

@@ -42,6 +42,11 @@ public class InstructionsRepository : IInstructionsRepository
             .ToArrayAsync();
     }
 
+    public async Task<int> GetRootInstructionCountAsync()
+    {
+        return await _db.Instructions.CountAsync(i => i.ParentId == null);
+    }
+
     public async Task<Instruction?> GetInstructionByIdAsync(int instructionId)
     {
         return await _db.Instructions.SingleOrDefaultAsync(i => i.Id == instructionId);

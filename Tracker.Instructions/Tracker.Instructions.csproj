@@ -15,4 +15,8 @@
       <ProjectReference Include="..\Tracker.Users\Tracker.Users.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="TreePaths" />
+    </ItemGroup>
+
 </Project>

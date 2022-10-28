@@ -26,7 +26,7 @@ public class InstructionsTreeRepositoryPath : IInstructionsTreeRepository
             throw new Exception($"Instruction with id '{instructionId}' has null tree path");
         
         // tree path у рута будет, например "1", а у дочернего поручения, например "1/2/3"
-        var index = treePath.IndexOf(InstructionsService.TreePathDelimiter);
+        var index = treePath.IndexOf(TreePathsService.TreePathDelimiter);
         var rootId = index > 0 ? treePath.Substring(0, index) : treePath;
 
         // получаем дерево поручений из бд, делаем привязки parent/children - получаем плоский список с привязками

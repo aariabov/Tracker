@@ -3,9 +3,12 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Authorization;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Tracker.Audit;
+using Tracker.Common;
+using Tracker.Common.Progress;
 using Tracker.Db;
 using Tracker.Db.Models;
 using Tracker.Db.Transactions;
@@ -18,6 +21,8 @@ using Tracker.Roles;
 using Tracker.Roles.Validators;
 using Tracker.Users;
 using Tracker.Users.Validators;
+using Tracker.Web;
+using Tracker.Web.Sandbox;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -66,7 +71,7 @@ builder.Services.AddControllers(option =>
 builder.Services.AddTransient<JwtGenerator>();
 
 builder.Services.AddScoped<IInstructionsService, InstructionsService>();
-builder.Services.AddScoped<IInstructionGeneratorService, InstructionGeneratorService>();
+builder.Services.AddScoped<InstructionGeneratorService>();
 builder.Services.AddScoped<IInstructionStatusService, InstructionStatusService>();
 builder.Services.AddScoped<IInstructionsRepository, InstructionsRepository>();
 // builder.Services.AddScoped<IInstructionsTreeRepository, InstructionsTreeRepositoryCte>();
@@ -87,9 +92,15 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IAuditService, AuditService>();
 builder.Services.AddScoped<IAuditRepository, AuditRepository>();
 
+builder.Services.AddScoped<Progress>();
+builder.Services.AddScoped<ProgressableTestService>();
+builder.Services.AddScoped<ProgressableParamsTestService>();
+builder.Services.AddScoped<TreePathsService>();
+
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<ITransactionManager, TransactionManager>();
 builder.Services.AddScoped<DataSeeder>();
+builder.Services.AddSignalR();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
@@ -123,7 +134,7 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}").RequireAuthorization();
 
 app.UseExceptionHandler(app.Environment.IsDevelopment() ? "/error-development" : "/error");
-
+app.MapHub<ProgressHub>("/api/progress-hub");
 app.Run();
 
 public partial class Program { }
