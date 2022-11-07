@@ -1,4 +1,5 @@
-﻿using Tracker.Common;
+﻿using System.Diagnostics;
+using Tracker.Common;
 using Tracker.Common.Progress;
 using Tracker.Db.Models;
 using Tracker.Instructions.RequestModels;
@@ -33,6 +34,8 @@ public class InstructionGeneratorService
 
     public async Task RunJob(ClientSocketRm socket, GenerationRm model, int taskId)
     {
+        var watch = Stopwatch.StartNew();
+        
         var allUsers = await _usersService.GetUsersTreeAsync();
         var bosses = allUsers.Where(u => u.Children != null && u.Children.Any()).ToArray();
 
@@ -60,6 +63,9 @@ public class InstructionGeneratorService
             
             _progress.NotifyClient(i, model.Total, socket, frequency: 1, taskId);
         }
+        
+        watch.Stop();
+        Console.WriteLine($"Generation time: {watch.Elapsed:mm\\:ss\\.ff}");
     }
 
     private async Task<DateTime?> Delegate(User creator, int parentInstructionId, string prefix, DateTime pastDay, DateTime parentDeadline)
