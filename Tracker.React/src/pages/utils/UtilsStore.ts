@@ -29,7 +29,7 @@ export class UtilsStore {
         };
 
         const generationParam: GenerationParam = {
-            total: 100
+            total: 1_000_000
         };
 
         this._utils = [
@@ -47,14 +47,12 @@ export class UtilsStore {
                 url: "/api/instructions/recalculate-all-closure-table",
                 updateUtils: this.updateUtils.bind(this)
             }),
-            new ProgressableUtil({
+            new UnProgressableUtil({
                 id: 3,
                 name: "Генерация поручений",
                 url: "/api/instructions/generate-instructions",
                 updateUtils: this.updateUtils.bind(this),
                 pars: generationParam,
-                connection: this._connection,
-                progressMethodName: progressMethodName
             }),
             new ProgressableUtil({
                 id: 4,

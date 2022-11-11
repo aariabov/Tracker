@@ -7,7 +7,7 @@ using Tracker.Users;
 
 namespace Tracker.Instructions;
 
-public class InstructionGeneratorService
+public class InstructionSlowGeneratorService
 {
     private const int MinPastDaysFromToday = -365;
     private const int MaxDeadlineDaysFromToday = 10;
@@ -24,7 +24,7 @@ public class InstructionGeneratorService
     private readonly Progress _progress;
     private readonly Random _random;
 
-    public InstructionGeneratorService(UsersService usersService, IInstructionsService instructionsService, Progress progress)
+    public InstructionSlowGeneratorService(UsersService usersService, IInstructionsService instructionsService, Progress progress)
     {
         _usersService = usersService;
         _instructionsService = instructionsService;
@@ -32,6 +32,7 @@ public class InstructionGeneratorService
         _random = new Random();
     }
 
+    [Obsolete("Медленный генератор: работает синхронно, каждое поручение сначала генерируется потом инсертится, выполняется валидация, прогресс")]
     public async Task RunJob(ClientSocketRm socket, GenerationRm model, int taskId)
     {
         var watch = Stopwatch.StartNew();

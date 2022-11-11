@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.SignalR;
 using Tracker.Common;
 using Tracker.Common.Progress;
+using Tracker.Instructions.Generator;
 using Tracker.Instructions.RequestModels;
 using Tracker.Instructions.ViewModels;
 using Tracker.Users;
@@ -15,22 +15,19 @@ namespace Tracker.Instructions;
 public class InstructionsController : ControllerBase
 {
     private readonly IInstructionsService _instructionsService;
-    private readonly InstructionGeneratorService _instructionGeneratorService;
     private readonly UsersService _usersService;
-    private readonly Progress _progress;
     private readonly TreePathsService _treePathsService;
+    private readonly InstructionsGenerationService _instructionsGenerationService;
     
     public InstructionsController(IInstructionsService instructionsService,
-        InstructionGeneratorService instructionGeneratorService,
         UsersService usersService,
-        Progress progress,
-        TreePathsService treePathsService)
+        TreePathsService treePathsService, 
+        InstructionsGenerationService instructionsGenerationService)
     {
         _instructionsService = instructionsService;
-        _instructionGeneratorService = instructionGeneratorService;
         _usersService = usersService;
-        _progress = progress;
         _treePathsService = treePathsService;
+        _instructionsGenerationService = instructionsGenerationService;
     }
 
     [HttpGet]
@@ -105,9 +102,9 @@ public class InstructionsController : ControllerBase
     [HttpPost("generate-instructions")]
     [Authorize(Roles = "Admin")]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    public async Task<ActionResult> GenerateInstructions(ProgressRm<GenerationRm> model)
+    public async Task<ActionResult> GenerateInstructions(GenerationRm model)
     {
-        await _instructionGeneratorService.RunJob(model.SocketInfo, model.Pars, model.TaskId);
+        await _instructionsGenerationService.RunJob(model);
         return Ok();
     }
 }
