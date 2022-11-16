@@ -102,5 +102,10 @@ public class InstructionsRepository : IInstructionsRepository
             .CountAsync(i => (i.CreatorId == userId && i.ParentId == null) || i.ExecutorId == userId);
     }
 
+    public Task TruncateInstructions()
+    {
+        return _db.Database.ExecuteSqlRawAsync("TRUNCATE instructions RESTART IDENTITY CASCADE;");
+    }
+
     public async Task SaveChangesAsync() => await _db.SaveChangesAsync();
 }

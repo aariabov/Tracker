@@ -1,4 +1,5 @@
-﻿using Tracker.Common;
+﻿using System.Diagnostics;
+using Tracker.Common;
 using Tracker.Common.Progress;
 using Tracker.Db.Models;
 using Tracker.Instructions.RequestModels;
@@ -6,7 +7,7 @@ using Tracker.Users;
 
 namespace Tracker.Instructions;
 
-public class InstructionGeneratorService
+public class InstructionSlowGeneratorService
 {
     private const int MinPastDaysFromToday = -365;
     private const int MaxDeadlineDaysFromToday = 10;
@@ -23,7 +24,7 @@ public class InstructionGeneratorService
     private readonly Progress _progress;
     private readonly Random _random;
 
-    public InstructionGeneratorService(UsersService usersService, IInstructionsService instructionsService, Progress progress)
+    public InstructionSlowGeneratorService(UsersService usersService, IInstructionsService instructionsService, Progress progress)
     {
         _usersService = usersService;
         _instructionsService = instructionsService;
@@ -31,8 +32,11 @@ public class InstructionGeneratorService
         _random = new Random();
     }
 
+    [Obsolete("Медленный генератор: работает синхронно, каждое поручение сначала генерируется потом инсертится, выполняется валидация, прогресс")]
     public async Task RunJob(ClientSocketRm socket, GenerationRm model, int taskId)
     {
+        var watch = Stopwatch.StartNew();
+        
         var allUsers = await _usersService.GetUsersTreeAsync();
         var bosses = allUsers.Where(u => u.Children != null && u.Children.Any()).ToArray();
 
@@ -60,6 +64,9 @@ public class InstructionGeneratorService
             
             _progress.NotifyClient(i, model.Total, socket, frequency: 1, taskId);
         }
+        
+        watch.Stop();
+        Console.WriteLine($"Generation time: {watch.Elapsed:mm\\:ss\\.ff}");
     }
 
     private async Task<DateTime?> Delegate(User creator, int parentInstructionId, string prefix, DateTime pastDay, DateTime parentDeadline)

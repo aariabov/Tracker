@@ -36,5 +36,6 @@ public interface IInstructionsRepository
     Task RecalculateAllInstructionsClosuresAsync();
     Task UpdateInstructionClosureAsync(int id, int? parentId);
     Task<int> GetTotalUserInstructionsAsync(string userId);
+    Task TruncateInstructions();
     Task SaveChangesAsync();
 }
