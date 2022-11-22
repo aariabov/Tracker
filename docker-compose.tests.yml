@@ -1,0 +1,25 @@
+﻿version: '3.4'
+
+services:
+  backend:
+    image: backend:latest
+    depends_on:
+      - "db"
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "5000:80"
+    environment:
+      ConnectionStrings__PostgresConnection: host=db;port=5432;database=tracker;username=postgres;password=123123asd@
+
+  db:
+    image: postgres:latest
+    restart: always
+    ports:
+      - "5555:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=123123asd@
+      - POSTGRES_DB=tracker
+ 

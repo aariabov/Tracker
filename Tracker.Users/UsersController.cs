@@ -28,7 +28,6 @@ public class UsersController : ControllerBase
         return Ok(allUsers);
     }
 
-    [AllowAnonymous]
     [HttpPost("register")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(string))]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ModelErrorsVm))]

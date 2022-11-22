@@ -74,6 +74,6 @@ public class TestBase
     private void ClearDb(AppDbContext db)
     {
         db.Database.ExecuteSqlRaw("delete from asp_net_users where email != 'admin@parma.ru'");
-        db.Database.ExecuteSqlRaw("delete from asp_net_roles");
+        db.Database.ExecuteSqlRaw("delete from asp_net_roles where name != 'Admin'");
     }
 }
