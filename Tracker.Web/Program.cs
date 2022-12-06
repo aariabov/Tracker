@@ -127,7 +127,6 @@ var dataSeeder = serviceScope.ServiceProvider.GetRequiredService<DataSeeder>();
 await dbContext.Database.MigrateAsync();
 await dataSeeder.Seed();
 
-app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
 app.UseAuthentication();

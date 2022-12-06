@@ -1,21 +1,26 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using FluentAssertions;
+﻿using FluentAssertions;
 using Tracker.Common;
-using Tracker.IntegrationTests.Common;
+using Tracker.IntegrationTests.Docker.Common;
 using Tracker.Roles;
 using Tracker.Roles.RequestModels;
 using Xunit;
+using Tracker.Users.ViewModels;
 
-namespace Tracker.IntegrationTests;
+namespace Tracker.IntegrationTests.Docker;
 
 public class RolesTests : TestBase
 {
     [Fact]
     public async Task concurrency_role_updating()
     {
+        // login
+        var loginVm = new LoginVM
+        {
+            Email = "admin@parma.ru",
+            Password = "1"
+        };
+        var tokensVm = await PostAsync<TokensVm>("/api/users/login", loginVm, token: null);
+        
         // создание роли
         const string testRole = "test role";
         var roleCreationRm = new RoleCreationRm
@@ -23,7 +28,7 @@ public class RolesTests : TestBase
             Name = testRole
         };
         
-        var roleId = await PostAsync("api/roles/create", roleCreationRm);
+        var roleId = await PostAsync("/api/roles/create", roleCreationRm, tokensVm.Token);
         Guid.TryParse(roleId, out _).Should().BeTrue();
         
         // получение роли
@@ -37,7 +42,7 @@ public class RolesTests : TestBase
             Name = "new role name",
             ConcurrencyStamp = existingRole.ConcurrencyStamp
         };
-        var updatingResponse = await PostAsync("api/roles/update", roleUpdatingRm);
+        var updatingResponse = await PostAsync("api/roles/update", roleUpdatingRm, tokensVm.Token);
         updatingResponse.Should().BeEmpty();
         
         // конкурентное обновление роли - ошибка
@@ -47,7 +52,7 @@ public class RolesTests : TestBase
             Name = "new role name1",
             ConcurrencyStamp = existingRole.ConcurrencyStamp
         };
-        var errorsModel = await PostAsync<ModelErrorsVm>("api/roles/update", roleUpdatingRm1);
+        var errorsModel = await PostAsync<ModelErrorsVm>("api/roles/update", roleUpdatingRm1, tokensVm.Token);
         var expectedModel = new ModelErrorsVm(Result.Errors<string>(new Dictionary<string, string>
         {
             { "name", "Роль была изменена, обновите страницу и попробуйте заново" }
