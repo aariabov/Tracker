@@ -1,10 +1,12 @@
 import { makeObservable, observable, computed, action } from "mobx";
 import { Moment } from "moment";
 import { RangeValue } from "rc-picker/lib/interface";
-import { post } from "../../helpers/api";
+import { EmployeeReportRm, EmployeeReportRowVm } from "../../api/Api";
+import { apiClient } from "../../ApiClient";
+import { api } from "../../helpers/api";
 
 export class EmployeeReportStore {
-  private _rows: ReportRow[] = [];
+  private _rows: EmployeeReportRowVm[] = [];
 
   private _executorId: string | undefined = undefined;
   private _period: RangeValue<Moment> = null;
@@ -12,7 +14,7 @@ export class EmployeeReportStore {
   private _executorIdError: string | undefined = undefined;
   private _periodError: string | undefined = undefined;
 
-  public get rows(): ReportRow[] {
+  public get rows(): EmployeeReportRowVm[] {
     return this._rows;
   }
 
@@ -55,31 +57,17 @@ export class EmployeeReportStore {
       this._period[0] &&
       this._period[1]
     ) {
-      const body: Body = {
+      const body: EmployeeReportRm = {
         executorId: this._executorId,
-        startDate: this._period[0].toDate(),
-        endDate: this._period[1].toDate(),
+        startDate: this._period[0].toDate().toISOString(),
+        endDate: this._period[1].toDate().toISOString(),
       };
 
-      this._rows = await post<Body, ReportRow[]>(
-        "api/analytics/employee-report",
-        body
-      );
+      const res = await api(apiClient.api.analyticsEmployeeReport, body);
+      this._rows = res.data;
     } else {
       if (!this._executorId) this._executorIdError = "Выберите сотрудника";
       if (!this._period) this._periodError = "Выберите период";
     }
   };
-}
-
-interface Body {
-  executorId: string;
-  startDate: Date;
-  endDate: Date;
-}
-
-export interface ReportRow {
-  id: string;
-  status: string;
-  count: number;
 }

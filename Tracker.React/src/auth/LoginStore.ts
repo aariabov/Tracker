@@ -1,11 +1,8 @@
 import { action, makeObservable, observable } from "mobx";
-import { post, TokenResponse } from "../helpers/api";
+import { LoginVM } from "../api/Api";
+import { apiClient } from "../ApiClient";
+import { api } from "../helpers/api";
 import { userStore } from "./UserStore";
-
-interface LoginBody {
-  email: string;
-  password: string;
-}
 
 export class LoginStore {
   private _email: string = "";
@@ -55,17 +52,14 @@ export class LoginStore {
   };
 
   handleSubmit = async (): Promise<void> => {
-    const body: LoginBody = {
+    const body: LoginVM = {
       email: this._email,
       password: this._password,
     };
 
     try {
-      const response = await post<LoginBody, TokenResponse>(
-        "api/users/login",
-        body
-      );
-      userStore.setTokens(response.token, response.refreshToken);
+      const res = await api(apiClient.api.usersLogin, body);
+      userStore.setTokens(res.data.token, res.data.refreshToken);
       this.clear();
     } catch (err) {
       this._error = "Неправильный email или пароль";

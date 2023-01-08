@@ -10,50 +10,50 @@
  */
 
 export interface ClientSocketRm {
-  connectionId?: string | null;
-  methodName?: string | null;
+  connectionId: string;
+  methodName: string;
 }
 
 export interface EmployeeReportRm {
-  executorId?: string | null;
+  executorId: string;
   /** @format date-time */
-  startDate?: string;
+  startDate: string;
   /** @format date-time */
-  endDate?: string;
+  endDate: string;
 }
 
 export interface EmployeeReportRowVm {
-  id?: ExecStatus;
-  status?: string | null;
+  id: ExecStatus;
+  status: string;
   /** @format int32 */
-  count?: number;
+  count: number;
 }
 
 export interface EmployeesReportRm {
   /** @format date-time */
-  startDate?: string;
+  startDate: string;
   /** @format date-time */
-  endDate?: string;
+  endDate: string;
 }
 
 export interface EmployeesReportRowVm {
-  id?: string | null;
-  executor?: string | null;
+  id: string;
+  executor: string;
   /** @format int32 */
-  inWorkCount?: number;
+  inWorkCount: number;
   /** @format int32 */
-  inWorkOverdueCount?: number;
+  inWorkOverdueCount: number;
   /** @format int32 */
-  completedCount?: number;
+  completedCount: number;
   /** @format int32 */
-  completedOverdueCount?: number;
+  completedOverdueCount: number;
 }
 
 export interface ExecDateRm {
   /** @format int32 */
-  instructionId?: number;
+  instructionId: number;
   /** @format date-time */
-  execDate?: string;
+  execDate: string;
 }
 
 /** @format int32 */
@@ -61,144 +61,144 @@ export type ExecStatus = 1 | 2 | 3 | 4;
 
 export interface GenerationRm {
   /** @format int32 */
-  total?: number;
+  total: number;
 }
 
 export interface IdentityError {
-  code?: string | null;
-  description?: string | null;
+  code: string | null;
+  description: string | null;
 }
 
 export interface InstructionRm {
-  name?: string | null;
+  name: string;
   /** @format int32 */
-  parentId?: number | null;
-  executorId?: string | null;
+  parentId: number | null;
+  executorId: string;
   /** @format date-time */
-  deadline?: string;
+  deadline: string;
 }
 
 export interface InstructionTreeItemVm {
   /** @format int32 */
-  id?: number;
-  name?: string | null;
+  id: number;
+  name: string;
   /** @format int32 */
-  parentId?: number | null;
-  creatorName?: string | null;
-  executorName?: string | null;
+  parentId: number | null;
+  creatorName: string;
+  executorName: string;
   /** @format date-time */
-  deadline?: string;
+  deadline: string;
   /** @format date-time */
-  execDate?: string | null;
-  status?: string | null;
+  execDate: string | null;
+  status: string;
 }
 
 export interface InstructionVm {
   /** @format int32 */
-  id?: number;
-  name?: string | null;
+  id: number;
+  name: string;
   /** @format int32 */
-  parentId?: number | null;
-  creatorName?: string | null;
-  executorName?: string | null;
+  parentId: number | null;
+  creatorName: string;
+  executorName: string;
   /** @format date-time */
-  deadline?: string;
+  deadline: string;
   /** @format date-time */
-  execDate?: string | null;
-  status?: string | null;
-  canCreateChild?: boolean;
-  canBeExecuted?: boolean;
+  execDate: string | null;
+  status: string;
+  canCreateChild: boolean;
+  canBeExecuted: boolean;
 }
 
 export interface LoginVM {
-  email?: string | null;
-  password?: string | null;
+  email: string;
+  password: string;
 }
 
 export interface ModelErrorsVm {
-  commonErrors?: string[] | null;
-  modelErrors?: Record<string, string>;
+  commonErrors: string[];
+  modelErrors: Record<string, string>;
 }
 
 export interface OrgStructElementVm {
-  id?: string | null;
-  name?: string | null;
-  email?: string | null;
-  parentId?: string | null;
-  roles?: string[] | null;
+  id: string;
+  name: string;
+  email: string;
+  parentId: string | null;
+  roles: string[];
 }
 
 export interface ProblemDetails {
-  type?: string | null;
-  title?: string | null;
+  type: string | null;
+  title: string | null;
   /** @format int32 */
-  status?: number | null;
-  detail?: string | null;
-  instance?: string | null;
+  status: number | null;
+  detail: string | null;
+  instance: string | null;
   [key: string]: any;
 }
 
 export interface ProgressRm {
-  socketInfo?: ClientSocketRm;
+  socketInfo: ClientSocketRm;
   /** @format int32 */
-  taskId?: number;
+  taskId: number;
 }
 
 export interface RoleCreationRm {
-  name?: string | null;
+  name: string;
 }
 
 export interface RoleDeletingRm {
-  id?: string | null;
+  id: string;
 }
 
 export interface RoleUpdatingRm {
-  name?: string | null;
-  id?: string | null;
-  concurrencyStamp?: string | null;
+  name: string;
+  id: string;
+  concurrencyStamp: string;
 }
 
 export interface RoleVm {
-  id?: string | null;
-  name?: string | null;
-  concurrencyStamp?: string | null;
+  id: string;
+  name: string;
+  concurrencyStamp: string;
 }
 
 export interface TestJobParams {
   /** @format int32 */
-  value?: number;
+  value: number;
 }
 
 export interface TestJobParamsProgressRm {
-  socketInfo?: ClientSocketRm;
+  socketInfo: ClientSocketRm;
   /** @format int32 */
-  taskId?: number;
-  pars?: TestJobParams;
+  taskId: number;
+  pars: TestJobParams;
 }
 
 export interface TokensVm {
-  token?: string | null;
-  refreshToken?: string | null;
+  token: string;
+  refreshToken: string;
 }
 
 export interface UserDeletingRm {
-  id?: string | null;
+  id: string;
 }
 
 export interface UserRegistrationRm {
-  name?: string | null;
-  email?: string | null;
-  bossId?: string | null;
-  roles?: string[] | null;
-  password?: string | null;
+  name: string;
+  email: string;
+  bossId: string | null;
+  roles: string[];
+  password: string;
 }
 
 export interface UserUpdatingRm {
-  name?: string | null;
-  email?: string | null;
-  bossId?: string | null;
-  roles?: string[] | null;
-  id?: string | null;
+  name: string;
+  email: string;
+  bossId: string | null;
+  roles: string[];
+  id: string;
 }
 
 export type QueryParamsType = Record<string | number, any>;

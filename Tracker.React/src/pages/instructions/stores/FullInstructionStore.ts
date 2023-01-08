@@ -1,9 +1,11 @@
 import { makeObservable, observable, computed, action } from "mobx";
+import { InstructionTreeItemVm } from "../../../api/Api";
+import { apiClient } from "../../../ApiClient";
 import { listToTree } from "../../../helpers";
-import { get, post } from "../../../helpers/api";
+import { api } from "../../../helpers/api";
 
 export class FullInstructionStore {
-  private _instructions: Instruction[] = [];
+  private _instructions: InstructionTreeItemVm[] = [];
   private _isDrawerVisible: boolean = false;
 
   constructor() {
@@ -24,7 +26,7 @@ export class FullInstructionStore {
   }
 
   get instructionsRows(): InstructionRow[] {
-    const mapFunc = (instruction: Instruction): InstructionRow => ({
+    const mapFunc = (instruction: InstructionTreeItemVm): InstructionRow => ({
       ...instruction,
       children: [],
     });
@@ -34,9 +36,8 @@ export class FullInstructionStore {
 
   show = async (instructionId: number): Promise<void> => {
     this._isDrawerVisible = true;
-    this._instructions = await get<Instruction[]>(
-      `api/Instructions/${instructionId}`
-    );
+    const res = await api(apiClient.api.instructionsDetail, instructionId);
+    this._instructions = res.data;
   };
 
   close = (): void => {
@@ -45,24 +46,13 @@ export class FullInstructionStore {
   };
 }
 
-export interface Instruction {
-  id: number;
-  name: string;
-  parentId?: number;
-  creatorName: string;
-  executorName: string;
-  deadline: Date;
-  execDate?: Date;
-  status: string;
-}
-
 export interface InstructionRow {
   id: number;
   name: string;
   creatorName: string;
   executorName: string;
-  deadline: Date;
-  execDate?: Date;
+  deadline: string;
+  execDate: string | null;
   children: InstructionRow[];
   status: string;
 }

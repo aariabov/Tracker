@@ -1,6 +1,12 @@
 import { action, makeObservable, observable } from "mobx";
-import { ModelErrors, post } from "../../helpers/api";
-import { Role } from "./RolesStore";
+import {
+  RoleCreationRm,
+  RoleDeletingRm,
+  RoleUpdatingRm,
+  RoleVm,
+} from "../../api/Api";
+import { apiClient } from "../../ApiClient";
+import { ModelErrors, api } from "../../helpers/api";
 
 export class RoleStore {
   private _id: string | undefined = undefined;
@@ -49,7 +55,7 @@ export class RoleStore {
     if (this._errors?.name) this._errors.name = undefined;
   };
 
-  showModal = (role?: Role): void => {
+  showModal = (role?: RoleVm): void => {
     if (role) {
       this._id = role.id;
       this._name = role.name;
@@ -68,16 +74,12 @@ export class RoleStore {
   deleteRole = async (
     roleId: string
   ): Promise<undefined | ModelErrors<Errors>> => {
-    const body: DeletingBody = {
+    const body: RoleDeletingRm = {
       id: roleId,
     };
 
-    const result = await post<DeletingBody, ModelErrors<Errors>>(
-      "api/roles/delete",
-      body
-    );
-
-    return result;
+    const res = await api(apiClient.api.rolesDelete, body);
+    return res.data;
   };
 
   save = async (): Promise<boolean> => {
@@ -94,45 +96,24 @@ export class RoleStore {
   };
 
   private async createRole(): Promise<ModelErrors<Errors>> {
-    const body: CreationBody = {
+    const body: RoleCreationRm = {
       name: this._name,
     };
 
-    const result = await post<CreationBody, ModelErrors<Errors>>(
-      "api/roles/create",
-      body
-    );
-
-    return result;
+    const res = await api(apiClient.api.rolesCreate, body);
+    return res.data;
   }
 
   private async updateRole(): Promise<ModelErrors<Errors>> {
-    const body: UpdatingBody = {
+    const body: RoleUpdatingRm = {
       id: this._id!,
       name: this._name,
-      concurrencyStamp: this._concurrencyStamp
+      concurrencyStamp: this._concurrencyStamp,
     };
 
-    const result = await post<UpdatingBody, ModelErrors<Errors>>(
-      "api/roles/update",
-      body
-    );
-
-    return result;
+    const res = await api(apiClient.api.rolesUpdate, body);
+    return res.data;
   }
-}
-
-interface CreationBody {
-  name: string;
-}
-
-interface UpdatingBody extends CreationBody {
-  id: string;
-  concurrencyStamp: string;
-}
-
-interface DeletingBody {
-  id: string;
 }
 
 interface Errors {

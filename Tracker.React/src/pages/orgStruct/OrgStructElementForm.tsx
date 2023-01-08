@@ -91,7 +91,7 @@ const OrgStructElementForm: FC<Props> = observer((props: Props) => {
               dropdownStyle={{ maxHeight: 400, overflow: "auto" }}
               treeData={orgStructStore.orgStructTreeData}
               treeDefaultExpandAll
-              value={store.parentId}
+              value={store.parentId ?? undefined}
               onChange={store.setParentId}
               allowClear
             />

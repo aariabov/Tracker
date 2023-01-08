@@ -1,131 +1,144 @@
 import { HubConnection, HubConnectionBuilder } from "@microsoft/signalr";
 import { makeObservable, observable, action } from "mobx";
+import { GenerationRm, TestJobParams } from "../../api/Api";
+import { apiClient } from "../../ApiClient";
+import { api } from "../../helpers/api";
 import { ProgressableUtil, UnProgressableUtil, Util } from "./Util";
 
-interface TestParam {
-    value: number;
-}
-
-interface GenerationParam {
-    total: number;
-}
-
 interface ProgressResponse {
-    processed: number;
-    total: number;
-    taskId: number;
+  processed: number;
+  total: number;
+  taskId: number;
 }
 
-const progressMethodName: string = 'progress';
+const progressMethodName: string = "progress";
 
 export class UtilsStore {
+  private _connection: HubConnection;
+  private _utils: Util[] = [];
 
-    private _connection: HubConnection;
-    private _utils: Util[] = [];
-
-    private createUtils(): void {
-        const testParam: TestParam = {
-            value: 42
-        };
-
-        const generationParam: GenerationParam = {
-            total: 1_000_000
-        };
-
-        this._utils = [
-            new ProgressableUtil({
-                id: 1,
-                name: "Полный пересчет tree paths для иерархий поручений",
-                url: "/api/instructions/recalculate-all-tree-paths",
-                updateUtils: this.updateUtils.bind(this),
-                connection: this._connection,
-                progressMethodName: progressMethodName
-            }),
-            new UnProgressableUtil({
-                id: 2,
-                name: "Полный пересчет closure table для иерархий поручений",
-                url: "/api/instructions/recalculate-all-closure-table",
-                updateUtils: this.updateUtils.bind(this)
-            }),
-            new UnProgressableUtil({
-                id: 3,
-                name: "Генерация поручений",
-                url: "/api/instructions/generate-instructions",
-                updateUtils: this.updateUtils.bind(this),
-                pars: generationParam,
-            }),
-            new ProgressableUtil({
-                id: 4,
-                name: "Test run progressable job",
-                url: "/api/test/run-progressable-job",
-                updateUtils: this.updateUtils.bind(this),
-                connection: this._connection,
-                progressMethodName: progressMethodName
-            }),
-            new ProgressableUtil({
-                id: 5,
-                name: "Test run progressable job with params",
-                url: "/api/test/run-progressable-job-with-params",
-                updateUtils: this.updateUtils.bind(this),
-                pars: testParam,
-                connection: this._connection,
-                progressMethodName: progressMethodName
-            }),
-            new UnProgressableUtil({
-                id: 6,
-                name: "Test run unprogressable job",
-                url: "/api/test/run-unprogressable-job",
-                updateUtils: this.updateUtils.bind(this)
-            }),
-            new UnProgressableUtil({
-                id: 7,
-                name: "Test run unprogressable job with params",
-                url: "/api/test/run-unprogressable-job-with-params",
-                updateUtils: this.updateUtils.bind(this),
-                pars: testParam
-            }),
-        ]
+  private createUtils(): void {
+    const testParam: TestJobParams = {
+      value: 42,
     };
 
-    public get utils(): Util[] {
-        return this._utils;
-    }
+    const generationParam: GenerationRm = {
+      total: 1_000_000,
+    };
 
-    constructor() {
-        makeObservable<UtilsStore, "_utils">(this, {
-            _utils: observable,
-        });
+    this._utils = [
+      new ProgressableUtil({
+        id: 1,
+        name: "Полный пересчет tree paths для иерархий поручений",
+        updateUtils: this.updateUtils.bind(this),
+        api: () =>
+          api(apiClient.api.instructionsRecalculateAllTreePaths, {
+            socketInfo: {
+              connectionId: this._connection.connectionId!,
+              methodName: progressMethodName,
+            },
+            taskId: 1,
+          }),
+      }),
+      new UnProgressableUtil({
+        id: 2,
+        name: "Полный пересчет closure table для иерархий поручений",
+        updateUtils: this.updateUtils.bind(this),
+        api: () => api(apiClient.api.instructionsRecalculateAllClosureTable),
+      }),
+      new UnProgressableUtil({
+        id: 3,
+        name: "Генерация поручений",
+        updateUtils: this.updateUtils.bind(this),
+        api: () =>
+          api(apiClient.api.instructionsGenerateInstructions, generationParam),
+      }),
+      new ProgressableUtil({
+        id: 4,
+        name: "Test run progressable job",
+        updateUtils: this.updateUtils.bind(this),
+        api: () =>
+          api(apiClient.api.testRunProgressableJob, {
+            socketInfo: {
+              connectionId: this._connection.connectionId!,
+              methodName: progressMethodName,
+            },
+            taskId: 4,
+          }),
+      }),
+      new ProgressableUtil({
+        id: 5,
+        name: "Test run progressable job with params",
+        updateUtils: this.updateUtils.bind(this),
+        api: () =>
+          api(apiClient.api.testRunProgressableJobWithParams, {
+            socketInfo: {
+              connectionId: this._connection.connectionId!,
+              methodName: progressMethodName,
+            },
+            taskId: 5,
+            pars: testParam,
+          }),
+      }),
+      new UnProgressableUtil({
+        id: 6,
+        name: "Test run unprogressable job",
+        api: () => api(apiClient.api.testRunUnprogressableJob),
+        updateUtils: this.updateUtils.bind(this),
+      }),
+      new UnProgressableUtil({
+        id: 7,
+        name: "Test run unprogressable job with params",
+        updateUtils: this.updateUtils.bind(this),
+        api: () =>
+          api(apiClient.api.testRunUnprogressableJobWithParams, testParam),
+      }),
+    ];
+  }
 
-        this._connection = this.createConnection();
-        this.startConnection(this._connection);
-        this._connection.on(progressMethodName, this.updateProgress);
-        this.createUtils();
-    }
+  public get utils(): Util[] {
+    return this._utils;
+  }
 
-    public updateUtils(): void {
-        this._utils = this._utils.map(u => u);
-    }
+  constructor() {
+    makeObservable<UtilsStore, "_utils">(this, {
+      _utils: observable,
+    });
 
-    private updateProgress = (progressResponse: ProgressResponse): void => {
-        const util = this._utils.find(u => u.id === progressResponse.taskId);
-        if (util) {
-            const progressableUtil = util as ProgressableUtil<any>;
-            progressableUtil.updateProgress(progressResponse.processed, progressResponse.total);
-        }
-    }
+    this._connection = this.createConnection();
+    this.startConnection(this._connection);
+    this._connection.on(progressMethodName, this.updateProgress);
+    this.createUtils();
+  }
 
-    private createConnection(): HubConnection {
-        return new HubConnectionBuilder()
-            .withUrl('/api/progress-hub')
-            .withAutomaticReconnect()
-            .build();
-    }
+  public updateUtils(): void {
+    this._utils = this._utils.map((u) => u);
+  }
 
-    private startConnection(connection: HubConnection): Promise<void> {
-        return connection.start()
-            .then(_ => {
-                console.log('Connected!');
-            })
-            .catch(e => console.log('Connection failed: ', e));
+  private updateProgress = (progressResponse: ProgressResponse): void => {
+    const util = this._utils.find((u) => u.id === progressResponse.taskId);
+    if (util) {
+      const progressableUtil = util as ProgressableUtil;
+      progressableUtil.updateProgress(
+        progressResponse.processed,
+        progressResponse.total
+      );
     }
+  };
+
+  private createConnection(): HubConnection {
+    return new HubConnectionBuilder()
+      .withUrl("/api/progress-hub")
+      .withAutomaticReconnect()
+      .build();
+  }
+
+  private startConnection(connection: HubConnection): Promise<void> {
+    return connection
+      .start()
+      .then((_) => {
+        console.log("Connected!");
+      })
+      .catch((e) => console.log("Connection failed: ", e));
+  }
 }
