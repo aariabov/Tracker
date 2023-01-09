@@ -39,6 +39,7 @@ public class InstructionsGenerationService
 
         await _instructionsRepository.SaveChangesAsync();
         await _instructionsService.RecalculateAllClosureTable();
+        await _instructionsRepository.UpdateSequence();
         
         stopwatch.Stop();
         var elapsed = stopwatch.Elapsed;
