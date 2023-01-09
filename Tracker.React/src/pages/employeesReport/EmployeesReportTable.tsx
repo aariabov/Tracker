@@ -1,7 +1,8 @@
 import { Table } from "antd";
 import React, { FC } from "react";
 import { observer } from "mobx-react";
-import { EmployeesReportStore, ReportRow } from "./EmployeesReportStore";
+import { EmployeesReportStore } from "./EmployeesReportStore";
+import { EmployeesReportRowVm } from "../../api/Api";
 
 interface Props {
   store: EmployeesReportStore;
@@ -14,32 +15,32 @@ const EmployeesReportTable: FC<Props> = observer((props: Props) => {
   return (
     <>
       {dataWasLoaded && (
-        <Table<ReportRow>
+        <Table<EmployeesReportRowVm>
           key={Math.random()}
           dataSource={store.rows}
           rowKey="id"
           defaultExpandAllRows
         >
-          <Table.Column<ReportRow>
+          <Table.Column<EmployeesReportRowVm>
             title="Исполнитель / Статус"
             dataIndex="executor"
           />
-          <Table.Column<ReportRow>
+          <Table.Column<EmployeesReportRowVm>
             title="В работе"
             dataIndex="inWorkCount"
             align="center"
           />
-          <Table.Column<ReportRow>
+          <Table.Column<EmployeesReportRowVm>
             title="В работе просрочено"
             dataIndex="inWorkOverdueCount"
             align="center"
           />
-          <Table.Column<ReportRow>
+          <Table.Column<EmployeesReportRowVm>
             title="Выполнено в срок"
             dataIndex="completedCount"
             align="center"
           />
-          <Table.Column<ReportRow>
+          <Table.Column<EmployeesReportRowVm>
             title="Выполнено с нарушением срока"
             dataIndex="completedOverdueCount"
             align="center"

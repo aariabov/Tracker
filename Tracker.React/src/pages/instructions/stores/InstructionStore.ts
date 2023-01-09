@@ -1,10 +1,12 @@
 import { action, makeObservable, observable } from "mobx";
-import { ModelErrors, post } from "../../../helpers/api";
+import { ExecDateRm, InstructionRm } from "../../../api/Api";
+import { apiClient } from "../../../ApiClient";
+import { api, ModelErrors } from "../../../helpers/api";
 
 export class InstructionStore {
   private _id: number = 0;
   private _name: string = "";
-  private _parentId: number | undefined = undefined;
+  private _parentId: number | null = null;
   private _executorId: string | undefined = undefined;
   private _deadline: Date | undefined = undefined;
 
@@ -14,7 +16,7 @@ export class InstructionStore {
   public get name(): string {
     return this._name;
   }
-  public get parentId(): number | undefined {
+  public get parentId(): number | null {
     return this._parentId;
   }
   public get executorId(): string | undefined {
@@ -61,7 +63,7 @@ export class InstructionStore {
   clear = (): void => {
     this._id = 0;
     this._name = "";
-    this._parentId = undefined;
+    this._parentId = null;
     this._executorId = undefined;
     this._deadline = undefined;
     this._errors = undefined;
@@ -97,28 +99,25 @@ export class InstructionStore {
   };
 
   async setExecutionDate(instructionId: number, execDate: Date): Promise<void> {
-    const body: ExecDateSettingBody = {
+    const body: ExecDateRm = {
       instructionId: instructionId,
-      execDate: execDate,
+      execDate: execDate.toISOString(),
     };
 
-    await post<ExecDateSettingBody>("api/instructions/set-exec-date", body);
+    await api(apiClient.api.instructionsSetExecDate, body);
   }
 
   save = async (): Promise<boolean> => {
-    const body: InstructionBody = {
+    const body: InstructionRm = {
       name: this._name,
       parentId: this._parentId,
-      executorId: this._executorId,
-      deadline: this._deadline,
+      executorId: this._executorId ?? "",
+      deadline: this._deadline?.toISOString() ?? "",
     };
 
-    const result = await post<InstructionBody, RequestResult>(
-      "api/instructions/create",
-      body
-    );
-    if (result.modelErrors) {
-      this._errors = result.modelErrors;
+    var result = await api(apiClient.api.instructionsCreate, body);
+    if (result.data.modelErrors) {
+      this._errors = result.data.modelErrors;
       return false;
     } else {
       this.hideModal();
@@ -128,23 +127,9 @@ export class InstructionStore {
   };
 }
 
-type RequestResult = number & ModelErrors<Errors>;
-
-interface InstructionBody {
-  name: string;
-  parentId: number | undefined;
-  executorId: string | undefined;
-  deadline: Date | undefined;
-}
-
 interface Errors {
   name?: string;
   parentId?: string;
   executorId?: string;
   deadline?: string;
-}
-
-interface ExecDateSettingBody {
-  instructionId?: number;
-  execDate?: Date;
 }

@@ -3,11 +3,9 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Authorization;
-using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Tracker.Audit;
-using Tracker.Common;
 using Tracker.Common.Progress;
 using Tracker.Db;
 using Tracker.Db.Models;
@@ -104,7 +102,11 @@ builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<ITransactionManager, TransactionManager>();
 builder.Services.AddScoped<DataSeeder>();
 builder.Services.AddSignalR();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SchemaFilter<RequireValueTypePropertiesSchemaFilter>(true);
+    options.SupportNonNullableReferenceTypes();
+});
 
 var app = builder.Build();
 

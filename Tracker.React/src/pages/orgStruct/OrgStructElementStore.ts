@@ -1,5 +1,11 @@
 import { action, makeObservable, observable } from "mobx";
-import { ModelErrors, post } from "../../helpers/api";
+import {
+  UserDeletingRm,
+  UserRegistrationRm,
+  UserUpdatingRm,
+} from "../../api/Api";
+import { apiClient } from "../../ApiClient";
+import { api, ModelErrors } from "../../helpers/api";
 import { OrgStructElementRow } from "../../stores/OrgStructStore";
 
 export class OrgStructElementStore {
@@ -7,7 +13,7 @@ export class OrgStructElementStore {
   private _name: string = "";
   private _email: string = "";
   private _password: string = "";
-  private _parentId: string | undefined = undefined;
+  private _parentId: string | null = null;
   private _roles: string[] = [];
 
   private _errors: Errors | undefined = undefined;
@@ -23,7 +29,7 @@ export class OrgStructElementStore {
   public get password(): string {
     return this._password;
   }
-  public get parentId(): string | undefined {
+  public get parentId(): string | null {
     return this._parentId;
   }
   public get roles(): string[] {
@@ -68,7 +74,7 @@ export class OrgStructElementStore {
     this._name = "";
     this._email = "";
     this._password = "";
-    this._parentId = undefined;
+    this._parentId = null;
     this._roles = [];
     this._errors = undefined;
   };
@@ -119,16 +125,12 @@ export class OrgStructElementStore {
   deleteUser = async (
     roleId: string
   ): Promise<undefined | ModelErrors<Errors>> => {
-    const body: DeletingBody = {
+    const body: UserDeletingRm = {
       id: roleId,
     };
 
-    const result = await post<DeletingBody, ModelErrors<Errors>>(
-      "api/users/delete",
-      body
-    );
-
-    return result;
+    var res = await api(apiClient.api.usersDelete, body);
+    return res.data;
   };
 
   save = async (): Promise<boolean> => {
@@ -147,7 +149,7 @@ export class OrgStructElementStore {
   };
 
   private async createUser(): Promise<ModelErrors<Errors>> {
-    const body: CreationBody = {
+    const body: UserRegistrationRm = {
       name: this._name,
       email: this._email,
       password: this._password,
@@ -155,16 +157,12 @@ export class OrgStructElementStore {
       roles: this._roles,
     };
 
-    const result = await post<CreationBody, ModelErrors<Errors>>(
-      "api/users/register",
-      body
-    );
-
-    return result;
+    var res = await api(apiClient.api.usersRegister, body);
+    return res.data;
   }
 
   private async updateUser(): Promise<ModelErrors<Errors>> {
-    const body: UpdatingBody = {
+    const body: UserUpdatingRm = {
       id: this._id!,
       name: this._name,
       email: this._email,
@@ -172,29 +170,9 @@ export class OrgStructElementStore {
       roles: this._roles,
     };
 
-    const result = await post<UpdatingBody, ModelErrors<Errors>>(
-      "api/users/update",
-      body
-    );
-
-    return result;
+    var res = await api(apiClient.api.usersUpdate, body);
+    return res.data;
   }
-}
-
-interface CreationBody {
-  name: string;
-  email: string;
-  password: string;
-  bossId: string | undefined;
-  roles: string[];
-}
-
-interface UpdatingBody {
-  id: string;
-  name: string;
-  email: string;
-  bossId: string | undefined;
-  roles: string[];
 }
 
 interface Errors {
@@ -204,8 +182,4 @@ interface Errors {
   password?: string;
   bossId?: string;
   roles?: string;
-}
-
-interface DeletingBody {
-  id: string;
 }

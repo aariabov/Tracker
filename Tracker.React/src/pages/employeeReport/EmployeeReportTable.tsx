@@ -1,7 +1,8 @@
 import { Table } from "antd";
 import React, { FC } from "react";
 import { observer } from "mobx-react";
-import { EmployeeReportStore, ReportRow } from "./EmployeeReportStore";
+import { EmployeeReportStore } from "./EmployeeReportStore";
+import { EmployeeReportRowVm } from "../../api/Api";
 
 interface Props {
   store: EmployeeReportStore;
@@ -14,15 +15,18 @@ const EmployeeReportTable: FC<Props> = observer((props: Props) => {
   return (
     <>
       {dataWasLoaded && (
-        <Table<ReportRow>
+        <Table<EmployeeReportRowVm>
           key={Math.random()}
           dataSource={store.rows}
           rowKey="id"
           defaultExpandAllRows
           style={{ width: 400 }}
         >
-          <Table.Column<ReportRow> title="Статус" dataIndex="status" />
-          <Table.Column<ReportRow>
+          <Table.Column<EmployeeReportRowVm>
+            title="Статус"
+            dataIndex="status"
+          />
+          <Table.Column<EmployeeReportRowVm>
             title="Кол-во"
             dataIndex="count"
             align="center"

@@ -1,14 +1,20 @@
 import { makeObservable, observable, computed, action } from "mobx";
 import { listToTree } from "../../../helpers";
 import TreeNode from "../../../interfaces/TreeNode";
-import { get } from "../../../helpers/api";
+import { api } from "../../../helpers/api";
 import { TablePaginationConfig } from "antd";
-import { FilterValue, SorterResult, TableCurrentDataSource } from "antd/lib/table/interface";
+import {
+  FilterValue,
+  SorterResult,
+  TableCurrentDataSource,
+} from "antd/lib/table/interface";
+import { apiClient } from "../../../ApiClient";
+import { InstructionVm } from "../../../api/Api";
 
 const DEFAULT_PER_PAGE = 5;
 
 export class InstructionsStore {
-  instructions: Instruction[] = [];
+  instructions: InstructionVm[] = [];
   totalInstructions: number = 0;
   page: number = 1;
   perPage: number = DEFAULT_PER_PAGE;
@@ -24,7 +30,7 @@ export class InstructionsStore {
   }
 
   get instructionsRows(): InstructionRow[] {
-    const mapFunc = (instruction: Instruction): InstructionRow => ({
+    const mapFunc = (instruction: InstructionVm): InstructionRow => ({
       ...instruction,
       children: [],
     });
@@ -33,7 +39,7 @@ export class InstructionsStore {
   }
 
   get instructionsTreeData(): TreeNode<number>[] {
-    const mapFunc = (e: Instruction): TreeNode<number> => ({
+    const mapFunc = (e: InstructionVm): TreeNode<number> => ({
       key: e.id,
       value: e.id,
       title: e.name,
@@ -45,42 +51,42 @@ export class InstructionsStore {
   }
 
   async load(): Promise<void> {
-    var url = `api/Instructions?page=${this.page}&perPage=${this.perPage}`;
+    let sort: string | undefined = undefined;
     if (this.sortedInfo.order) {
-      var direction = this.sortedInfo.order === 'descend'
-        ? this.sortedInfo.columnKey
-        : `-${this.sortedInfo.columnKey}`;
-      url += `&sort=${direction}`
+      var direction =
+        this.sortedInfo.order === "descend"
+          ? this.sortedInfo.columnKey?.toString()
+          : `-${this.sortedInfo.columnKey}`;
+      sort = direction;
     }
-    this.instructions = await get<Instruction[]>(url);
+
+    const query = {
+      page: this.page,
+      perPage: this.perPage,
+      sort: sort,
+    };
+
+    const res = await api(apiClient.api.instructionsList, query);
+    this.instructions = res.data;
   }
 
   async getTotalInstructions(): Promise<void> {
-    this.totalInstructions = await get<number>("api/Instructions/total");
+    var res = await api(apiClient.api.instructionsTotalList);
+    this.totalInstructions = res.data;
   }
 
-  onChange = (pagination: TablePaginationConfig, filters: Record<string, FilterValue | null>
-    , sorter: SorterResult<InstructionRow> | SorterResult<InstructionRow>[]
-    , extra: TableCurrentDataSource<InstructionRow>): void => {
+  onChange = (
+    pagination: TablePaginationConfig,
+    filters: Record<string, FilterValue | null>,
+    sorter: SorterResult<InstructionRow> | SorterResult<InstructionRow>[],
+    extra: TableCurrentDataSource<InstructionRow>
+  ): void => {
     this.sortedInfo = sorter as SorterResult<InstructionRow>;
     // при смене сортировки и perPage переходим на 1ую страницу
-    this.page = pagination.current === this.page ? 1 : (pagination.current ?? 1);
+    this.page = pagination.current === this.page ? 1 : pagination.current ?? 1;
     this.perPage = pagination.pageSize ?? DEFAULT_PER_PAGE;
     this.load();
-  }
-}
-
-export interface Instruction {
-  id: number;
-  name: string;
-  parentId?: number;
-  creatorName: string;
-  executorName: string;
-  deadline: Date;
-  execDate?: Date;
-  status: string;
-  canCreateChild: boolean;
-  canBeExecuted: boolean;
+  };
 }
 
 export interface InstructionRow {
@@ -88,8 +94,8 @@ export interface InstructionRow {
   name: string;
   creatorName: string;
   executorName: string;
-  deadline: Date;
-  execDate?: Date;
+  deadline: string;
+  execDate: string | null;
   status: string;
   canCreateChild: boolean;
   canBeExecuted: boolean;

@@ -1,10 +1,12 @@
 import { makeObservable, observable, action } from "mobx";
-import { get } from "../../helpers/api";
+import { RoleVm } from "../../api/Api";
+import { apiClient } from "../../ApiClient";
+import { api } from "../../helpers/api";
 
 export class RolesStore {
-  private _roles: Role[] = [];
+  private _roles: RoleVm[] = [];
 
-  public get roles(): Role[] {
+  public get roles(): RoleVm[] {
     return this._roles;
   }
 
@@ -17,12 +19,7 @@ export class RolesStore {
 
   load = async (): Promise<void> => {
     this._roles = [];
-    this._roles = await get<Role[]>("api/roles");
+    var res = await api(apiClient.api.rolesList);
+    this._roles = res.data;
   };
-}
-
-export interface Role {
-  id: string;
-  name: string;
-  concurrencyStamp: string;
 }

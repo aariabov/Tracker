@@ -1,4 +1,5 @@
 import { action, computed, makeObservable, observable } from "mobx";
+import { apiClient } from "../ApiClient";
 
 interface UserInfo {
   nameid: string;
@@ -83,6 +84,7 @@ export class UserStore {
       this._roles = userInfo.role || [];
       this._token = token;
       localStorage.setItem(tokenKey, token);
+      apiClient.setSecurityData(token);
     }
 
     this._refreshToken = refreshToken;

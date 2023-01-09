@@ -1,8 +1,9 @@
 import { Modal, Table } from "antd";
 import React, { FC, ReactNode } from "react";
 import { observer } from "mobx-react";
-import { Role, RolesStore } from "./RolesStore";
+import { RolesStore } from "./RolesStore";
 import { RoleStore } from "./RoleStore";
+import { RoleVm } from "../../api/Api";
 
 interface Props {
   rolesStore: RolesStore;
@@ -13,7 +14,7 @@ const RolesTable: FC<Props> = observer((props: Props) => {
   const { roleStore, rolesStore: store } = props;
   const dataWasLoaded = store.roles.length > 0;
 
-  const showConfirmModal = (role: Role): void => {
+  const showConfirmModal = (role: RoleVm): void => {
     Modal.confirm({
       title: "Вы действительно хотите удалить роль?",
       content: `Роль "${role.name}" будет удалена`,
@@ -31,30 +32,30 @@ const RolesTable: FC<Props> = observer((props: Props) => {
     });
   };
 
-  const editRole = (role: Role): void => {
+  const editRole = (role: RoleVm): void => {
     roleStore.showModal(role);
   };
 
   return (
     <>
       {dataWasLoaded ? (
-        <Table<Role>
+        <Table<RoleVm>
           key={Math.random()}
           dataSource={store.roles}
           rowKey="id"
           defaultExpandAllRows
           style={{ width: 400 }}
         >
-          <Table.Column<Role> title="Название" dataIndex="name" />
-          <Table.Column<Role>
+          <Table.Column<RoleVm> title="Название" dataIndex="name" />
+          <Table.Column<RoleVm>
             width="10%"
-            render={(_: string, record: Role): ReactNode => (
+            render={(_: string, record: RoleVm): ReactNode => (
               <a onClick={(): void => editRole(record)}>Редактировать</a>
             )}
           />
-          <Table.Column<Role>
+          <Table.Column<RoleVm>
             width="10%"
-            render={(_: string, record: Role): ReactNode => (
+            render={(_: string, record: RoleVm): ReactNode => (
               <a onClick={(): void => showConfirmModal(record)}>Удалить</a>
             )}
           />

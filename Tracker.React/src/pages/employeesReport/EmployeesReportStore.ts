@@ -1,15 +1,17 @@
 import { makeObservable, observable, computed, action } from "mobx";
 import { Moment } from "moment";
 import { RangeValue } from "rc-picker/lib/interface";
-import { post } from "../../helpers/api";
+import { EmployeesReportRm, EmployeesReportRowVm } from "../../api/Api";
+import { apiClient } from "../../ApiClient";
+import { api } from "../../helpers/api";
 
 export class EmployeesReportStore {
-  private _rows: ReportRow[] = [];
+  private _rows: EmployeesReportRowVm[] = [];
   private _period: RangeValue<Moment> = null;
 
   private _periodError: string | undefined = undefined;
 
-  public get rows(): ReportRow[] {
+  public get rows(): EmployeesReportRowVm[] {
     return this._rows;
   }
   public get periodError(): string | undefined {
@@ -35,31 +37,15 @@ export class EmployeesReportStore {
 
   load = async (): Promise<void> => {
     if (this._period && this._period[0] && this._period[1]) {
-      const body: Body = {
-        startDate: this._period[0].toDate(),
-        endDate: this._period[1].toDate(),
+      const body: EmployeesReportRm = {
+        startDate: this._period[0].toDate().toISOString(),
+        endDate: this._period[1].toDate().toISOString(),
       };
 
-      this._rows = await post<Body, ReportRow[]>(
-        "api/analytics/employees-report",
-        body
-      );
+      const res = await api(apiClient.api.analyticsEmployeesReport, body);
+      this._rows = res.data;
     } else {
       if (!this._period) this._periodError = "Выберите период";
     }
   };
-}
-
-interface Body {
-  startDate: Date;
-  endDate: Date;
-}
-
-export interface ReportRow {
-  id: string;
-  executor: string;
-  inWorkCount: number;
-  inWorkOverdueCount: number;
-  completedCount: number;
-  completedOverdueCount: number;
 }
