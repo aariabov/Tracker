@@ -107,5 +107,11 @@ public class InstructionsRepository : IInstructionsRepository
         return _db.Database.ExecuteSqlRawAsync("TRUNCATE instructions RESTART IDENTITY CASCADE;");
     }
 
+    public async Task UpdateSequence()
+    {
+        var number = await _db.Instructions.CountAsync();
+        await _db.Database.ExecuteSqlInterpolatedAsync($"SELECT setval('instructions_id_seq', {number});");
+    }
+
     public async Task SaveChangesAsync() => await _db.SaveChangesAsync();
 }
