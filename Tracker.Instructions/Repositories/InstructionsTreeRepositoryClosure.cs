@@ -73,6 +73,7 @@ WITH RECURSIVE cte AS
 INSERT INTO instructions_closures
 SELECT * FROM cte order by parent_id;";
         
+        _db.Database.SetCommandTimeout(200);
         await _db.Database.ExecuteSqlRawAsync(sql);
     }
 
