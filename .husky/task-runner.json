@@ -1,13 +1,24 @@
 {
    "tasks": [
       {
-         "name": "welcome-message-example",
-         "command": "bash",
-         "args": [ "-c", "echo Husky.Net is awesome!" ],
-         "windows": {
-            "command": "cmd",
-            "args": ["/c", "echo Husky.Net is awesome!" ]
-         }
-      }
+         "name": "dotnet-format",
+         "group": "pre-commit",
+         "command": "dotnet",
+         "args": [ "format", "--include", "${staged}" ],
+         "include": [ "**/*.cs" ]
+      },
+      {
+         "name": "test-start",
+         "group": "pre-commit",
+         "command": "dotnet",
+         "args": [ "test", "./Tracker.UnitTests/Tracker.UnitTests.csproj" ]
+      },
+//      {
+//         "name": "warning-check",
+//         "command": "dotnet",
+//         "group": "pre-commit",
+//         "args": [ "build", "/warnaserror", "--no-incremental", "--no-restore" ],
+//         "include": [ "**/*.cs" ]
+//      }
    ]
 }
