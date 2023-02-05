@@ -1,4 +1,4 @@
-﻿namespace Tracker.Db.UnitOfWorks;
+namespace Tracker.Db.UnitOfWorks;
 
 public class UnitOfWork : IUnitOfWork
 {

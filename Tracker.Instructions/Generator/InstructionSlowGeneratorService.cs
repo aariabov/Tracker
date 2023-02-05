@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using Tracker.Common;
 using Tracker.Common.Progress;
 using Tracker.Db.Models;
@@ -18,7 +18,7 @@ public class InstructionSlowGeneratorService
     private const double DelegationToChildThreshold = 0.5;
     private const double ChildDeadlineThreshold = 0.1;
     private const double ExecutionThreshold = 0.1;
-    
+
     private readonly UsersService _usersService;
     private readonly IInstructionsService _instructionsService;
     private readonly Progress _progress;
@@ -36,7 +36,7 @@ public class InstructionSlowGeneratorService
     public async Task RunJob(ClientSocketRm socket, GenerationRm model, int taskId)
     {
         var watch = Stopwatch.StartNew();
-        
+
         var allUsers = await _usersService.GetUsersTreeAsync();
         var bosses = allUsers.Where(u => u.Children != null && u.Children.Any()).ToArray();
 
@@ -54,17 +54,20 @@ public class InstructionSlowGeneratorService
 
             var instruction = new InstructionRm($"Поручение {i}", executor.Id, deadline, parentId: null);
             var res = await _instructionsService.CreateInstructionAsync(instruction, creator, pastDay);
-            if (!res.IsSuccess) throw new Exception(string.Join(", ", res.ValidationErrors));
+            if (!res.IsSuccess)
+            {
+                throw new Exception(string.Join(", ", res.ValidationErrors));
+            }
 
             // тк не все поручения делегируются, рандомно решаем, будем ли делегировать
             if (_random.NextDouble() > DelegationThreshold)
             {
                 await Delegate(executor, res.Value, i.ToString(), pastDay, deadline);
             }
-            
+
             _progress.NotifyClient(i, model.Total, socket, frequency: 1, taskId);
         }
-        
+
         watch.Stop();
         Console.WriteLine($"Generation time: {watch.Elapsed:mm\\:ss\\.ff}");
     }
@@ -83,31 +86,39 @@ public class InstructionSlowGeneratorService
         {
             // можем делегировать не на всех детей, рандомно решаем
             if (_random.NextDouble() < DelegationToChildThreshold)
+            {
                 continue;
+            }
 
             var deadline = GenerateDeadline(pastDay, parentDeadline);
             var newPrefix = $"{prefix}.{i}";
             var instruction = new InstructionRm($"Поручение {newPrefix}", executor.Id, deadline, parentInstructionId);
-            
+
             var res = await _instructionsService.CreateInstructionAsync(instruction, creator, pastDay);
             if (!res.IsSuccess)
+            {
                 throw new Exception(string.Join(", ", res.ValidationErrors));
+            }
 
             // рекурсивно делегируем потомкам
             var execDate = await Delegate(executor, res.Value, newPrefix, pastDay, deadline);
             childrenExecDates.Add(execDate);
-            
+
             i++;
         }
-        
+
         // если не было делегирования - можем исполнить
-        if(!childrenExecDates.Any())
+        if (!childrenExecDates.Any())
+        {
             return await MaybeExecuteInstruction(creator.Id, parentInstructionId, pastDay, parentDeadline);
+        }
 
         // если есть хотя бы одно неисполненное дочернее поручение - исполнять нельзя
-        if(childrenExecDates.Any(d => d is null))
+        if (childrenExecDates.Any(d => d is null))
+        {
             return null;
-        
+        }
+
         // если все потомки исполнили - можем исполнить, но только с датой >= макс дата исполнения всех потомков
         return await MaybeExecuteInstruction(creator.Id, parentInstructionId, childrenExecDates.Max().Value, parentDeadline);
     }
@@ -116,8 +127,10 @@ public class InstructionSlowGeneratorService
     {
         // в некоторых случаях дедлайн дочернего поручения мб больше родительского
         if (_random.NextDouble() < ChildDeadlineThreshold)
+        {
             return parentDeadline.AddDays(_random.Next(1, MaxDaysFromParentDeadline));
-        
+        }
+
         // в большинстве случаев дедлайн дочернего поручения меньше родительского
         var diffDays = (parentDeadline - pastDay).Days;
         return pastDay.AddDays(_random.Next(0, diffDays));
@@ -127,7 +140,9 @@ public class InstructionSlowGeneratorService
         DateTime deadline)
     {
         if (_random.NextDouble() < ExecutionThreshold)
+        {
             return null;
+        }
 
         return await ExecuteInstruction(executorId, instructionId, pastDay, deadline);
     }
@@ -138,7 +153,9 @@ public class InstructionSlowGeneratorService
         var execDateRm = new ExecDateRm { ExecDate = execDate, InstructionId = instructionId };
         var res = await _instructionsService.SetExecDateAsync(execDateRm, executorId, execDate);
         if (!res.IsSuccess)
+        {
             throw new Exception(string.Join(", ", res.ValidationErrors));
+        }
 
         return execDate.Date;
     }
@@ -147,12 +164,16 @@ public class InstructionSlowGeneratorService
     {
         // когда кто-то из потомков просрочил, и дата исполнения больше родительского дедлайна
         if (minPossibleDate > deadline)
+        {
             return minPossibleDate.AddDays(_random.Next(0, MaxOverdueDays));
-        
+        }
+
         // просрачиваем
         if (_random.NextDouble() < OverdueThreshold)
+        {
             return deadline.AddDays(_random.Next(1, MaxOverdueDays));
-        
+        }
+
         // исполняем вовремя
         var diffDays = (deadline - minPossibleDate).Days;
         return minPossibleDate.AddDays(_random.Next(0, diffDays));

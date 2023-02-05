@@ -1,4 +1,4 @@
-﻿using Tracker.Common.Progress;
+using Tracker.Common.Progress;
 
 namespace Tracker.Web.Sandbox;
 
@@ -46,4 +46,3 @@ internal static class Helpers
     }
 }
 
-    

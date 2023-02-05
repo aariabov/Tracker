@@ -26,29 +26,35 @@ public class UserValidationService : IUserValidationService
         var validator = new UserCreationValidator(baseValidator, _userRepository);
         var validationResult = await validator.ValidateAsync(userRm);
         if (validationResult.IsValid)
+        {
             return Result.Ok();
-        
+        }
+
         return Result.Errors<string>(validationResult.Errors.Format());
     }
-    
+
     public async Task<Result> ValidateUpdatingModelAsync(UserUpdatingRm userUpdatingRm)
     {
         var baseValidator = new UserBaseValidator(_userRepository);
         var validator = new UserUpdatingValidator(baseValidator, _userRepository);
         var validationResult = await validator.ValidateAsync(userUpdatingRm);
         if (validationResult.IsValid)
+        {
             return Result.Ok();
-            
+        }
+
         return Result.Errors<string>(validationResult.Errors.Format());
     }
-    
+
     public async Task<Result> ValidateDeletingModelAsync(UserDeletingRm userDeletingRm)
     {
         var validator = new UserDeletingValidator(_db, _userRepository, _adminEmail);
         var validationResult = await validator.ValidateAsync(userDeletingRm);
         if (validationResult.IsValid)
+        {
             return Result.Ok();
-            
+        }
+
         return Result.Errors<string>(validationResult.Errors.Format());
     }
 }

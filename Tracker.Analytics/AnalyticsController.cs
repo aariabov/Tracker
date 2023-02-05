@@ -34,22 +34,22 @@ public class AnalyticsController : ControllerBase
                 i.ExecutorId == reportRm.ExecutorId &&
                 i.Deadline.Date >= reportRm.StartDate.Date &&
                 i.Deadline.Date <= reportRm.EndDate.Date);
-        
+
         var allStatuses = new ExecStatus[]
         {
-            ExecStatus.InWork, 
-            ExecStatus.InWorkOverdue, 
-            ExecStatus.Completed, 
+            ExecStatus.InWork,
+            ExecStatus.InWorkOverdue,
+            ExecStatus.Completed,
             ExecStatus.CompletedOverdue
         };
-        
-        var reportRows = 
+
+        var reportRows =
             from status in allStatuses
             join instruction in filteredInstructions
                 on status equals _statusService.GetStatus(instruction)
                 into instructions
             select new EmployeeReportRowVm(status, instructions.Count());
-        
+
         return Ok(reportRows.ToArray());
     }
 
@@ -63,24 +63,24 @@ public class AnalyticsController : ControllerBase
             .Where(i =>
                 i.Deadline.Date >= reportRm.StartDate.Date &&
                 i.Deadline.Date <= reportRm.EndDate.Date);
-        
+
         var statusInfos = filteredInstructions.Select(i => new
         {
-            Executor = i.Executor, 
+            Executor = i.Executor,
             Status = _statusService.GetStatus(i)
         });
 
         var reportRows = from statusInfo in statusInfos
-            group statusInfo by statusInfo.Executor into g
-            orderby g.Key.UserName
-            select new EmployeesReportRowVm(
-                id: g.Key.Id, 
-                executor: g.Key.UserName,
-                inWorkCount: g.Count(i => i.Status == ExecStatus.InWork),
-                inWorkOverdueCount: g.Count(i => i.Status == ExecStatus.InWorkOverdue), 
-                completedCount: g.Count(i => i.Status == ExecStatus.Completed), 
-                completedOverdueCount: g.Count(i => i.Status == ExecStatus.CompletedOverdue));
-        
+                         group statusInfo by statusInfo.Executor into g
+                         orderby g.Key.UserName
+                         select new EmployeesReportRowVm(
+                             id: g.Key.Id,
+                             executor: g.Key.UserName,
+                             inWorkCount: g.Count(i => i.Status == ExecStatus.InWork),
+                             inWorkOverdueCount: g.Count(i => i.Status == ExecStatus.InWorkOverdue),
+                             completedCount: g.Count(i => i.Status == ExecStatus.Completed),
+                             completedOverdueCount: g.Count(i => i.Status == ExecStatus.CompletedOverdue));
+
         return Ok(reportRows.ToArray());
     }
 }

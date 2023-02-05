@@ -13,7 +13,7 @@ public class TokensService
     private readonly UsersService _userService;
     private readonly SignInManager<User> _signInManager;
     private readonly JwtGenerator _jwtGenerator;
-    
+
     private readonly int _refreshTokenValidityInDays;
 
     public TokensService(UsersService userService
@@ -24,7 +24,7 @@ public class TokensService
         _userService = userService;
         _signInManager = signInManager;
         _jwtGenerator = jwtGenerator;
-        
+
         _refreshTokenValidityInDays = Convert.ToInt32(config["Token:RefreshTokenValidityInDays"]);
     }
 
@@ -32,43 +32,51 @@ public class TokensService
     {
         var user = await _userService.GetUserByEmailAsync(loginVm.Email);
         if (user is null)
-            return Result.CommonErrors<TokensVm>(new List<string>{"Неверный логин или пароль"});
-        
+        {
+            return Result.CommonErrors<TokensVm>(new List<string> { "Неверный логин или пароль" });
+        }
+
         var result = await _signInManager.CheckPasswordSignInAsync(user, loginVm.Password, false);
         if (!result.Succeeded)
-            return Result.CommonErrors<TokensVm>(new List<string>{"Неверный логин или пароль"});
+        {
+            return Result.CommonErrors<TokensVm>(new List<string> { "Неверный логин или пароль" });
+        }
 
         var token = await CreateToken(user);
         var refreshToken = GenerateRefreshToken();
-        
+
         user.RefreshToken = refreshToken;
         user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(_refreshTokenValidityInDays);
         await _userService.UpdateUserAsync(user);
-        
+
         return Result.Ok(new TokensVm(token, refreshToken));
     }
-    
+
     public async Task<Result<TokensVm>> RefreshTokenAsync(string refreshToken)
     {
         var user = await _userService.GetUserByRefreshTokenAsync(refreshToken);
         if (user is null || user.RefreshTokenExpiryTime < DateTime.UtcNow)
-            return Result.CommonErrors<TokensVm>(new List<string>{"Неверный refresh token"});
-        
+        {
+            return Result.CommonErrors<TokensVm>(new List<string> { "Неверный refresh token" });
+        }
+
         var token = await CreateToken(user);
         var newRefreshToken = GenerateRefreshToken();
-        
+
         user.RefreshToken = newRefreshToken;
         await _userService.UpdateUserAsync(user);
-        
+
         return Result.Ok(new TokensVm(token, newRefreshToken));
     }
-    
+
     public async Task RevokeAsync()
     {
         var user = await _userService.GetCurrentUser();
         if (user is null)
+        {
             throw new Exception("User not found");
-        
+        }
+
         user.RefreshToken = null;
         await _userService.UpdateUserAsync(user);
     }
@@ -85,7 +93,7 @@ public class TokensService
             , isUserBoss: isUserBoss);
         return token;
     }
-    
+
     private static string GenerateRefreshToken()
     {
         var randomNumber = new byte[64];

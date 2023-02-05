@@ -16,7 +16,7 @@ public class AppDbContext : IdentityDbContext<User, Role, string>
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
-        
+
         modelBuilder.Entity<IdentityUserToken<string>>().ToTable("asp_net_user_tokens");
         modelBuilder.Entity<IdentityUserLogin<string>>().ToTable("asp_net_user_logins");
         modelBuilder.Entity<IdentityUserClaim<string>>().ToTable("asp_net_user_claims");
@@ -27,43 +27,43 @@ public class AppDbContext : IdentityDbContext<User, Role, string>
         modelBuilder.Entity<Instruction>(b =>
         {
             b.Property(p => p.Name).HasMaxLength(255);
-            
+
             b.HasOne(i => i.Parent)
                 .WithMany(i => i.Children)
                 .HasForeignKey(e => e.ParentId);
-            
+
             b.HasOne(i => i.Creator)
                 .WithMany()
                 .HasForeignKey(e => e.CreatorId);
-            
+
             b.HasOne(i => i.Executor)
                 .WithMany()
                 .HasForeignKey(e => e.ExecutorId);
         });
-        
+
         modelBuilder.Entity<InstructionClosure>(b =>
         {
             b.HasKey(i => new { i.ParentId, i.Id });
-            
+
             b.HasOne<Instruction>()
                 .WithMany()
                 .HasForeignKey(e => e.ParentId);
-            
+
             b.HasOne<Instruction>()
                 .WithMany()
                 .HasForeignKey(e => e.Id);
         });
-        
+
         modelBuilder.Entity<User>(b =>
         {
             b.HasOne<User>()
                 .WithMany()
                 .HasForeignKey(e => e.BossId);
-            
+
             b.HasMany(e => e.Roles)
                 .WithMany(e => e.Users)
                 .UsingEntity<IdentityUserRole<string>>();
-            
+
             b.HasOne(i => i.Boss)
                 .WithMany(i => i.Children)
                 .HasForeignKey(e => e.BossId);
@@ -73,7 +73,7 @@ public class AppDbContext : IdentityDbContext<User, Role, string>
             b.ToTable("asp_net_users");
         });
         SeedUsers(modelBuilder);
-        
+
         modelBuilder.Entity<AuditLog>(b =>
         {
             b.HasOne(i => i.User)

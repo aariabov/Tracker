@@ -21,7 +21,7 @@ public class AppDbContextFactory : IDesignTimeDbContextFactory<AppDbContext>
 
         var optionsBuilder = new DbContextOptionsBuilder<AppDbContext>();
         var connectionString = config.GetConnectionString("PostgresConnection");
-        
+
         optionsBuilder
             .UseNpgsql(connectionString)
             .UseSnakeCaseNamingConvention();

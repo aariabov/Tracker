@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
@@ -29,12 +29,12 @@ public class TestBase
                         options.Filters.Add(new AllowAnonymousFilter());
                     });
                     services.AddAuthentication("Test")
-                        .AddScheme<AuthenticationSchemeOptions, TestAuthHandler>("Test", _ => {});
+                        .AddScheme<AuthenticationSchemeOptions, TestAuthHandler>("Test", _ => { });
                 }));
-        
+
         var db = application.Services.GetRequiredService<AppDbContext>();
         ClearDb(db);
-        
+
         _httpClient = application.CreateClient();
     }
 
@@ -50,19 +50,22 @@ public class TestBase
     {
         var json = JsonConvert.SerializeObject(model);
         var content = new StringContent(json, Encoding.UTF8, "application/json");
-        var request = new HttpRequestMessage {
+        var request = new HttpRequestMessage
+        {
             Method = HttpMethod.Post,
             RequestUri = new Uri(url, UriKind.Relative),
             Content = content
         };
-            
+
         var response = await _httpClient.SendAsync(request);
         response.EnsureSuccessStatusCode();
-            
+
         var resultStr = await response.Content.ReadAsStringAsync();
         if (typeof(TResult) == typeof(string))
+        {
             return (TResult)(object)resultStr;
-            
+        }
+
         return JsonConvert.DeserializeObject<TResult>(resultStr);
     }
 

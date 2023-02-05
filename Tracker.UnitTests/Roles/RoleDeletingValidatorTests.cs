@@ -21,7 +21,7 @@ public class RoleDeletingValidatorTests
         yield return new object?[] { string.Empty };
         yield return new object?[] { "    " };
     }
-    
+
     [Theory]
     [MemberData(nameof(InvalidRoleIds))]
     public async Task validation_error_msg_when_role_id_is_empty(string roleId)
@@ -33,11 +33,11 @@ public class RoleDeletingValidatorTests
             {"id", "Идентификатор роли не может быть пустым"}
         });
         var sut = fixture.Create<RoleValidationService>();
-        
+
         var result = await sut.ValidateDeletingModelAsync(roleDeletingModel);
         result.Should().BeEquivalentTo(expected);
     }
-    
+
     [Fact]
     public async Task validation_error_msg_when_role_not_found()
     {
@@ -47,18 +47,18 @@ public class RoleDeletingValidatorTests
         stubRoleManager
             .Setup(m => m.GetRoleById(roleId))
             .ReturnsAsync((Role?)null);
-        
+
         var roleDeletingModel = new RoleDeletingRm { Id = roleId };
         var expected = Result.Errors<string>(new Dictionary<string, string>
         {
             {"id", $"Роль с идентификатором {roleId} не найдена"}
         });
         var sut = fixture.Create<RoleValidationService>();
-        
+
         var result = await sut.ValidateDeletingModelAsync(roleDeletingModel);
         result.Should().BeEquivalentTo(expected);
     }
-    
+
     [Fact]
     public async Task validation_error_msg_when_users_use_role()
     {
@@ -72,18 +72,18 @@ public class RoleDeletingValidatorTests
         stubRoleManager
             .Setup(m => m.IsAnyUserBelongToRole(roleId))
             .ReturnsAsync(true);
-        
+
         var roleDeletingModel = new RoleDeletingRm { Id = roleId };
         var expected = Result.Errors<string>(new Dictionary<string, string>
         {
             {"id", $"Пользователи используют роль '{roleName}'"}
         });
         var sut = fixture.Create<RoleValidationService>();
-        
+
         var result = await sut.ValidateDeletingModelAsync(roleDeletingModel);
         result.Should().BeEquivalentTo(expected);
     }
-    
+
     [Fact]
     public async Task validation_successful()
     {
@@ -97,11 +97,11 @@ public class RoleDeletingValidatorTests
         stubRoleManager
             .Setup(m => m.IsAnyUserBelongToRole(roleId))
             .ReturnsAsync(false);
-        
+
         var roleDeletingModel = new RoleDeletingRm { Id = roleId };
         var expected = Result.Ok();
         var sut = fixture.Create<RoleValidationService>();
-        
+
         var result = await sut.ValidateDeletingModelAsync(roleDeletingModel);
         result.Should().BeEquivalentTo(expected);
     }

@@ -27,7 +27,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 var connectionString = builder.Configuration.GetConnectionString("PostgresConnection");
 builder.Services.AddDbContext<AppDbContext>(options => options.UseNpgsql(connectionString).UseSnakeCaseNamingConvention());
-builder.Services.AddIdentityCore<User>(o => {
+builder.Services.AddIdentityCore<User>(o =>
+{
     o.Password.RequireDigit = false;
     o.Password.RequireLowercase = false;
     o.Password.RequireUppercase = false;
@@ -55,10 +56,10 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             };
         });
 
-builder.Services.AddControllers(option => 
+builder.Services.AddControllers(option =>
 {
     option.EnableEndpointRouting = false;
-    var policy =  new AuthorizationPolicyBuilder()
+    var policy = new AuthorizationPolicyBuilder()
         .RequireAuthenticatedUser()
         .Build();
     option.Filters.Add(new AuthorizeFilter(policy));

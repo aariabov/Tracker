@@ -6,17 +6,17 @@ namespace Tracker.Roles.Validators.FluentValidators;
 public class RoleDeletingFluentValidator : AbstractValidator<RoleDeletingRm>
 {
     private readonly IRoleRepo _roleRepo;
-    
+
     public RoleDeletingFluentValidator(IRoleRepo roleRepo)
     {
         _roleRepo = roleRepo;
-        
+
         RuleFor(rm => rm.Id)
             .Cascade(CascadeMode.Stop)
             .NotEmpty().WithMessage("Идентификатор роли не может быть пустым")
             .CustomAsync(MustBeValid);
     }
-    
+
     private async Task MustBeValid(string roleId, ValidationContext<RoleDeletingRm> context, CancellationToken token)
     {
         var role = await _roleRepo.GetRoleById(roleId);

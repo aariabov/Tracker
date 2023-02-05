@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.SignalR;
+using Microsoft.AspNetCore.SignalR;
 
 namespace Tracker.Common.Progress;
 
@@ -19,7 +19,7 @@ public class Progress
             SendToClient(processed, total, socket, taskId).ConfigureAwait(false);
         }
     }
-    
+
     private async Task SendToClient(int processed, int total, ClientSocketRm socket, int taskId)
     {
         var progressInfo = new ProgressInfo(processed, total, taskId);

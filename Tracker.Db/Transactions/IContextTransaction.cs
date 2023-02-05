@@ -1,4 +1,4 @@
-﻿namespace Tracker.Db.Transactions;
+namespace Tracker.Db.Transactions;
 
 public interface IContextTransaction : IDisposable
 {

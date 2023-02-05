@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Security.Claims;
@@ -41,19 +41,19 @@ public class UsersServiceTests
         mockTransactionManager
             .Setup(m => m.BeginTransaction(IsolationLevel.Unspecified))
             .Returns(mockTransaction.Object);
-        
+
         fixture.Inject<IAuditService>(fixture.Create<AuditService>());
-        
+
         var stubUserValidationService = fixture.Freeze<Mock<IUserValidationService>>();
         stubUserValidationService
             .Setup(s => s.ValidateRegistrationModelAsync(validUserRegistrationRm))
             .ReturnsAsync(Result.Ok());
-        
+
         var stubHttpContextAccessor = fixture.Freeze<Mock<IHttpContextAccessor>>();
         stubHttpContextAccessor
             .Setup(s => s.HttpContext.User.FindFirst(It.IsAny<string>()))
             .Returns(new Claim("name", "admin"));
-        
+
         var stubUserManagerService = fixture.Freeze<Mock<IUserManagerService>>();
         stubUserManagerService
             .Setup(s => s.CreateAsync(It.IsAny<User>(), It.IsAny<string>()))
@@ -61,10 +61,10 @@ public class UsersServiceTests
         stubUserManagerService
             .Setup(s => s.AddToRolesAsync(It.IsAny<User>(), It.IsAny<IEnumerable<string>>()))
             .ReturnsAsync(IdentityResult.Success);
-        
+
         var expected = Result.Ok();
         var sut = fixture.Create<UsersService>();
-        
+
         var result = await sut.RegisterAsync(validUserRegistrationRm);
         result.Should().BeEquivalentTo(expected);
         mockTransactionManager.Verify(m => m.BeginTransaction(IsolationLevel.Unspecified), Times.Once);
@@ -72,7 +72,7 @@ public class UsersServiceTests
         mockTransaction.Verify(m => m.CommitAsync(), Times.Once);
         mockTransaction.Verify(m => m.RollbackAsync(), Times.Never);
     }
-    
+
     [Fact]
     public async Task rollback_transaction_when_user_creation_error()
     {
@@ -91,19 +91,19 @@ public class UsersServiceTests
         mockTransactionManager
             .Setup(m => m.BeginTransaction(IsolationLevel.Unspecified))
             .Returns(mockTransaction.Object);
-        
+
         var stubUserValidationService = fixture.Freeze<Mock<IUserValidationService>>();
         stubUserValidationService
             .Setup(s => s.ValidateRegistrationModelAsync(validUserRegistrationRm))
             .ReturnsAsync(Result.Ok());
-        
+
         var stubUserManagerService = fixture.Freeze<Mock<IUserManagerService>>();
         stubUserManagerService
             .Setup(s => s.CreateAsync(It.IsAny<User>(), It.IsAny<string>()))
             .ReturnsAsync(IdentityResult.Failed());
-        
+
         var sut = fixture.Create<UsersService>();
-        
+
         var act = async () => await sut.RegisterAsync(validUserRegistrationRm);
         await act.Should().ThrowAsync<Exception>();
         mockTransactionManager.Verify(m => m.BeginTransaction(IsolationLevel.Unspecified), Times.Once);

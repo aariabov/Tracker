@@ -18,10 +18,10 @@ public class InstructionsController : ControllerBase
     private readonly UsersService _usersService;
     private readonly TreePathsService _treePathsService;
     private readonly InstructionsGenerationService _instructionsGenerationService;
-    
+
     public InstructionsController(IInstructionsService instructionsService,
         UsersService usersService,
-        TreePathsService treePathsService, 
+        TreePathsService treePathsService,
         InstructionsGenerationService instructionsGenerationService)
     {
         _instructionsService = instructionsService;
@@ -58,16 +58,18 @@ public class InstructionsController : ControllerBase
     [HttpPost("create")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(int))]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ModelErrorsVm))]
-    public async Task<ActionResult<int>> CreateInstruction([FromBody]InstructionRm instructionRm)
+    public async Task<ActionResult<int>> CreateInstruction([FromBody] InstructionRm instructionRm)
     {
         var user = await _usersService.GetCurrentUser();
         var result = await _instructionsService.CreateInstructionAsync(instructionRm, user, DateTime.UtcNow);
         if (result.IsSuccess)
+        {
             return Ok(result.Value);
+        }
 
         return Ok(new ModelErrorsVm(result));
     }
-    
+
     [HttpPost("set-exec-date")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ModelErrorsVm))]
@@ -76,11 +78,13 @@ public class InstructionsController : ControllerBase
         var userId = _usersService.GetCurrentUserId();
         var result = await _instructionsService.SetExecDateAsync(execDateRm, userId, DateTime.UtcNow);
         if (result.IsSuccess)
+        {
             return Ok();
+        }
 
         return Ok(new ModelErrorsVm(result));
     }
-    
+
     [HttpPost("recalculate-all-tree-paths")]
     [Authorize(Roles = "Admin")]
     [ProducesResponseType(StatusCodes.Status200OK)]
@@ -89,7 +93,7 @@ public class InstructionsController : ControllerBase
         await _treePathsService.RunJob(model.SocketInfo, model.TaskId);
         return Ok();
     }
-    
+
     [HttpPost("recalculate-all-closure-table")]
     [Authorize(Roles = "Admin")]
     [ProducesResponseType(StatusCodes.Status200OK)]
@@ -98,7 +102,7 @@ public class InstructionsController : ControllerBase
         await _instructionsService.RecalculateAllClosureTable();
         return Ok();
     }
-    
+
     [HttpPost("generate-instructions")]
     [Authorize(Roles = "Admin")]
     [ProducesResponseType(StatusCodes.Status200OK)]

@@ -1,4 +1,4 @@
-﻿using Tracker.Common;
+using Tracker.Common;
 using Tracker.Common.Progress;
 using Tracker.Db.Models;
 
@@ -7,7 +7,7 @@ namespace Tracker.Instructions;
 public class TreePathsService
 {
     public const char TreePathDelimiter = '/';
-    
+
     private readonly IInstructionsRepository _instructionsRepository;
     private readonly Progress _progress;
 
@@ -21,7 +21,7 @@ public class TreePathsService
     public async Task RunJob(ClientSocketRm socket, int taskId)
     {
         await _instructionsRepository.UpdateAllTreePathsToNullAsync();
-        
+
         var total = await _instructionsRepository.GetRootInstructionCountAsync();
         var rootInstructionIds = await _instructionsRepository.GetRootInstructionIdsAsync();
         var i = 1;
@@ -36,7 +36,7 @@ public class TreePathsService
             _progress.NotifyClient(i, total, socket, frequency: 5, taskId);
             i++;
         }
-        
+
         void UpdateTreePaths(Instruction rootInstruction)
         {
             var instructions = Helpers.GetAllChildren(rootInstruction);
@@ -48,7 +48,7 @@ public class TreePathsService
             }
         }
     }
-    
+
     public async Task UpdateInstructionTreePath(Instruction instruction)
     {
         var treePath = instruction.Id.ToString();

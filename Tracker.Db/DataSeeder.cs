@@ -33,19 +33,21 @@ public class DataSeeder
         {
             var result = await _roleManager.CreateAsync(new Role(adminRole));
             if (!result.Succeeded)
+            {
                 throw new Exception($"Error when creation role: {string.Join(", ", result.Errors)}");
+            }
         }
 
         var admin = await _userManager.FindByEmailAsync(adminEmail);
-        if(admin is null)
+        if (admin is null)
         {
-            var adminUser = new User(adminName , adminEmail, bossId: null);
+            var adminUser = new User(adminName, adminEmail, bossId: null);
             if (!string.IsNullOrEmpty(adminId))
             {
                 // надо для интеграционных тестов, чтоб записать в claims
                 adminUser.Id = adminId;
             }
-            
+
             var createdAdmin = await _userManager.CreateAsync(adminUser, adminPassword);
             if (createdAdmin.Succeeded)
             {

@@ -21,8 +21,10 @@ public class RoleValidationService
         var validator = new RoleCreationFluentValidator(_roleRepo);
         var validationResult = await validator.ValidateAsync(roleCreationRm);
         if (validationResult.IsValid)
+        {
             return Result.Ok();
-            
+        }
+
         return Result.Errors<string>(validationResult.Errors.Format());
     }
 
@@ -32,8 +34,10 @@ public class RoleValidationService
         var validator = new RoleUpdatingFluentValidator(_roleRepo, creationValidator, _adminRole);
         var validationResult = await validator.ValidateAsync(roleUpdatingRm);
         if (validationResult.IsValid)
+        {
             return Result.Ok();
-            
+        }
+
         return Result.Errors<string>(validationResult.Errors.Format());
     }
 
@@ -42,8 +46,10 @@ public class RoleValidationService
         var validator = new RoleDeletingFluentValidator(_roleRepo);
         var validationResult = await validator.ValidateAsync(roleDeletingRm);
         if (validationResult.IsValid)
+        {
             return Result.Ok();
-            
+        }
+
         return Result.Errors<string>(validationResult.Errors.Format());
     }
 }

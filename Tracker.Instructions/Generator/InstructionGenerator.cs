@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using Tracker.Db.Models;
 
 namespace Tracker.Instructions.Generator;
@@ -27,34 +27,34 @@ public class InstructionGenerator
     public void Benchmark(int total, User[] bosses)
     {
         Console.WriteLine($"Cores count {Environment.ProcessorCount}");
-        
+
         var sw = Stopwatch.StartNew();
         GenerateForLoop(total, bosses);
         Console.WriteLine("ForLoop: {0:f2} s", sw.Elapsed.TotalSeconds);
-        
+
         Instructions = new();
         sw = Stopwatch.StartNew();
         GenerateParallelFor(total, bosses);
         Console.WriteLine("Parallel.For: {0:f2} s", sw.Elapsed.TotalSeconds);
-        
+
         Instructions = new();
         sw = Stopwatch.StartNew();
         GenerateParallelForDegreeOfParallelism(total, bosses);
         Console.WriteLine("ParallelForDegreeOfParallelism: {0:f2} s", sw.Elapsed.TotalSeconds);
-        
+
         Instructions = new();
         sw = Stopwatch.StartNew();
         GenerateCustomParallel(total, bosses);
         Console.WriteLine("CustomParallel: {0:f2} s", sw.Elapsed.TotalSeconds);
     }
-    
+
     public Instruction[] GenerateForLoop(int total, User[] bosses)
     {
         for (var i = 1; i <= total; i++)
         {
             GenerateInstruction(bosses, i);
         }
-        
+
         return Instructions.Values.ToArray();
     }
 
@@ -69,7 +69,7 @@ public class InstructionGenerator
         var options = new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount };
         Parallel.For(1, total + 1, options, i => { GenerateInstruction(bosses, i); });
     }
-    
+
     public Instruction[] GenerateCustomParallel(int total, User[] bosses)
     {
         var degreeOfParallelism = Environment.ProcessorCount;
@@ -138,11 +138,13 @@ public class InstructionGenerator
         {
             // можем делегировать не на всех детей, рандомно решаем
             if (_random.NextDouble() < DelegationToChildThreshold)
+            {
                 continue;
+            }
 
             var deadline = GenerateDeadline(pastDay, parentDeadline);
             var newPrefix = $"{prefix}.{i}";
-            
+
             var parentInstruction = Instructions[parentInstructionId];
             var newInstruction = new Instruction
             {
@@ -154,22 +156,26 @@ public class InstructionGenerator
             };
             var newId = Instructions.Add(newInstruction);
             newInstruction.TreePath = $"{parentInstruction.TreePath}{TreePathsService.TreePathDelimiter}{newId}";
-            
+
             // рекурсивно делегируем потомкам
             var execDate = Delegate(executor, newId, newPrefix, pastDay, deadline);
             childrenExecDates.Add(execDate);
-            
+
             i++;
         }
-        
+
         // если не было делегирования - можем исполнить
-        if(!childrenExecDates.Any())
+        if (!childrenExecDates.Any())
+        {
             return MaybeExecuteInstruction(creator.Id, parentInstructionId, pastDay, parentDeadline);
+        }
 
         // если есть хотя бы одно неисполненное дочернее поручение - исполнять нельзя
-        if(childrenExecDates.Any(d => d is null))
+        if (childrenExecDates.Any(d => d is null))
+        {
             return null;
-        
+        }
+
         // если все потомки исполнили - можем исполнить, но только с датой >= макс дата исполнения всех потомков
         return MaybeExecuteInstruction(creator.Id, parentInstructionId, childrenExecDates.Max().Value, parentDeadline);
     }
@@ -178,8 +184,10 @@ public class InstructionGenerator
     {
         // в некоторых случаях дедлайн дочернего поручения мб больше родительского
         if (_random.NextDouble() < ChildDeadlineThreshold)
+        {
             return parentDeadline.AddDays(_random.Next(1, MaxDaysFromParentDeadline));
-        
+        }
+
         // в большинстве случаев дедлайн дочернего поручения меньше родительского
         var diffDays = (parentDeadline - pastDay).Days;
         return pastDay.AddDays(_random.Next(0, diffDays));
@@ -189,7 +197,9 @@ public class InstructionGenerator
         DateTime deadline)
     {
         if (_random.NextDouble() < ExecutionThreshold)
+        {
             return null;
+        }
 
         return ExecuteInstruction(executorId, instructionId, pastDay, deadline);
     }
@@ -199,7 +209,7 @@ public class InstructionGenerator
         var execDate = GenerateExecDate(minPossibleDate, deadline);
         var instruction = Instructions[instructionId];
         instruction.ExecDate = execDate.Date;
-        
+
         return execDate.Date;
     }
 
@@ -207,17 +217,21 @@ public class InstructionGenerator
     {
         // когда кто-то из потомков просрочил, и дата исполнения больше родительского дедлайна
         if (minPossibleDate > deadline)
+        {
             return minPossibleDate.AddDays(_random.Next(0, MaxOverdueDays));
-        
+        }
+
         // просрачиваем
         if (_random.NextDouble() < OverdueThreshold)
+        {
             return deadline.AddDays(_random.Next(1, MaxOverdueDays));
-        
+        }
+
         // исполняем вовремя
         var diffDays = (deadline - minPossibleDate).Days;
         return minPossibleDate.AddDays(_random.Next(0, diffDays));
     }
-    
+
     private class InstructionsMemoryStorage : Dictionary<int, Instruction>
     {
         private readonly object _locker = new();

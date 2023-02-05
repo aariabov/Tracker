@@ -6,14 +6,14 @@ namespace Tracker.Users.Validators.FluentValidators;
 public class UserBaseValidator : AbstractValidator<UserBaseRm>
 {
     private readonly IUserRepository _userRepository;
-    
+
     public UserBaseValidator(IUserRepository userRepository)
     {
         _userRepository = userRepository;
 
         const int nameMinLen = 3;
         const int nameMaxLen = 100;
-        
+
         RuleFor(user => user.Name)
             .Cascade(CascadeMode.Stop)
             .NotEmpty().WithMessage("ФИО не может быть пустым")
@@ -28,7 +28,7 @@ public class UserBaseValidator : AbstractValidator<UserBaseRm>
         RuleFor(user => user.Roles)
             .CustomAsync(MustBeValidInstruction);
     }
-    
+
     private async Task MustBeValidInstruction(IEnumerable<string> roles
         , ValidationContext<UserBaseRm> context, CancellationToken token)
     {
@@ -42,7 +42,7 @@ public class UserBaseValidator : AbstractValidator<UserBaseRm>
             }
         }
     }
-    
+
     private async Task<bool> BossExistsAsync(string? bossId, CancellationToken token)
     {
         return await _userRepository.IsUserExistsAsync(bossId!);

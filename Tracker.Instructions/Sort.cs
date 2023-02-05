@@ -1,4 +1,4 @@
-﻿namespace Tracker.Instructions;
+namespace Tracker.Instructions;
 
 public enum Sort
 {

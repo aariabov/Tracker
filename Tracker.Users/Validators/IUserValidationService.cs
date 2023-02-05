@@ -1,4 +1,4 @@
-﻿using Tracker.Common;
+using Tracker.Common;
 using Tracker.Users.RequestModels;
 
 namespace Tracker.Users.Validators;
