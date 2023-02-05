@@ -10,7 +10,7 @@ public class UserDeletingValidator : AbstractValidator<UserDeletingRm>
     private readonly IUserRepository _userRepository;
     private readonly AppDbContext _db;
     private readonly string _adminEmail;
-    
+
     public UserDeletingValidator(AppDbContext db, IUserRepository userRepository, string adminEmail)
     {
         _db = db;
@@ -22,7 +22,7 @@ public class UserDeletingValidator : AbstractValidator<UserDeletingRm>
             .NotEmpty().WithMessage("Идентификатор не может быть пустым")
             .CustomAsync(MustBeValid);
     }
-    
+
     private async Task MustBeValid(string userId, ValidationContext<UserDeletingRm> context, CancellationToken token)
     {
         var user = await _userRepository.GetUserById(userId);
@@ -47,7 +47,7 @@ public class UserDeletingValidator : AbstractValidator<UserDeletingRm>
             context.AddFailure("У пользователя есть поручения");
             return;
         }
-        
+
         if (user.IsAdmin(_adminEmail))
         {
             context.AddFailure("Администратора нельзя удалить");

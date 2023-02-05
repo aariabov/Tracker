@@ -1,8 +1,8 @@
-﻿using Microsoft.AspNetCore.SignalR;
+using Microsoft.AspNetCore.SignalR;
 
 namespace Tracker.Common.Progress;
 
 public class ProgressHub : Hub
 {
-    
+
 }

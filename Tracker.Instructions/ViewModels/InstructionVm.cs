@@ -15,22 +15,31 @@ public class InstructionVm
     public string Status { get; set; }
     public bool CanCreateChild { get; set; }
     public bool CanBeExecuted { get; set; }
-    
+
     public static InstructionVm Create(Instruction instruction, ExecStatus status
         , bool canCreateChild, bool canBeExecuted)
     {
         return new InstructionVm
         {
             Id = instruction.Id
-            , Name = instruction.Name
-            , ParentId = instruction.ParentId
-            , CreatorName = instruction.Creator.UserName
-            , ExecutorName = instruction.Executor.UserName
-            , Deadline = instruction.Deadline
-            , ExecDate = instruction.ExecDate
-            , Status = status.GetString()
-            , CanCreateChild = canCreateChild
-            , CanBeExecuted = canBeExecuted
+            ,
+            Name = instruction.Name
+            ,
+            ParentId = instruction.ParentId
+            ,
+            CreatorName = instruction.Creator.UserName
+            ,
+            ExecutorName = instruction.Executor.UserName
+            ,
+            Deadline = instruction.Deadline
+            ,
+            ExecDate = instruction.ExecDate
+            ,
+            Status = status.GetString()
+            ,
+            CanCreateChild = canCreateChild
+            ,
+            CanBeExecuted = canBeExecuted
         };
     }
 }

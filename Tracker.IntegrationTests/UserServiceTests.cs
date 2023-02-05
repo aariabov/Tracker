@@ -24,7 +24,7 @@ public class UserServiceTests : TestBase
 
         var userId = await PostAsync("api/users/register", registrationModel);
         Guid.TryParse(userId, out _).Should().BeTrue();
-        
+
         // повторная регистрация пользователя - ошибка валидации
         var errorsModel = await PostAsync<ModelErrorsVm>("api/users/register", registrationModel);
         var expectedModel = new ModelErrorsVm(Result.Errors<string>(new Dictionary<string, string>
@@ -32,7 +32,7 @@ public class UserServiceTests : TestBase
             { "email", "Email уже существует" }
         }));
         errorsModel.Should().BeEquivalentTo(expectedModel);
-        
+
         // обновление пользователя
         var updatingModel = new UserUpdatingRm
         {

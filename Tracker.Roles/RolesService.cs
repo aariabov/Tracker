@@ -32,13 +32,17 @@ public class RolesService
     {
         var validationResult = await _validationService.ValidateCreationModelAsync(roleCreationRm);
         if (!validationResult.IsSuccess)
+        {
             return Result.Errors<string>(validationResult.ValidationErrors);
-        
+        }
+
         var newRole = new Role(roleCreationRm.Name);
-        var result =  await _roleManager.CreateAsync(newRole);
+        var result = await _roleManager.CreateAsync(newRole);
         if (result.Succeeded)
+        {
             return Result.Ok(newRole.Id);
-        
+        }
+
         throw new Exception(result.Errors.Join());
     }
 
@@ -46,14 +50,18 @@ public class RolesService
     {
         var validationResult = await _validationService.ValidateUpdatingModelAsync(roleUpdatingRm);
         if (!validationResult.IsSuccess)
+        {
             return Result.Errors(validationResult.ValidationErrors);
+        }
 
         var updatedRole = await _roleManager.FindByIdAsync(roleUpdatingRm.Id);
         updatedRole.Name = roleUpdatingRm.Name;
         var result = await _roleManager.UpdateAsync(updatedRole);
         if (result.Succeeded)
+        {
             return Result.Ok();
-        
+        }
+
         throw new Exception(result.Errors.Join());
     }
 
@@ -61,13 +69,17 @@ public class RolesService
     {
         var validationResult = await _validationService.ValidateDeletingModelAsync(roleDeletingRm);
         if (!validationResult.IsSuccess)
+        {
             return Result.Errors(validationResult.ValidationErrors);
+        }
 
         var deletedRole = await _roleManager.FindByIdAsync(roleDeletingRm.Id);
         var result = await _roleManager.DeleteAsync(deletedRole);
         if (result.Succeeded)
+        {
             return Result.Ok();
-        
+        }
+
         throw new Exception(result.Errors.Join());
     }
 }

@@ -7,7 +7,7 @@ public class InstructionRm
     public string ExecutorId { get; set; } = string.Empty;
     public DateTime Deadline { get; set; }
 
-    public InstructionRm(){}
+    public InstructionRm() { }
 
     public InstructionRm(string name, string executorId, DateTime deadline, int? parentId)
     {

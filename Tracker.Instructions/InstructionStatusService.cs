@@ -7,7 +7,9 @@ public class InstructionStatusService : IInstructionStatusService
     public ExecStatus GetStatus(Instruction instruction)
     {
         if (!instruction.Children.Any())
+        {
             return GetStatusDespiteChildren(instruction);
+        }
 
         var anyChildInWork = AnyChildInWork(instruction);
 
@@ -25,7 +27,9 @@ public class InstructionStatusService : IInstructionStatusService
     {
         var instructions = Helpers.GetAllChildren(instruction).Where(i => i.Id != instruction.Id).ToArray();
         if (instructions.Any(i => i.ExecDate is null))
+        {
             return null;
+        }
 
         return instructions.Max(i => i.ExecDate);
     }

@@ -7,21 +7,21 @@ public class RoleUpdatingFluentValidator : AbstractValidator<RoleUpdatingRm>
 {
     private readonly IRoleRepo _roleRepo;
     private readonly string _adminRole;
-    
+
     public RoleUpdatingFluentValidator(IRoleRepo roleRepo
         , RoleCreationFluentValidator roleCreationFluentValidator
         , string adminRole)
     {
         _roleRepo = roleRepo;
         _adminRole = adminRole;
-        
+
         Include(roleCreationFluentValidator);
         RuleFor(role => role)
             .Cascade(CascadeMode.Stop)
             .NotEmpty().WithMessage("Идентификатор роли не может быть пустым")
             .CustomAsync(MustBeValid);
     }
-    
+
     private async Task MustBeValid(RoleUpdatingRm roleRm, ValidationContext<RoleUpdatingRm> context, CancellationToken token)
     {
         if (string.IsNullOrWhiteSpace(roleRm.Id))
@@ -29,7 +29,7 @@ public class RoleUpdatingFluentValidator : AbstractValidator<RoleUpdatingRm>
             context.AddFailure(nameof(RoleUpdatingRm.Name), "Идентификатор роли не может быть пустым");
             return;
         }
-        
+
         var role = await _roleRepo.GetRoleById(roleRm.Id);
         if (role is null)
         {

@@ -33,11 +33,11 @@ public class RoleRepo : IRoleRepo
 
     public async Task<bool> IsAnyUserBelongToRole(string roleId)
     {
-        var query = 
+        var query =
             from role in _roleManager.Roles
             where role.Id == roleId
             select role.Users.Any();
-        
+
         return await query.SingleAsync();
     }
 }

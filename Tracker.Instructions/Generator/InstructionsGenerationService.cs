@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using Tracker.Instructions.RequestModels;
 using Tracker.Users;
 
@@ -13,7 +13,7 @@ public class InstructionsGenerationService
 
     public InstructionsGenerationService(UsersService usersService,
         InstructionGenerator instructionGenerator,
-        IInstructionsRepository instructionsRepository, 
+        IInstructionsRepository instructionsRepository,
         IInstructionsService instructionsService)
     {
         _usersService = usersService;
@@ -27,7 +27,7 @@ public class InstructionsGenerationService
         var stopwatch = Stopwatch.StartNew();
 
         await _instructionsRepository.TruncateInstructions();
-        
+
         var allUsers = await _usersService.GetUsersTreeAsync();
         var bosses = allUsers.Where(u => u.Children != null && u.Children.Any()).ToArray();
 
@@ -40,7 +40,7 @@ public class InstructionsGenerationService
         await _instructionsRepository.SaveChangesAsync();
         await _instructionsService.RecalculateAllClosureTable();
         await _instructionsRepository.UpdateSequence();
-        
+
         stopwatch.Stop();
         var elapsed = stopwatch.Elapsed;
         Console.WriteLine($"Generation time: {elapsed.Hours}h {elapsed.Minutes}m {elapsed.Seconds}s");

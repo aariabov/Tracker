@@ -72,7 +72,7 @@ public class UsersService
     {
         return await _userRepository.IsUserExistsAsync(userId);
     }
-    
+
     public async Task<Result<string>> RegisterAsync(UserRegistrationRm userRm)
     {
         using var transaction = _transactionManager.BeginTransaction();
@@ -80,20 +80,26 @@ public class UsersService
         {
             var validationResult = await _userValidationService.ValidateRegistrationModelAsync(userRm);
             if (!validationResult.IsSuccess)
+            {
                 return Result.Errors<string>(validationResult.ValidationErrors);
-        
+            }
+
             var newUser = new User(userRm.Name, userRm.Email, userRm.BossId);
             var result = await _userManagerService.CreateAsync(newUser, userRm.Password);
             if (!result.Succeeded)
+            {
                 throw new Exception(result.Errors.Join());
-        
+            }
+
             _auditService.LogAsync(AuditType.Create, newUser.Id, newUser.GetType().Name, GetCurrentUserId());
-            
+
             if (userRm.Roles.Any())
             {
                 var rolesResult = await _userManagerService.AddToRolesAsync(newUser, userRm.Roles);
                 if (!rolesResult.Succeeded)
+                {
                     throw new Exception(rolesResult.Errors.Join());
+                }
             }
 
             await _unitOfWork.SaveChangesAsync();
@@ -106,7 +112,7 @@ public class UsersService
             throw;
         }
     }
-    
+
     public async Task<Result> UpdateUserAsync(UserUpdatingRm userUpdatingRm)
     {
         using var transaction = _transactionManager.BeginTransaction();
@@ -114,12 +120,16 @@ public class UsersService
         {
             var validationResult = await _userValidationService.ValidateUpdatingModelAsync(userUpdatingRm);
             if (!validationResult.IsSuccess)
+            {
                 return Result.Errors<string>(validationResult.ValidationErrors);
+            }
 
             var updatedUser = await _userManagerService.FindByIdAsync(userUpdatingRm.Id);
             if (updatedUser is null)
+            {
                 throw new Exception($"User with id {userUpdatingRm.Id} not found");
-        
+            }
+
             updatedUser.UserName = userUpdatingRm.Name;
             updatedUser.Email = userUpdatingRm.Email;
             updatedUser.BossId = userUpdatingRm.BossId;
@@ -129,15 +139,19 @@ public class UsersService
             var userRoles = await _userManagerService.GetRolesAsync(updatedUser);
             var addedRoles = userUpdatingRm.Roles.Except(userRoles);
             var removedRoles = userRoles.Except(userUpdatingRm.Roles);
- 
+
             var roleAddingResult = await _userManagerService.AddToRolesAsync(updatedUser, addedRoles);
             if (!roleAddingResult.Succeeded)
+            {
                 throw new Exception(roleAddingResult.Errors.Join());
-        
+            }
+
             var roleRemovingResult = await _userManagerService.RemoveFromRolesAsync(updatedUser, removedRoles);
             if (!roleRemovingResult.Succeeded)
+            {
                 throw new Exception(roleRemovingResult.Errors.Join());
-        
+            }
+
             await transaction.CommitAsync();
             return Result.Ok();
         }
@@ -147,27 +161,35 @@ public class UsersService
             throw;
         }
     }
-    
+
     public async Task UpdateUserAsync(User updatedUser)
     {
         var result = await _userManagerService.UpdateAsync(updatedUser);
         if (!result.Succeeded)
+        {
             throw new Exception(result.Errors.Join());
+        }
     }
-    
+
     public async Task<Result> DeleteUserAsync(UserDeletingRm userDeletingRm)
     {
         var validationResult = await _userValidationService.ValidateDeletingModelAsync(userDeletingRm);
         if (!validationResult.IsSuccess)
+        {
             return Result.Errors<string>(validationResult.ValidationErrors);
+        }
 
         var deletedUser = await _userManagerService.FindByIdAsync(userDeletingRm.Id);
         if (deletedUser is null)
+        {
             throw new Exception($"User with id {userDeletingRm.Id} not found");
-        
+        }
+
         var result = await _userManagerService.DeleteAsync(deletedUser);
         if (!result.Succeeded)
+        {
             throw new Exception(result.Errors.Join());
+        }
 
         return Result.Ok();
     }
@@ -177,7 +199,9 @@ public class UsersService
         var userId = _httpContextAccessor.HttpContext!.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         //var user = await _userManager.GetUserAsync(HttpContext.User);
         if (userId is null)
+        {
             throw new Exception("User not found");
+        }
 
         return userId;
     }

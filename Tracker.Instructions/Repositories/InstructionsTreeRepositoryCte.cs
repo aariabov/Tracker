@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Tracker.Db;
 using Tracker.Db.Models;
 using Tracker.Instructions.Interfaces;
@@ -13,7 +13,7 @@ public class InstructionsTreeRepositoryCte : IInstructionsTreeRepository
     {
         _db = db;
     }
-    
+
     // TODO: можно написать интеграционный тест
     public async Task<Instruction[]> GetTreeInstructionsAsync(int instructionId)
     {
@@ -33,7 +33,7 @@ WITH RECURSIVE r AS (
 )
 
 SELECT * FROM r";
-        
+
         // получаем дерево поручений из бд, делаем привязки parent/children - получаем плоский список с привязками
         return await _db.Instructions.FromSqlInterpolated(cte)
             .Include(i => i.Creator)
@@ -74,7 +74,7 @@ WITH RECURSIVE r AS (
 )
 
 SELECT * FROM r";
-        
+
         // получаем дерево поручений из бд, делаем привязки parent/children - получаем плоский список с привязками
         return await _db.Instructions.FromSqlInterpolated(cte)
             .Include(i => i.Creator)
@@ -98,7 +98,7 @@ WITH RECURSIVE r AS (
 )
 
 SELECT * FROM r ORDER BY level desc LIMIT 1";
-        
+
         var rootInstructionId = await _db.Instructions.FromSqlInterpolated(cte)
             .Select(i => i.Id)
             .SingleAsync();

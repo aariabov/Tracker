@@ -1,4 +1,4 @@
-﻿namespace Tracker.Db.Models;
+namespace Tracker.Db.Models;
 
 public class AuditLog
 {

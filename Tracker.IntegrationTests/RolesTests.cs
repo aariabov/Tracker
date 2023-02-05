@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -22,10 +22,10 @@ public class RolesTests : TestBase
         {
             Name = testRole
         };
-        
+
         var roleId = await PostAsync("api/roles/create", roleCreationRm);
         Guid.TryParse(roleId, out _).Should().BeTrue();
-        
+
         // получение роли
         var existingRoles = await GetAsync<RoleVm[]>("api/roles");
         var existingRole = existingRoles.Single(r => r.Name == testRole);
@@ -39,7 +39,7 @@ public class RolesTests : TestBase
         };
         var updatingResponse = await PostAsync("api/roles/update", roleUpdatingRm);
         updatingResponse.Should().BeEmpty();
-        
+
         // конкурентное обновление роли - ошибка
         var roleUpdatingRm1 = new RoleUpdatingRm
         {

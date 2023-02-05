@@ -11,7 +11,7 @@ public sealed class User : IdentityUser
     public User? Boss { get; set; }
     public ICollection<User>? Children { get; set; }
 
-    public User(){}
+    public User() { }
 
     public User(string name, string email, string? bossId)
     {

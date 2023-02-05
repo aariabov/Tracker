@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Tracker.Db;
 using Tracker.Db.Models;
 using Tracker.Instructions.Interfaces;
@@ -13,11 +13,11 @@ public class InstructionsTreeRepositoryClosure : IInstructionsTreeRepository
     {
         _db = db;
     }
-    
+
     public async Task<Instruction[]> GetTreeInstructionsAsync(int instructionId)
     {
         var rootId = await GetTreeRootId(instructionId);
-        
+
         return await _db.Instructions
             .Include(i => i.Creator)
             .Include(i => i.Executor)
@@ -51,7 +51,7 @@ public class InstructionsTreeRepositoryClosure : IInstructionsTreeRepository
     public async Task RecalculateAllInstructionsClosuresAsync()
     {
         await DeleteFromInstructionsClosuresAsync();
-        
+
         var sql = @"
 WITH RECURSIVE cte AS
 (
@@ -72,7 +72,7 @@ WITH RECURSIVE cte AS
 )
 INSERT INTO instructions_closures
 SELECT * FROM cte order by parent_id;";
-        
+
         _db.Database.SetCommandTimeout(200);
         await _db.Database.ExecuteSqlRawAsync(sql);
     }
@@ -103,7 +103,7 @@ union all select {id}, {id}, 0";
         var maxDepth = await _db.InstructionsClosures
             .Where(c => c.Id == instructionId)
             .MaxAsync(c => c.Depth);
-        
+
         var closureRow = await _db.InstructionsClosures.SingleAsync(c => c.Id == instructionId && c.Depth == maxDepth);
         return closureRow.ParentId;
     }

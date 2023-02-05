@@ -19,14 +19,14 @@ public class RoleCreationValidatorTests
     {
         var tooShortName = new string('*', RoleMinLen - 1);
         var tooLongName = new string('*', RoleMaxLen + 1);
-        
+
         yield return new object?[] { null, "Название роли не может быть пустым" };
         yield return new object?[] { string.Empty, "Название роли не может быть пустым" };
         yield return new object?[] { "    ", "Название роли не может быть пустым" };
         yield return new object?[] { tooShortName, $"Название роли должно быть от {RoleMinLen} до {RoleMaxLen} символов" };
         yield return new object?[] { tooLongName, $"Название роли должно быть от {RoleMinLen} до {RoleMaxLen} символов" };
     }
-    
+
     [Theory]
     [MemberData(nameof(InvalidRoleNames))]
     public async Task validation_error_msg_when_invalid_role_name(string roleName, string errorMsg)
@@ -38,11 +38,11 @@ public class RoleCreationValidatorTests
         });
         var fixture = new Fixture().Customize(new AutoMoqCustomization());
         var sut = fixture.Create<RoleValidationService>();
-        
+
         var result = await sut.ValidateCreationModelAsync(roleCreationModel);
         result.Should().BeEquivalentTo(expected);
     }
-    
+
     [Fact]
     public async Task validation_error_msg_when_role_name_exists_already()
     {
@@ -52,18 +52,18 @@ public class RoleCreationValidatorTests
         stubRoleManager
             .Setup(m => m.RoleExistsAsync(existingRoleName))
             .ReturnsAsync(true);
-        
+
         var roleCreationModel = new RoleCreationRm { Name = existingRoleName };
         var expected = Result.Errors<string>(new Dictionary<string, string>
         {
             {"name", "Название роли уже существует"}
         });
         var sut = fixture.Create<RoleValidationService>();
-        
+
         var result = await sut.ValidateCreationModelAsync(roleCreationModel);
         result.Should().BeEquivalentTo(expected);
     }
-    
+
     [Fact]
     public async Task validation_successful()
     {
@@ -73,11 +73,11 @@ public class RoleCreationValidatorTests
         stubRoleManager
             .Setup(m => m.RoleExistsAsync(roleName))
             .ReturnsAsync(false);
-        
+
         var roleCreationModel = new RoleCreationRm { Name = roleName };
         var expected = Result.Ok();
         var sut = fixture.Create<RoleValidationService>();
-        
+
         var result = await sut.ValidateCreationModelAsync(roleCreationModel);
         result.Should().BeEquivalentTo(expected);
     }

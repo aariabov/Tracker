@@ -16,8 +16,8 @@ public static class Helpers
 
         return errorsDict;
     }
-    
-    public static string Join(this  IEnumerable<IdentityError> errors)
+
+    public static string Join(this IEnumerable<IdentityError> errors)
     {
         return string.Join(", ", errors.Select(e => e.Description));
     }

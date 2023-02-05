@@ -1,10 +1,10 @@
-﻿using FluentAssertions;
+using FluentAssertions;
 using Tracker.Common;
 using Tracker.IntegrationTests.Docker.Common;
 using Tracker.Roles;
 using Tracker.Roles.RequestModels;
-using Xunit;
 using Tracker.Users.ViewModels;
+using Xunit;
 
 namespace Tracker.IntegrationTests.Docker;
 
@@ -20,17 +20,17 @@ public class RolesTests : TestBase
             Password = "1"
         };
         var tokensVm = await PostAsync<TokensVm>("/api/users/login", loginVm, token: null);
-        
+
         // создание роли
         const string testRole = "test role";
         var roleCreationRm = new RoleCreationRm
         {
             Name = testRole
         };
-        
+
         var roleId = await PostAsync("/api/roles/create", roleCreationRm, tokensVm.Token);
         Guid.TryParse(roleId, out _).Should().BeTrue();
-        
+
         // получение роли
         var existingRoles = await GetAsync<RoleVm[]>("api/roles");
         var existingRole = existingRoles.Single(r => r.Name == testRole);
@@ -44,7 +44,7 @@ public class RolesTests : TestBase
         };
         var updatingResponse = await PostAsync("api/roles/update", roleUpdatingRm, tokensVm.Token);
         updatingResponse.Should().BeEmpty();
-        
+
         // конкурентное обновление роли - ошибка
         var roleUpdatingRm1 = new RoleUpdatingRm
         {

@@ -12,19 +12,26 @@ public class InstructionTreeItemVm
     public DateTime Deadline { get; set; }
     public DateTime? ExecDate { get; set; }
     public string Status { get; set; }
-    
+
     public static InstructionTreeItemVm Create(Instruction instruction, ExecStatus status)
     {
         return new InstructionTreeItemVm
         {
             Id = instruction.Id
-            , Name = instruction.Name
-            , ParentId = instruction.ParentId
-            , CreatorName = instruction.Creator.UserName
-            , ExecutorName = instruction.Executor.UserName
-            , Deadline = instruction.Deadline
-            , ExecDate = instruction.ExecDate
-            , Status = status.GetString()
+            ,
+            Name = instruction.Name
+            ,
+            ParentId = instruction.ParentId
+            ,
+            CreatorName = instruction.Creator.UserName
+            ,
+            ExecutorName = instruction.Executor.UserName
+            ,
+            Deadline = instruction.Deadline
+            ,
+            ExecDate = instruction.ExecDate
+            ,
+            Status = status.GetString()
         };
     }
 }

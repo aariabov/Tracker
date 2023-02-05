@@ -1,4 +1,4 @@
-﻿using Tracker.Common;
+using Tracker.Common;
 
 namespace Tracker.Web.Sandbox;
 

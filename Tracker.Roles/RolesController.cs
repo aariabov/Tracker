@@ -18,7 +18,7 @@ public class RolesController : ControllerBase
     {
         _rolesService = rolesService;
     }
-    
+
     [HttpGet]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<RoleVm>))]
     public async Task<ActionResult<IEnumerable<RoleVm>>> GetAllRoles()
@@ -31,11 +31,13 @@ public class RolesController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(string))]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ModelErrorsVm))]
     [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(IEnumerable<IdentityError>))]
-    public async Task<ActionResult<string>> CreateRole([FromBody]RoleCreationRm roleCreationRm)
+    public async Task<ActionResult<string>> CreateRole([FromBody] RoleCreationRm roleCreationRm)
     {
         var result = await _rolesService.CreateRole(roleCreationRm);
         if (result.IsSuccess)
+        {
             return Ok(result.Value);
+        }
 
         return Ok(new ModelErrorsVm(result));
     }
@@ -43,11 +45,13 @@ public class RolesController : ControllerBase
     [HttpPost("update")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ModelErrorsVm))]
-    public async Task<ActionResult> UpdateRole([FromBody]RoleUpdatingRm roleUpdatingRm)
+    public async Task<ActionResult> UpdateRole([FromBody] RoleUpdatingRm roleUpdatingRm)
     {
         var result = await _rolesService.UpdateRole(roleUpdatingRm);
         if (result.IsSuccess)
+        {
             return Ok();
+        }
 
         return Ok(new ModelErrorsVm(result));
     }
@@ -55,11 +59,13 @@ public class RolesController : ControllerBase
     [HttpPost("delete")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ModelErrorsVm))]
-    public async Task<ActionResult> DeleteRole([FromBody]RoleDeletingRm roleDeletingRm)
+    public async Task<ActionResult> DeleteRole([FromBody] RoleDeletingRm roleDeletingRm)
     {
         var result = await _rolesService.DeleteRole(roleDeletingRm);
         if (result.IsSuccess)
+        {
             return Ok();
+        }
 
         return Ok(new ModelErrorsVm(result));
     }

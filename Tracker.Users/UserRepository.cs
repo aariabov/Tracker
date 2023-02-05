@@ -20,16 +20,16 @@ public class UserRepository : IUserRepository
     public async Task<OrgStructElementVm[]> GetOrgStructVm()
     {
         var query = from user in _userManager.Users
-            orderby user.UserName
-            select new OrgStructElementVm
-            {
-                Id = user.Id,
-                Name = user.UserName,
-                Email = user.Email,
-                ParentId = user.BossId,
-                Roles = user.Roles.Select(role => role.Name)
-            };
-        
+                    orderby user.UserName
+                    select new OrgStructElementVm
+                    {
+                        Id = user.Id,
+                        Name = user.UserName,
+                        Email = user.Email,
+                        ParentId = user.BossId,
+                        Roles = user.Roles.Select(role => role.Name)
+                    };
+
         var allUsers = await query.ToArrayAsync();
         return allUsers;
     }

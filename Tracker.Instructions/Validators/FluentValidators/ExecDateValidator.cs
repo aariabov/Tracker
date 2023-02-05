@@ -3,12 +3,12 @@ using Tracker.Instructions.RequestModels;
 
 namespace Tracker.Instructions.Validators.FluentValidators;
 
-internal class ExecDateValidator: AbstractValidator<ExecDateRm>
+internal class ExecDateValidator : AbstractValidator<ExecDateRm>
 {
     private readonly IInstructionsRepository _instructionsRepository;
     private readonly IInstructionStatusService _statusService;
     private readonly string _executorId;
-    
+
     public ExecDateValidator(IInstructionsRepository instructionsRepository
         , IInstructionStatusService statusService
         , string executorId
@@ -27,7 +27,7 @@ internal class ExecDateValidator: AbstractValidator<ExecDateRm>
             .NotEmpty().WithMessage("Дата исполнения не может быть пустой")
             .Must(execDate => execDate.Date == today.Date).WithMessage("Дата исполнения должна быть сегодня");
     }
-    
+
     private async Task MustBeValidInstruction(ExecDateRm execDateRm, ValidationContext<ExecDateRm> context, CancellationToken token)
     {
         var id = execDateRm.InstructionId;
@@ -36,7 +36,7 @@ internal class ExecDateValidator: AbstractValidator<ExecDateRm>
             context.AddFailure(nameof(ExecDateRm.InstructionId), "Идентификатор поручения не может быть пустым");
             return;
         }
-        
+
         var instruction = await _instructionsRepository.GetInstructionTreeAsync(id);
         if (instruction is null)
         {
@@ -50,7 +50,7 @@ internal class ExecDateValidator: AbstractValidator<ExecDateRm>
             return;
         }
 
-        if (instruction.ExecDate is not null)   
+        if (instruction.ExecDate is not null)
         {
             context.AddFailure(nameof(ExecDateRm.InstructionId), "Поручение уже исполнено");
             return;

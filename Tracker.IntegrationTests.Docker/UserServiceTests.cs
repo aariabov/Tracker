@@ -19,7 +19,7 @@ public class UserServiceTests : TestBase
             Password = "1"
         };
         var tokensVm = await PostAsync<TokensVm>("/api/users/login", loginVm, token: null);
-        
+
         // регистрация пользователя
         var registrationModel = new UserRegistrationRm
         {
@@ -30,7 +30,7 @@ public class UserServiceTests : TestBase
 
         var userId = await PostAsync("api/users/register", registrationModel, tokensVm.Token);
         Guid.TryParse(userId, out _).Should().BeTrue();
-        
+
         // повторная регистрация пользователя - ошибка валидации
         var errorsModel = await PostAsync<ModelErrorsVm>("api/users/register", registrationModel, tokensVm.Token);
         var expectedModel = new ModelErrorsVm(Result.Errors<string>(new Dictionary<string, string>
@@ -38,7 +38,7 @@ public class UserServiceTests : TestBase
             { "email", "Email уже существует" }
         }));
         errorsModel.Should().BeEquivalentTo(expectedModel);
-        
+
         // обновление пользователя
         var updatingModel = new UserUpdatingRm
         {

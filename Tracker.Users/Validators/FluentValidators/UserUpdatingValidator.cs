@@ -10,7 +10,7 @@ public class UserUpdatingValidator : AbstractValidator<UserUpdatingRm>
     public UserUpdatingValidator(UserBaseValidator userBaseValidator, IUserRepository userRepository)
     {
         _userRepository = userRepository;
-        
+
         Include(userBaseValidator);
         RuleFor(user => user.Id)
             .Cascade(CascadeMode.Stop)
@@ -19,13 +19,13 @@ public class UserUpdatingValidator : AbstractValidator<UserUpdatingRm>
         RuleFor(user => user.Email)
             .MustAsync(UniqueEmailAsync).WithMessage("Email уже существует");
     }
-    
+
     private async Task<bool> UniqueEmailAsync(UserUpdatingRm userRm, string email, CancellationToken token)
     {
         var user = await _userRepository.GetUserByEmail(email);
         return user is null || user.Id == userRm.Id;
     }
-    
+
     private async Task<bool> UserExistsAsync(string userId, CancellationToken token)
     {
         return await _userRepository.IsUserExistsAsync(userId);

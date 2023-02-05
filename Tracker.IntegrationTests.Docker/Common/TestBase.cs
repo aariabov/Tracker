@@ -1,4 +1,4 @@
-﻿using System.Configuration;
+using System.Configuration;
 using System.Net.Http.Headers;
 using System.Text;
 using Microsoft.Extensions.Configuration;
@@ -9,7 +9,7 @@ using Xunit;
 namespace Tracker.IntegrationTests.Docker.Common;
 
 [Collection("Sequential")]
-public class TestBase
+public class TestBase : IDisposable
 {
     private readonly HttpClient _httpClient;
 
@@ -22,9 +22,9 @@ public class TestBase
         var backendUrl = config["BackendUrl"] ?? throw new ConfigurationErrorsException("BackendUrl is missing");
         var connectionString = config.GetConnectionString("PostgresConnection") ??
                                throw new ConfigurationErrorsException("PostgresConnection is missing");
-        
+
         ClearDb(connectionString);
-        
+
         var handler = new HttpClientHandler();
         handler.UseDefaultCredentials = true;
         _httpClient = new HttpClient(handler);
@@ -44,22 +44,27 @@ public class TestBase
     {
         var json = JsonConvert.SerializeObject(model);
         var content = new StringContent(json, Encoding.UTF8, "application/json");
-        var request = new HttpRequestMessage {
+        var request = new HttpRequestMessage
+        {
             Method = HttpMethod.Post,
             RequestUri = new Uri(url, UriKind.Relative),
             Content = content
         };
-        
-        if(!string.IsNullOrEmpty(token))
+
+        if (!string.IsNullOrEmpty(token))
+        {
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-        
+        }
+
         var response = await _httpClient.SendAsync(request);
         response.EnsureSuccessStatusCode();
-            
+
         var resultStr = await response.Content.ReadAsStringAsync();
         if (typeof(TResult) == typeof(string))
+        {
             return (TResult)(object)resultStr;
-            
+        }
+
         return JsonConvert.DeserializeObject<TResult>(resultStr);
     }
 
@@ -75,8 +80,13 @@ public class TestBase
         sc.Open();
         cmd.CommandText = "delete from asp_net_users where email != 'admin@parma.ru'";
         cmd.ExecuteNonQuery();
-            
+
         cmd.CommandText = "delete from asp_net_roles where name != 'Admin'";
         cmd.ExecuteNonQuery();
+    }
+
+    public void Dispose()
+    {
+        throw new NotImplementedException();
     }
 }

@@ -10,13 +10,13 @@ public class InstructionsRepository : IInstructionsRepository
 {
     private readonly AppDbContext _db;
     private readonly IInstructionsTreeRepository _treeRepository;
-    
+
     // CTE Repository нужен для пересчета данных для быстрой работы с иерархиями
     // для способа Enumeration Paths надо пересчитать tree_path
     // для способа Closure надо пересчитать closure table
     // для способа Nested sets надо пересчитать все коэффициенты
     private readonly InstructionsTreeRepositoryCte _cteRepository;
-    
+
     // нужен, чтобы держать closure table в актуальном состоянии, независимо от способа работы с иерархиями,
     // чтобы можно было переключать способы без полного пересчета
     private readonly InstructionsTreeRepositoryClosure _closureRepository;
@@ -55,7 +55,7 @@ public class InstructionsRepository : IInstructionsRepository
     public async Task<Instruction> GetInstructionTreeAsync(int instructionId)
     {
         var instructionTree = await _treeRepository.GetTreeInstructionsAsync(instructionId);
-        
+
         // возвращаем поручение, которое запрашивали, но уже со всеми parent/children
         return instructionTree.Single(i => i.Id == instructionId);
     }

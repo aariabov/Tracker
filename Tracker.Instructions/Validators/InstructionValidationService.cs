@@ -26,18 +26,22 @@ public class InstructionValidationService
         var validator = new InstructionValidator(_instructionsRepository, _usersService, _statusService, creator, today);
         var validationResult = await validator.ValidateAsync(instructionRm);
         if (validationResult.IsValid)
+        {
             return Result.Ok();
-            
+        }
+
         return Result.Errors<string>(validationResult.Errors.Format());
     }
-    
+
     public async Task<Result> ValidateExecDateAsync(ExecDateRm execDateRm, string executorId, DateTime today)
     {
         var validator = new ExecDateValidator(_instructionsRepository, _statusService, executorId, today);
         var validationResult = await validator.ValidateAsync(execDateRm);
         if (validationResult.IsValid)
+        {
             return Result.Ok();
-            
+        }
+
         return Result.Errors<string>(validationResult.Errors.Format());
     }
 }

@@ -1,4 +1,4 @@
-﻿using Tracker.Db.Models;
+using Tracker.Db.Models;
 
 namespace Tracker.Audit;
 

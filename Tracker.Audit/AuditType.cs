@@ -1,4 +1,4 @@
-﻿namespace Tracker.Audit;
+namespace Tracker.Audit;
 
 public enum AuditType
 {

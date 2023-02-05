@@ -1,4 +1,4 @@
-﻿using Tracker.Common.Progress;
+using Tracker.Common.Progress;
 
 namespace Tracker.Instructions.RequestModels;
 

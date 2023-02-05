@@ -25,7 +25,7 @@ internal class InstructionValidator : AbstractValidator<InstructionRm>
 
         const int nameMinLen = 3;
         const int nameMaxLen = 100;
-        
+
         RuleFor(instruction => instruction.Name)
             .Cascade(CascadeMode.Stop)
             .NotEmpty().WithMessage("Текст поручения не может быть пустым")
@@ -45,24 +45,24 @@ internal class InstructionValidator : AbstractValidator<InstructionRm>
             .MustAsync(BeCreatedByMyBossAsync).WithMessage("Родительское поручение должно быть создано Вашим руководителем")
             .When(instruction => instruction.ParentId is not null);
     }
-    
+
     private async Task<bool> ExecutorExistsAsync(string executorId, CancellationToken token)
     {
         return await _usersService.IsUserExistsAsync(executorId);
     }
-    
+
     private async Task<bool> ParentExistsAsync(int? parentId, CancellationToken token)
     {
         return await _instructionsRepository.IsInstructionExistsAsync(parentId!.Value);
     }
-    
+
     private async Task<bool> BeNotExecutedAsync(int? parentId, CancellationToken token)
     {
         var parentInstruction = await _instructionsRepository.GetInstructionTreeAsync(parentId.Value);
         var status = _statusService.GetStatus(parentInstruction);
         return status is ExecStatus.InWork or ExecStatus.InWorkOverdue;
     }
-    
+
     private async Task<bool> BeCreatedByMyBossAsync(int? parentId, CancellationToken token)
     {
         var parentInstruction = await _instructionsRepository.GetInstructionByIdAsync(parentId!.Value);

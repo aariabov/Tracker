@@ -9,6 +9,6 @@ public class Role : IdentityRole
     public Role(string roleName) : base(roleName)
     {
     }
-    
-    private Role(){}
+
+    private Role() { }
 }
