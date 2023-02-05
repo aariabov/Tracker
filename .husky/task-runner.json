@@ -1,0 +1,24 @@
+{
+   "tasks": [
+      {
+         "name": "dotnet-format",
+         "group": "pre-commit",
+         "command": "dotnet",
+         "args": [ "format", "--include", "${staged}" ],
+         "include": [ "**/*.cs" ]
+      },
+      {
+         "name": "test-start",
+         "group": "pre-commit",
+         "command": "dotnet",
+         "args": [ "test", "./Tracker.UnitTests/Tracker.UnitTests.csproj" ]
+      },
+//      {
+//         "name": "warning-check",
+//         "command": "dotnet",
+//         "group": "pre-commit",
+//         "args": [ "build", "/warnaserror", "--no-incremental", "--no-restore" ],
+//         "include": [ "**/*.cs" ]
+//      }
+   ]
+}
