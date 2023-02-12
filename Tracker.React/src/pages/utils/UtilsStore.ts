@@ -68,7 +68,7 @@ export class UtilsStore {
       }),
       new ProgressableUtil({
         id: 5,
-        name: "Test run progressable job with parameters",
+        name: "Test run progressable job with pars",
         updateUtils: this.updateUtils.bind(this),
         api: () =>
           api(apiClient.api.testRunProgressableJobWithParams, {
@@ -88,7 +88,7 @@ export class UtilsStore {
       }),
       new UnProgressableUtil({
         id: 7,
-        name: "Test run unprogressable job with parameters",
+        name: "Test run unprogressable job with pars",
         updateUtils: this.updateUtils.bind(this),
         api: () =>
           api(apiClient.api.testRunUnprogressableJobWithParams, testParam),
