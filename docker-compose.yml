@@ -3,7 +3,7 @@
 services:
   web:
     container_name: web
-    image: tracker/web:latest
+    image: riabov/web:latest
     depends_on:
       - "backend"
     ports:
@@ -18,7 +18,7 @@ services:
 #      NODE_ENV: development
   
   backend:
-    image: tracker/backend:latest
+    image: riabov/backend:latest
     depends_on:
       - "db"
     build:
