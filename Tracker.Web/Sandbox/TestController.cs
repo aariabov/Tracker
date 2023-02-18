@@ -46,12 +46,25 @@ namespace Tracker.Web.Sandbox
             return Ok();
         }
 
+        /// <summary>
+        /// Запустить таск с параметрами без прогресса
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
         [HttpPost("run-unprogressable-job-with-params")]
         [Authorize(Roles = "Admin")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult> RunUnProgressableJobWithParams(TestJobParams model)
         {
             Thread.Sleep(5000);
+            return Ok();
+        }
+
+        [HttpPost("test")]
+        [Authorize(Roles = "Admin")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<ActionResult> Test()
+        {
             return Ok();
         }
     }
