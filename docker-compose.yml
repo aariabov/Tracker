@@ -19,26 +19,14 @@ services:
   
   backend:
     image: riabov/backend
-    depends_on:
-      - "db"
     build:
       context: .
       dockerfile: Dockerfile
     ports:
       - "5001:80"
     environment:
-      ConnectionStrings__PostgresConnection: host=db;port=5432;database=tracker;username=postgres;password=123123asd@
+      ConnectionStrings__PostgresConnection: server=host.docker.internal;port=5432;database=tracker;username=postgres;password=123123asd@
 
-  db:
-    image: postgres:latest
-    restart: always
-    ports:
-      - "5401:5432"
-    environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=123123asd@
-      - POSTGRES_DB=tracker
- 
 #  proxy:
 #    image: nginx:mainline
 #    volumes:
