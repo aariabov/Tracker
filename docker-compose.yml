@@ -26,6 +26,8 @@ services:
       - "5001:80"
     environment:
       ConnectionStrings__PostgresConnection: server=host.docker.internal;port=5432;database=tracker;username=postgres;password=123123asd@
+    extra_hosts:
+      - "host.docker.internal:host-gateway"  
 
 #  proxy:
 #    image: nginx:mainline
