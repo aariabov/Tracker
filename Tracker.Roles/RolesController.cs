@@ -19,6 +19,10 @@ public class RolesController : ControllerBase
         _rolesService = rolesService;
     }
 
+    /// <summary>
+    /// Получить список всех ролей
+    /// </summary>
+    /// <returns></returns>
     [HttpGet]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<RoleVm>))]
     public async Task<ActionResult<IEnumerable<RoleVm>>> GetAllRoles()
