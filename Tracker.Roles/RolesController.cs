@@ -20,7 +20,7 @@ public class RolesController : ControllerBase
     }
 
     /// <summary>
-    /// Получить все роли
+    /// Получить список всех ролей
     /// </summary>
     /// <returns></returns>
     [HttpGet]
