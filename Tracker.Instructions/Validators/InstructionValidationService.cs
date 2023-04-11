@@ -1,8 +1,8 @@
-using Tracker.Common;
 using Tracker.Db.Models;
 using Tracker.Instructions.RequestModels;
 using Tracker.Instructions.Validators.FluentValidators;
 using Tracker.Users;
+using Tracker.Users.Common;
 
 namespace Tracker.Instructions.Validators;
 

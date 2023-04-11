@@ -1,10 +1,10 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Http;
 using Tracker.Audit;
-using Tracker.Common;
 using Tracker.Db.Models;
 using Tracker.Db.Transactions;
 using Tracker.Db.UnitOfWorks;
+using Tracker.Users.Common;
 using Tracker.Users.RequestModels;
 using Tracker.Users.Validators;
 using Tracker.Users.ViewModels;

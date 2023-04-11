@@ -2,7 +2,7 @@ using System.Text.Json;
 using FluentValidation.Results;
 using Microsoft.AspNetCore.Identity;
 
-namespace Tracker.Common;
+namespace Tracker.Roles.Common;
 
 public static class Helpers
 {

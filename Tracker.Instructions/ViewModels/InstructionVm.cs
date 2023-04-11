@@ -1,4 +1,3 @@
-using Tracker.Common;
 using Tracker.Db.Models;
 
 namespace Tracker.Instructions.ViewModels;

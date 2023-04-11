@@ -1,5 +1,3 @@
-using Tracker.Common.Progress;
-
 namespace Tracker.Instructions.RequestModels;
 
 public class GenerationRm

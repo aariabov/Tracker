@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Tracker.Common;
 using Tracker.Common.Progress;
 
 namespace Tracker.Web.Sandbox

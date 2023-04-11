@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Configuration;
-using Tracker.Common;
 using Tracker.Db;
+using Tracker.Users.Common;
 using Tracker.Users.RequestModels;
 using Tracker.Users.Validators.FluentValidators;
 

@@ -1,4 +1,4 @@
-namespace Tracker.Common.Progress;
+namespace Tracker.Instructions.Common.Progress;
 
 public class ClientSocketRm
 {

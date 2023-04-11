@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Tracker.Common;
+using Tracker.Users.Common;
 using Tracker.Users.RequestModels;
 using Tracker.Users.ViewModels;
 
@@ -30,7 +30,7 @@ public class UsersController : ControllerBase
 
     [HttpPost("register")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(string))]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ModelErrorsVm))]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(UserModelErrorsVm))]
     public async Task<ActionResult> RegisterAsync([FromBody] UserRegistrationRm userRm)
     {
         var result = await _usersService.RegisterAsync(userRm);
@@ -39,13 +39,13 @@ public class UsersController : ControllerBase
             return Ok(result.Value);
         }
 
-        return Ok(new ModelErrorsVm(result));
+        return Ok(new UserModelErrorsVm(result));
     }
 
     [HttpPost("update")]
     [Authorize(Roles = "Admin")]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ModelErrorsVm))]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(UserModelErrorsVm))]
     public async Task<ActionResult> UpdateUserAsync([FromBody] UserUpdatingRm userUpdatingRm)
     {
         var result = await _usersService.UpdateUserAsync(userUpdatingRm);
@@ -54,13 +54,13 @@ public class UsersController : ControllerBase
             return Ok();
         }
 
-        return Ok(new ModelErrorsVm(result));
+        return Ok(new UserModelErrorsVm(result));
     }
 
     [HttpPost("delete")]
     [Authorize(Roles = "Admin")]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ModelErrorsVm))]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(UserModelErrorsVm))]
     public async Task<ActionResult<string>> DeleteUserAsync([FromBody] UserDeletingRm userDeletingRm)
     {
         var result = await _usersService.DeleteUserAsync(userDeletingRm);
@@ -69,7 +69,7 @@ public class UsersController : ControllerBase
             return Ok();
         }
 
-        return Ok(new ModelErrorsVm(result));
+        return Ok(new UserModelErrorsVm(result));
     }
 
     [AllowAnonymous]
@@ -84,7 +84,7 @@ public class UsersController : ControllerBase
             return Ok(result.Value);
         }
 
-        return Unauthorized(new ModelErrorsVm(result));
+        return Unauthorized(new UserModelErrorsVm(result));
     }
 
     [AllowAnonymous]
@@ -99,7 +99,7 @@ public class UsersController : ControllerBase
             return Ok(result.Value);
         }
 
-        return Unauthorized(new ModelErrorsVm(result));
+        return Unauthorized(new UserModelErrorsVm(result));
     }
 
     [HttpPost("revoke")]

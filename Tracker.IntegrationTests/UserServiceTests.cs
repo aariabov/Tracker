@@ -2,8 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using FluentAssertions;
-using Tracker.Common;
 using Tracker.IntegrationTests.Common;
+using Tracker.Roles.Common;
 using Tracker.Users.RequestModels;
 using Xunit;
 
@@ -26,8 +26,8 @@ public class UserServiceTests : TestBase
         Guid.TryParse(userId, out _).Should().BeTrue();
 
         // повторная регистрация пользователя - ошибка валидации
-        var errorsModel = await PostAsync<ModelErrorsVm>("api/users/register", registrationModel);
-        var expectedModel = new ModelErrorsVm(Result.Errors<string>(new Dictionary<string, string>
+        var errorsModel = await PostAsync<RoleModelErrorsVm>("api/users/register", registrationModel);
+        var expectedModel = new RoleModelErrorsVm(Result.Errors<string>(new Dictionary<string, string>
         {
             { "email", "Email уже существует" }
         }));

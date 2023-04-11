@@ -6,8 +6,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tracker.Roles", "Tracker.Ro
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tracker.Db", "Tracker.Db\Tracker.Db.csproj", "{AEC91FDC-5848-4A3C-B08B-BEF8C9C307C4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tracker.Common", "Tracker.Common\Tracker.Common.csproj", "{3E981603-2104-4AA8-BEB4-17E6A4EEFA9F}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tracker.Users", "Tracker.Users\Tracker.Users.csproj", "{9054D930-A6A1-4EF9-B165-620246D26974}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tracker.Analytics", "Tracker.Analytics\Tracker.Analytics.csproj", "{B8509980-83F0-4EFE-B00E-3E06A59732D1}"
@@ -42,10 +40,6 @@ Global
 		{AEC91FDC-5848-4A3C-B08B-BEF8C9C307C4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AEC91FDC-5848-4A3C-B08B-BEF8C9C307C4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AEC91FDC-5848-4A3C-B08B-BEF8C9C307C4}.Release|Any CPU.Build.0 = Release|Any CPU
-		{3E981603-2104-4AA8-BEB4-17E6A4EEFA9F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{3E981603-2104-4AA8-BEB4-17E6A4EEFA9F}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{3E981603-2104-4AA8-BEB4-17E6A4EEFA9F}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{3E981603-2104-4AA8-BEB4-17E6A4EEFA9F}.Release|Any CPU.Build.0 = Release|Any CPU
 		{9054D930-A6A1-4EF9-B165-620246D26974}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{9054D930-A6A1-4EF9-B165-620246D26974}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9054D930-A6A1-4EF9-B165-620246D26974}.Release|Any CPU.ActiveCfg = Release|Any CPU

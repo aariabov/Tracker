@@ -1,6 +1,6 @@
-using Tracker.Common;
 using Tracker.Common.Progress;
 using Tracker.Db.Models;
+using Tracker.Instructions.Common.Progress;
 
 namespace Tracker.Instructions;
 

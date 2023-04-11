@@ -1,3 +1,5 @@
+using Tracker.Instructions.Common.Progress;
+
 namespace Tracker.Common.Progress;
 
 public class ProgressRm

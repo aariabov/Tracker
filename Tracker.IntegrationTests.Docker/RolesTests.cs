@@ -1,7 +1,7 @@
 using FluentAssertions;
-using Tracker.Common;
 using Tracker.IntegrationTests.Docker.Common;
 using Tracker.Roles;
+using Tracker.Roles.Common;
 using Tracker.Roles.RequestModels;
 using Tracker.Users.ViewModels;
 using Xunit;
@@ -52,8 +52,8 @@ public class RolesTests : TestBase
             Name = "new role name1",
             ConcurrencyStamp = existingRole.ConcurrencyStamp
         };
-        var errorsModel = await PostAsync<ModelErrorsVm>("api/roles/update", roleUpdatingRm1, tokensVm.Token);
-        var expectedModel = new ModelErrorsVm(Result.Errors<string>(new Dictionary<string, string>
+        var errorsModel = await PostAsync<RoleModelErrorsVm>("api/roles/update", roleUpdatingRm1, tokensVm.Token);
+        var expectedModel = new RoleModelErrorsVm(Result.Errors<string>(new Dictionary<string, string>
         {
             { "name", "Роль была изменена, обновите страницу и попробуйте заново" }
         }));

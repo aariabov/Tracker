@@ -1,4 +1,4 @@
-namespace Tracker.Common;
+namespace Tracker.Users.Common;
 
 public record Result
 {

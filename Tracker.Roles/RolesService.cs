@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Tracker.Common;
 using Tracker.Db;
 using Tracker.Db.Models;
+using Tracker.Roles.Common;
 using Tracker.Roles.RequestModels;
 using Tracker.Roles.Validators;
 

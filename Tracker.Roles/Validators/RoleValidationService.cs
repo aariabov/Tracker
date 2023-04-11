@@ -1,5 +1,5 @@
 using Microsoft.Extensions.Configuration;
-using Tracker.Common;
+using Tracker.Roles.Common;
 using Tracker.Roles.RequestModels;
 using Tracker.Roles.Validators.FluentValidators;
 

@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Tracker.Common;
 using Tracker.Common.Progress;
+using Tracker.Instructions.Common;
 using Tracker.Instructions.Generator;
 using Tracker.Instructions.RequestModels;
 using Tracker.Instructions.ViewModels;
@@ -57,7 +57,7 @@ public class InstructionsController : ControllerBase
 
     [HttpPost("create")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(int))]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ModelErrorsVm))]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(InstructionModelErrorsVm))]
     public async Task<ActionResult<int>> CreateInstruction([FromBody] InstructionRm instructionRm)
     {
         var user = await _usersService.GetCurrentUser();
@@ -67,12 +67,12 @@ public class InstructionsController : ControllerBase
             return Ok(result.Value);
         }
 
-        return Ok(new ModelErrorsVm(result));
+        return Ok(new InstructionModelErrorsVm(result));
     }
 
     [HttpPost("set-exec-date")]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ModelErrorsVm))]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(InstructionModelErrorsVm))]
     public async Task<ActionResult> SetExecDate([FromBody] ExecDateRm execDateRm)
     {
         var userId = _usersService.GetCurrentUserId();
@@ -82,7 +82,7 @@ public class InstructionsController : ControllerBase
             return Ok();
         }
 
-        return Ok(new ModelErrorsVm(result));
+        return Ok(new InstructionModelErrorsVm(result));
     }
 
     [HttpPost("recalculate-all-tree-paths")]

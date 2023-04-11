@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.SignalR;
+using Tracker.Instructions.Common.Progress;
 
 namespace Tracker.Common.Progress;
 

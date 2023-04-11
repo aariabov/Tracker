@@ -2,8 +2,8 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
-using Tracker.Common;
 using Tracker.Db.Models;
+using Tracker.Users.Common;
 using Tracker.Users.ViewModels;
 
 namespace Tracker.Users;

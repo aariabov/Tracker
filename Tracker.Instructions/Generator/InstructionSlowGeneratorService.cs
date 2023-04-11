@@ -1,7 +1,7 @@
 using System.Diagnostics;
-using Tracker.Common;
 using Tracker.Common.Progress;
 using Tracker.Db.Models;
+using Tracker.Instructions.Common.Progress;
 using Tracker.Instructions.RequestModels;
 using Tracker.Users;
 
