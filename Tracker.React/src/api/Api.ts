@@ -69,6 +69,11 @@ export interface IdentityError {
   description: string | null;
 }
 
+export interface InstructionModelErrorsVm {
+  commonErrors: string[];
+  modelErrors: Record<string, string>;
+}
+
 export interface InstructionRm {
   name: string;
   /** @format int32 */
@@ -115,11 +120,6 @@ export interface LoginVM {
   password: string;
 }
 
-export interface ModelErrorsVm {
-  commonErrors: string[];
-  modelErrors: Record<string, string>;
-}
-
 export interface OrgStructElementVm {
   id: string;
   name: string;
@@ -150,6 +150,11 @@ export interface RoleCreationRm {
 
 export interface RoleDeletingRm {
   id: string;
+}
+
+export interface RoleModelErrorsVm {
+  commonErrors: string[];
+  modelErrors: Record<string, string>;
 }
 
 export interface RoleUpdatingRm {
@@ -183,6 +188,11 @@ export interface TokensVm {
 
 export interface UserDeletingRm {
   id: string;
+}
+
+export interface UserModelErrorsVm {
+  commonErrors: string[];
+  modelErrors: Record<string, string>;
 }
 
 export interface UserRegistrationRm {
@@ -515,7 +525,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @request POST:/api/Instructions/create
      */
     instructionsCreate: (data: InstructionRm, params: RequestParams = {}) =>
-      this.request<ModelErrorsVm, any>({
+      this.request<InstructionModelErrorsVm, any>({
         path: `/api/Instructions/create`,
         method: "POST",
         body: data,
@@ -532,7 +542,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @request POST:/api/Instructions/set-exec-date
      */
     instructionsSetExecDate: (data: ExecDateRm, params: RequestParams = {}) =>
-      this.request<ModelErrorsVm, any>({
+      this.request<InstructionModelErrorsVm, any>({
         path: `/api/Instructions/set-exec-date`,
         method: "POST",
         body: data,
@@ -610,7 +620,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @request POST:/api/Roles/create
      */
     rolesCreate: (data: RoleCreationRm, params: RequestParams = {}) =>
-      this.request<ModelErrorsVm, IdentityError[]>({
+      this.request<RoleModelErrorsVm, IdentityError[]>({
         path: `/api/Roles/create`,
         method: "POST",
         body: data,
@@ -627,7 +637,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @request POST:/api/Roles/update
      */
     rolesUpdate: (data: RoleUpdatingRm, params: RequestParams = {}) =>
-      this.request<ModelErrorsVm, any>({
+      this.request<RoleModelErrorsVm, any>({
         path: `/api/Roles/update`,
         method: "POST",
         body: data,
@@ -644,7 +654,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @request POST:/api/Roles/delete
      */
     rolesDelete: (data: RoleDeletingRm, params: RequestParams = {}) =>
-      this.request<ModelErrorsVm, any>({
+      this.request<RoleModelErrorsVm, any>({
         path: `/api/Roles/delete`,
         method: "POST",
         body: data,
@@ -718,6 +728,20 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @tags Test
+     * @name TestTest
+     * @request POST:/api/Test/test
+     */
+    testTest: (params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/Test/test`,
+        method: "POST",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @tags Users
      * @name UsersList
      * @request GET:/api/Users
@@ -738,7 +762,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @request POST:/api/Users/register
      */
     usersRegister: (data: UserRegistrationRm, params: RequestParams = {}) =>
-      this.request<ModelErrorsVm, any>({
+      this.request<UserModelErrorsVm, any>({
         path: `/api/Users/register`,
         method: "POST",
         body: data,
@@ -755,7 +779,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @request POST:/api/Users/update
      */
     usersUpdate: (data: UserUpdatingRm, params: RequestParams = {}) =>
-      this.request<ModelErrorsVm, any>({
+      this.request<UserModelErrorsVm, any>({
         path: `/api/Users/update`,
         method: "POST",
         body: data,
@@ -772,7 +796,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @request POST:/api/Users/delete
      */
     usersDelete: (data: UserDeletingRm, params: RequestParams = {}) =>
-      this.request<ModelErrorsVm, any>({
+      this.request<UserModelErrorsVm, any>({
         path: `/api/Users/delete`,
         method: "POST",
         body: data,
