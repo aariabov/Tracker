@@ -1,5 +1,5 @@
 using FluentAssertions;
-using Tracker.Common;
+using Riabov.Tracker.Common;
 using Tracker.IntegrationTests.Docker.Common;
 using Tracker.Users.RequestModels;
 using Tracker.Users.ViewModels;

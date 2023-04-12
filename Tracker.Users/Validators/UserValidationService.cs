@@ -1,5 +1,5 @@
 using Microsoft.Extensions.Configuration;
-using Tracker.Common;
+using Riabov.Tracker.Common;
 using Tracker.Db;
 using Tracker.Users.RequestModels;
 using Tracker.Users.Validators.FluentValidators;

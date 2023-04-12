@@ -718,6 +718,20 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @tags Test
+     * @name TestTest
+     * @request POST:/api/Test/test
+     */
+    testTest: (params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/Test/test`,
+        method: "POST",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @tags Users
      * @name UsersList
      * @request GET:/api/Users

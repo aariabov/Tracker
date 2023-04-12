@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using FluentAssertions;
-using Tracker.Common;
+using Riabov.Tracker.Common;
 using Tracker.IntegrationTests.Common;
 using Tracker.Users.RequestModels;
 using Xunit;
