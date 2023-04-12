@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Tracker.Common;
-using Tracker.Common.Progress;
+using Riabov.Tracker.Common;
+using Riabov.Tracker.Common.Progress;
 using Tracker.Instructions.Generator;
 using Tracker.Instructions.RequestModels;
 using Tracker.Instructions.ViewModels;

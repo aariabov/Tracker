@@ -1,4 +1,4 @@
-using Tracker.Common;
+using Riabov.Tracker.Common;
 using Tracker.Db.Models;
 
 namespace Tracker.Instructions.ViewModels;
