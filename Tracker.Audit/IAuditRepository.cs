@@ -1,8 +1,9 @@
-using Tracker.Db.Models;
+using Tracker.Audit.Db.Models;
 
 namespace Tracker.Audit;
 
 public interface IAuditRepository
 {
-    void CreateLog(AuditLog auditLog);
+    Task<int> CreateLog(AuditLog auditLog);
+    Task DeleteLog(int id);
 }

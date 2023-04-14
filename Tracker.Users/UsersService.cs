@@ -75,6 +75,8 @@ public class UsersService
 
     public async Task<Result<string>> RegisterAsync(UserRegistrationRm userRm)
     {
+        var auditLogId = 0;
+
         using var transaction = _transactionManager.BeginTransaction();
         try
         {
@@ -91,7 +93,7 @@ public class UsersService
                 throw new Exception(result.Errors.Join());
             }
 
-            _auditService.LogAsync(AuditType.Create, newUser.Id, newUser.GetType().Name, GetCurrentUserId());
+            auditLogId = await _auditService.LogAsync(AuditType.Create, newUser.Id, newUser.GetType().Name, GetCurrentUserId());
 
             if (userRm.Roles.Any())
             {
@@ -108,6 +110,11 @@ public class UsersService
         }
         catch
         {
+            if (auditLogId > 0)
+            {
+                await _auditService.DeleteLog(auditLogId);
+            }
+
             await transaction.RollbackAsync();
             throw;
         }

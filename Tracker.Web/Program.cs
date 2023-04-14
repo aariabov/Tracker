@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Riabov.Tracker.Common.Progress;
 using Tracker.Audit;
+using Tracker.Audit.Db;
 using Tracker.Db;
 using Tracker.Db.Models;
 using Tracker.Db.Transactions;
@@ -24,6 +25,9 @@ using Tracker.Web;
 using Tracker.Web.Sandbox;
 
 var builder = WebApplication.CreateBuilder(args);
+
+var auditConnectionString = builder.Configuration.GetConnectionString("AuditConnection");
+builder.Services.AddDbContext<AuditDbContext>(options => options.UseNpgsql(auditConnectionString).UseSnakeCaseNamingConvention());
 
 var connectionString = builder.Configuration.GetConnectionString("PostgresConnection");
 builder.Services.AddDbContext<AppDbContext>(options => options.UseNpgsql(connectionString).UseSnakeCaseNamingConvention());
@@ -125,6 +129,9 @@ else
 }
 
 using var serviceScope = app.Services.CreateScope();
+var auditDbContext = serviceScope.ServiceProvider.GetRequiredService<AuditDbContext>();
+await auditDbContext.Database.MigrateAsync();
+
 var dbContext = serviceScope.ServiceProvider.GetRequiredService<AppDbContext>();
 var dataSeeder = serviceScope.ServiceProvider.GetRequiredService<DataSeeder>();
 await dbContext.Database.MigrateAsync();

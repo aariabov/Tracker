@@ -9,9 +9,8 @@ public class AppDbContext : IdentityDbContext<User, Role, string>
 {
     public DbSet<Instruction> Instructions => Set<Instruction>();
     public DbSet<InstructionClosure> InstructionsClosures => Set<InstructionClosure>();
-    public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
 
-    public AppDbContext(DbContextOptions options) : base(options) { }
+    public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -73,13 +72,6 @@ public class AppDbContext : IdentityDbContext<User, Role, string>
             b.ToTable("asp_net_users");
         });
         SeedUsers(modelBuilder);
-
-        modelBuilder.Entity<AuditLog>(b =>
-        {
-            b.HasOne(i => i.User)
-                .WithMany()
-                .HasForeignKey(e => e.UserId);
-        });
     }
 
     private static void SeedUsers(ModelBuilder modelBuilder)

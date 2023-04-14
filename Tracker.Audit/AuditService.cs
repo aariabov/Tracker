@@ -1,28 +1,24 @@
-using Tracker.Db.Models;
-using Tracker.Db.UnitOfWorks;
+using Tracker.Audit.Db.Models;
 
 namespace Tracker.Audit;
 
 public class AuditService : IAuditService
 {
     private readonly IAuditRepository _auditRepository;
-    private readonly IUnitOfWork _unitOfWork;
 
-    public AuditService(IAuditRepository auditRepository, IUnitOfWork unitOfWork)
+    public AuditService(IAuditRepository auditRepository)
     {
         _auditRepository = auditRepository;
-        _unitOfWork = unitOfWork;
     }
 
-    public async Task LogAndSaveChangesAsync(AuditType type, string entityId, string entityName, string userId)
-    {
-        LogAsync(type, entityId, entityName, userId);
-        await _unitOfWork.SaveChangesAsync();
-    }
-
-    public void LogAsync(AuditType type, string entityId, string entityName, string userId)
+    public Task<int> LogAsync(AuditType type, string entityId, string entityName, string userId)
     {
         var newAuditLog = new AuditLog((int)type, entityId, entityName, userId, DateTime.UtcNow);
-        _auditRepository.CreateLog(newAuditLog);
+        return _auditRepository.CreateLog(newAuditLog);
+    }
+
+    public Task DeleteLog(int id)
+    {
+        return _auditRepository.DeleteLog(id);
     }
 }

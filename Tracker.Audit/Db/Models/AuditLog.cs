@@ -1,4 +1,4 @@
-namespace Tracker.Db.Models;
+namespace Tracker.Audit.Db.Models;
 
 public class AuditLog
 {
@@ -7,7 +7,6 @@ public class AuditLog
     public string EntityId { get; set; }
     public string EntityName { get; set; }
     public string UserId { get; set; }
-    public User User { get; set; }
     public DateTime DateTime { get; set; }
 
     private AuditLog() { }
