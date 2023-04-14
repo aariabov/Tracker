@@ -23,6 +23,8 @@ namespace Tracker.UnitTests.Users;
 
 public class UsersServiceTests
 {
+    private const string ADMIN = "admin";
+
     [Fact]
     public async Task register_successful()
     {
@@ -37,12 +39,11 @@ public class UsersServiceTests
         var fixture = new Fixture().Customize(new AutoMoqCustomization());
         var mockTransaction = fixture.Freeze<Mock<IContextTransaction>>();
         var mockUnitOfWork = fixture.Freeze<Mock<IUnitOfWork>>();
+        var mockAuditService = fixture.Freeze<Mock<IAuditService>>();
         var mockTransactionManager = fixture.Freeze<Mock<ITransactionManager>>();
         mockTransactionManager
             .Setup(m => m.BeginTransaction(IsolationLevel.Unspecified))
             .Returns(mockTransaction.Object);
-
-        fixture.Inject<IAuditService>(fixture.Create<AuditService>());
 
         var stubUserValidationService = fixture.Freeze<Mock<IUserValidationService>>();
         stubUserValidationService
@@ -52,7 +53,7 @@ public class UsersServiceTests
         var stubHttpContextAccessor = fixture.Freeze<Mock<IHttpContextAccessor>>();
         stubHttpContextAccessor
             .Setup(s => s.HttpContext.User.FindFirst(It.IsAny<string>()))
-            .Returns(new Claim("name", "admin"));
+            .Returns(new Claim("name", ADMIN));
 
         var stubUserManagerService = fixture.Freeze<Mock<IUserManagerService>>();
         stubUserManagerService
@@ -70,6 +71,7 @@ public class UsersServiceTests
         mockTransactionManager.Verify(m => m.BeginTransaction(IsolationLevel.Unspecified), Times.Once);
         mockUnitOfWork.Verify(m => m.SaveChangesAsync(), Times.Once);
         mockTransaction.Verify(m => m.CommitAsync(), Times.Once);
+        mockAuditService.Verify(m => m.LogAsync(AuditType.Create, It.IsAny<string>(), nameof(User), ADMIN), Times.Once);
         mockTransaction.Verify(m => m.RollbackAsync(), Times.Never);
     }
 
@@ -87,6 +89,7 @@ public class UsersServiceTests
         var fixture = new Fixture().Customize(new AutoMoqCustomization());
         var mockTransaction = fixture.Freeze<Mock<IContextTransaction>>();
         var mockUnitOfWork = fixture.Freeze<Mock<IUnitOfWork>>();
+        var mockAuditService = fixture.Freeze<Mock<IAuditService>>();
         var mockTransactionManager = fixture.Freeze<Mock<ITransactionManager>>();
         mockTransactionManager
             .Setup(m => m.BeginTransaction(IsolationLevel.Unspecified))
@@ -109,6 +112,116 @@ public class UsersServiceTests
         mockTransactionManager.Verify(m => m.BeginTransaction(IsolationLevel.Unspecified), Times.Once);
         mockUnitOfWork.Verify(m => m.SaveChangesAsync(), Times.Never);
         mockTransaction.Verify(m => m.CommitAsync(), Times.Never);
+        mockAuditService.Verify(m => m.LogAsync(AuditType.Create, It.IsAny<string>(), nameof(User), ADMIN), Times.Never);
+        mockTransaction.Verify(m => m.RollbackAsync(), Times.Once);
+    }
+
+    [Fact]
+    public async Task rollback_transaction_when_audit_log_error()
+    {
+        var validUserRegistrationRm = new UserRegistrationRm
+        {
+            Name = "test",
+            Email = "test@mail.ru",
+            Password = "42",
+            Roles = new[] { "testRole" }
+        };
+
+        var fixture = new Fixture().Customize(new AutoMoqCustomization());
+        var mockTransaction = fixture.Freeze<Mock<IContextTransaction>>();
+        var mockUnitOfWork = fixture.Freeze<Mock<IUnitOfWork>>();
+        var mockAuditService = fixture.Freeze<Mock<IAuditService>>();
+        mockAuditService
+            .Setup(m => m.LogAsync(AuditType.Create, It.IsAny<string>(), nameof(User), ADMIN))
+            .Throws<Exception>();
+
+        var mockTransactionManager = fixture.Freeze<Mock<ITransactionManager>>();
+        mockTransactionManager
+            .Setup(m => m.BeginTransaction(IsolationLevel.Unspecified))
+            .Returns(mockTransaction.Object);
+
+        var stubUserValidationService = fixture.Freeze<Mock<IUserValidationService>>();
+        stubUserValidationService
+            .Setup(s => s.ValidateRegistrationModelAsync(validUserRegistrationRm))
+            .ReturnsAsync(Result.Ok());
+
+        var stubHttpContextAccessor = fixture.Freeze<Mock<IHttpContextAccessor>>();
+        stubHttpContextAccessor
+            .Setup(s => s.HttpContext.User.FindFirst(It.IsAny<string>()))
+            .Returns(new Claim("name", ADMIN));
+
+        var stubUserManagerService = fixture.Freeze<Mock<IUserManagerService>>();
+        stubUserManagerService
+            .Setup(s => s.CreateAsync(It.IsAny<User>(), It.IsAny<string>()))
+            .ReturnsAsync(IdentityResult.Success);
+        stubUserManagerService
+            .Setup(s => s.AddToRolesAsync(It.IsAny<User>(), It.IsAny<IEnumerable<string>>()))
+            .ReturnsAsync(IdentityResult.Success);
+
+        var sut = fixture.Create<UsersService>();
+
+        var act = async () => await sut.RegisterAsync(validUserRegistrationRm);
+        await act.Should().ThrowAsync<Exception>();
+        mockTransactionManager.Verify(m => m.BeginTransaction(IsolationLevel.Unspecified), Times.Once);
+        mockUnitOfWork.Verify(m => m.SaveChangesAsync(), Times.Never);
+        mockTransaction.Verify(m => m.CommitAsync(), Times.Never);
+        mockAuditService.Verify(m => m.LogAsync(AuditType.Create, It.IsAny<string>(), nameof(User), ADMIN), Times.Once);
+        mockTransaction.Verify(m => m.RollbackAsync(), Times.Once);
+    }
+
+    [Fact]
+    public async Task rollback_transaction_when_roles_error()
+    {
+        const int AUDIT_LOG_ID = 1;
+
+        var validUserRegistrationRm = new UserRegistrationRm
+        {
+            Name = "test",
+            Email = "test@mail.ru",
+            Password = "42",
+            Roles = new[] { "testRole" }
+        };
+
+        var fixture = new Fixture().Customize(new AutoMoqCustomization());
+        var mockTransaction = fixture.Freeze<Mock<IContextTransaction>>();
+        var mockUnitOfWork = fixture.Freeze<Mock<IUnitOfWork>>();
+        var mockAuditService = fixture.Freeze<Mock<IAuditService>>();
+        mockAuditService
+            .Setup(m => m.LogAsync(AuditType.Create, It.IsAny<string>(), nameof(User), ADMIN))
+            .ReturnsAsync(AUDIT_LOG_ID);
+
+        var mockTransactionManager = fixture.Freeze<Mock<ITransactionManager>>();
+        mockTransactionManager
+            .Setup(m => m.BeginTransaction(IsolationLevel.Unspecified))
+            .Returns(mockTransaction.Object);
+
+        var stubUserValidationService = fixture.Freeze<Mock<IUserValidationService>>();
+        stubUserValidationService
+            .Setup(s => s.ValidateRegistrationModelAsync(validUserRegistrationRm))
+            .ReturnsAsync(Result.Ok());
+
+        var stubHttpContextAccessor = fixture.Freeze<Mock<IHttpContextAccessor>>();
+        stubHttpContextAccessor
+            .Setup(s => s.HttpContext.User.FindFirst(It.IsAny<string>()))
+            .Returns(new Claim("name", ADMIN));
+
+        var stubUserManagerService = fixture.Freeze<Mock<IUserManagerService>>();
+        stubUserManagerService
+            .Setup(s => s.CreateAsync(It.IsAny<User>(), It.IsAny<string>()))
+            .ReturnsAsync(IdentityResult.Success);
+        stubUserManagerService
+            .Setup(s => s.AddToRolesAsync(It.IsAny<User>(), It.IsAny<IEnumerable<string>>()))
+            .ReturnsAsync(IdentityResult.Failed());
+
+        var sut = fixture.Create<UsersService>();
+
+        var act = async () => await sut.RegisterAsync(validUserRegistrationRm);
+        await act.Should().ThrowAsync<Exception>();
+        mockTransactionManager.Verify(m => m.BeginTransaction(IsolationLevel.Unspecified), Times.Once);
+        mockUnitOfWork.Verify(m => m.SaveChangesAsync(), Times.Never);
+        mockTransaction.Verify(m => m.CommitAsync(), Times.Never);
+        mockAuditService.Verify(m => m.LogAsync(AuditType.Create, It.IsAny<string>(), nameof(User), ADMIN), Times.Once);
+        mockAuditService.Verify(m => m.DeleteLog(AUDIT_LOG_ID), Times.Once);
         mockTransaction.Verify(m => m.RollbackAsync(), Times.Once);
     }
 }
