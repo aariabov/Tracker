@@ -129,8 +129,8 @@ else
 }
 
 using var serviceScope = app.Services.CreateScope();
-var auditDbContext = serviceScope.ServiceProvider.GetRequiredService<AuditDbContext>();
-await auditDbContext.Database.MigrateAsync();
+// var auditDbContext = serviceScope.ServiceProvider.GetRequiredService<AuditDbContext>();
+// await auditDbContext.Database.MigrateAsync();
 
 var dbContext = serviceScope.ServiceProvider.GetRequiredService<AppDbContext>();
 var dataSeeder = serviceScope.ServiceProvider.GetRequiredService<DataSeeder>();
