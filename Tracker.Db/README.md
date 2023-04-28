@@ -3,17 +3,25 @@
 ### Накатить миграцию:
 1. Открыть терминал
 2. Перейти в Tracker.Web
-3. Создать миграцию, например:
+3. Просмотреть список миграций
 ```bash
-dotnet ef migrations add MIGRATION_NAME --project ..\Tracker.Db
+dotnet ef migrations list --context AppDbContext --project ..\Tracker.Db
 ```
-4. Проверить новый файл с миграцией, и посмотреть скрипт:
+4. Создать миграцию, например:
 ```bash
-dotnet ef migrations script PREVIOUS_MIGRATION_NAME --project ..\Tracker.Db
+dotnet ef migrations add MIGRATION_NAME --context AuditDbContext --project ..\Tracker.Audit --output-dir Db\Migrations
 ```
-5. Если все Ок, накатить миграцию:
+или для Tracker.Db
 ```bash
-dotnet ef database update --project ..\Tracker.Db
+dotnet ef migrations add MIGRATION_NAME --context AppDbContext --project ..\Tracker.Db
+```
+5. Проверить новый файл с миграцией, и посмотреть скрипт:
+```bash
+dotnet ef migrations script PREVIOUS_MIGRATION_NAME --context AppDbContext --project ..\Tracker.Db
+```
+6. Если все Ок, накатить миграцию:
+```bash
+dotnet ef database update --context AppDbContext --project ..\Tracker.Db
 ```
    
 
@@ -22,7 +30,7 @@ dotnet ef database update --project ..\Tracker.Db
 2. Перейти в Tracker.Web
 3. Запустить команду
 ```bash
-dotnet ef database update PREVIOUS_MIGRATION_NAME --project ..\Tracker.Db
+dotnet ef database update PREVIOUS_MIGRATION_NAME --context AppDbContext --project ..\Tracker.Db
 ```
 4. Удалить cs файл миграции
 5. Откатить AppDbContextModelSnapshot
