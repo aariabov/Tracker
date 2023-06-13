@@ -61,7 +61,7 @@ public class InstructionsController : ControllerBase
     public async Task<ActionResult<int>> CreateInstruction([FromBody] InstructionRm instructionRm)
     {
         var user = await _usersService.GetCurrentUser();
-        var result = await _instructionsService.CreateInstructionAsync(instructionRm, user, DateTime.UtcNow);
+        var result = await _instructionsService.CreateInstructionAsync(instructionRm, user.MapToUser(), DateTime.UtcNow);
         if (result.IsSuccess)
         {
             return Ok(result.Value);

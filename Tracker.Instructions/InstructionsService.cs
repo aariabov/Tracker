@@ -1,9 +1,12 @@
 using Riabov.Tracker.Common;
 using Tracker.Db.Models;
+using Tracker.Instructions.Db.Models;
 using Tracker.Instructions.RequestModels;
 using Tracker.Instructions.Validators;
 using Tracker.Instructions.ViewModels;
 using Tracker.Users;
+using Instruction = Tracker.Instructions.Db.Models.Instruction;
+using User = Tracker.Instructions.Db.Models.User;
 
 namespace Tracker.Instructions;
 

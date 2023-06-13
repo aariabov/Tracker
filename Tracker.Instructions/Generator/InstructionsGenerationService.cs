@@ -31,7 +31,7 @@ public class InstructionsGenerationService
         var allUsers = await _usersService.GetUsersTreeAsync();
         var bosses = allUsers.Where(u => u.Children != null && u.Children.Any()).ToArray();
 
-        var instructions = _instructionGenerator.GenerateForLoop(model.Total, bosses);
+        var instructions = _instructionGenerator.GenerateForLoop(model.Total, bosses.Select(b => b.MapToUser()).ToArray());
         foreach (var instruction in instructions)
         {
             _instructionsRepository.CreateInstruction(instruction);

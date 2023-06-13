@@ -1,6 +1,6 @@
 using System.Diagnostics;
 using Riabov.Tracker.Common.Progress;
-using Tracker.Db.Models;
+using Tracker.Instructions.Db.Models;
 using Tracker.Instructions.RequestModels;
 using Tracker.Users;
 
@@ -52,7 +52,7 @@ public class InstructionSlowGeneratorService
             var deadline = pastDay.AddDays(_random.Next(0, MaxDeadlineDaysFromToday));
 
             var instruction = new InstructionRm($"Поручение {i}", executor.Id, deadline, parentId: null);
-            var res = await _instructionsService.CreateInstructionAsync(instruction, creator, pastDay);
+            var res = await _instructionsService.CreateInstructionAsync(instruction, creator.MapToUser(), pastDay);
             if (!res.IsSuccess)
             {
                 throw new Exception(string.Join(", ", res.ValidationErrors));
@@ -61,7 +61,7 @@ public class InstructionSlowGeneratorService
             // тк не все поручения делегируются, рандомно решаем, будем ли делегировать
             if (_random.NextDouble() > DelegationThreshold)
             {
-                await Delegate(executor, res.Value, i.ToString(), pastDay, deadline);
+                await Delegate(executor.MapToUser(), res.Value, i.ToString(), pastDay, deadline);
             }
 
             _progress.NotifyClient(i, model.Total, socket, frequency: 1, taskId);

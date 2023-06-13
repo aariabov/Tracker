@@ -1,15 +1,15 @@
 using Microsoft.EntityFrameworkCore;
-using Tracker.Db;
-using Tracker.Db.Models;
+using Tracker.Instructions.Db;
+using Tracker.Instructions.Db.Models;
 using Tracker.Instructions.Interfaces;
 
 namespace Tracker.Instructions.Repositories;
 
 public class InstructionsTreeRepositoryCte : IInstructionsTreeRepository
 {
-    private readonly AppDbContext _db;
+    private readonly InstructionsDbContext _db;
 
-    public InstructionsTreeRepositoryCte(AppDbContext db)
+    public InstructionsTreeRepositoryCte(InstructionsDbContext db)
     {
         _db = db;
     }
@@ -46,14 +46,14 @@ SELECT * FROM r";
         FormattableString cte = @$"
 WITH RECURSIVE r AS (
    SELECT id, name, parent_id, creator_id, executor_id, deadline, exec_date, tree_path, 1 AS level
-   FROM (SELECT * FROM 
-            (SELECT 
+   FROM (SELECT * FROM
+            (SELECT
                 instructions.*,
                 (SELECT user_name::varchar FROM asp_net_users WHERE id = creator_id) AS creator,
                 (SELECT user_name::varchar FROM asp_net_users WHERE id = executor_id) AS executor
              FROM instructions
              WHERE (creator_id = {userId} AND parent_id is null) OR executor_id = {userId}) i
-         ORDER BY 
+         ORDER BY
             CASE WHEN {sort} = {Sort.NameAsc} THEN name ELSE null END ASC,
             CASE WHEN {sort} = {Sort.NameDesc} THEN name ELSE null END DESC,
             CASE WHEN {sort} = {Sort.CreatorAsc} THEN creator ELSE null END ASC,

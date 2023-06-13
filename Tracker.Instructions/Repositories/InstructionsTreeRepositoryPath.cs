@@ -1,15 +1,15 @@
 using Microsoft.EntityFrameworkCore;
-using Tracker.Db;
-using Tracker.Db.Models;
+using Tracker.Instructions.Db;
+using Tracker.Instructions.Db.Models;
 using Tracker.Instructions.Interfaces;
 
 namespace Tracker.Instructions.Repositories;
 
 public class InstructionsTreeRepositoryPath : IInstructionsTreeRepository
 {
-    private readonly AppDbContext _db;
+    private readonly InstructionsDbContext _db;
 
-    public InstructionsTreeRepositoryPath(AppDbContext db)
+    public InstructionsTreeRepositoryPath(InstructionsDbContext db)
     {
         _db = db;
     }
