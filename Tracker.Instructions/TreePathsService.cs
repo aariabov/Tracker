@@ -1,5 +1,5 @@
 using Riabov.Tracker.Common.Progress;
-using Tracker.Db.Models;
+using Tracker.Instructions.Db.Models;
 
 namespace Tracker.Instructions;
 

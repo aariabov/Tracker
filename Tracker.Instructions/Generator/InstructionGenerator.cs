@@ -1,5 +1,5 @@
 using System.Diagnostics;
-using Tracker.Db.Models;
+using Tracker.Instructions.Db.Models;
 
 namespace Tracker.Instructions.Generator;
 

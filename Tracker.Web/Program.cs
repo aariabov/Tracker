@@ -13,6 +13,7 @@ using Tracker.Db.Models;
 using Tracker.Db.Transactions;
 using Tracker.Db.UnitOfWorks;
 using Tracker.Instructions;
+using Tracker.Instructions.Db;
 using Tracker.Instructions.Generator;
 using Tracker.Instructions.Interfaces;
 using Tracker.Instructions.Repositories;
@@ -28,6 +29,9 @@ var builder = WebApplication.CreateBuilder(args);
 
 var auditConnectionString = builder.Configuration.GetConnectionString("AuditConnection");
 builder.Services.AddDbContext<AuditDbContext>(options => options.UseNpgsql(auditConnectionString).UseSnakeCaseNamingConvention());
+
+var instructionsConnectionString = builder.Configuration.GetConnectionString("InstructionsConnection");
+builder.Services.AddDbContext<InstructionsDbContext>(options => options.UseNpgsql(instructionsConnectionString).UseSnakeCaseNamingConvention());
 
 var connectionString = builder.Configuration.GetConnectionString("PostgresConnection");
 builder.Services.AddDbContext<AppDbContext>(options => options.UseNpgsql(connectionString).UseSnakeCaseNamingConvention());

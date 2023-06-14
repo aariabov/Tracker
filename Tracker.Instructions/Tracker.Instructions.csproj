@@ -8,16 +8,19 @@
 
     <ItemGroup>
       <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.2.5" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.1" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="6.0.1" />
+      <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="6.0.3" />
       <PackageReference Include="Riabov.Tracker.Common" Version="1.0.0" />
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Tracker.Db\Tracker.Db.csproj" />
-      <ProjectReference Include="..\Tracker.Users\Tracker.Users.csproj" />
+      <Folder Include="Db\Migrations" />
+      <Folder Include="TreePaths" />
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="TreePaths" />
+      <ProjectReference Include="..\Tracker.Users\Tracker.Users.csproj" />
     </ItemGroup>
 
 </Project>

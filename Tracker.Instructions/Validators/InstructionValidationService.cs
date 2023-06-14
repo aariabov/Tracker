@@ -1,8 +1,10 @@
 using Riabov.Tracker.Common;
 using Tracker.Db.Models;
+using Tracker.Instructions.Db.Models;
 using Tracker.Instructions.RequestModels;
 using Tracker.Instructions.Validators.FluentValidators;
 using Tracker.Users;
+using User = Tracker.Instructions.Db.Models.User;
 
 namespace Tracker.Instructions.Validators;
 

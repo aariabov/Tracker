@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
-using Tracker.Db;
-using Tracker.Db.Models;
+using Tracker.Instructions.Db;
+using Tracker.Instructions.Db.Models;
 using Tracker.Instructions.Interfaces;
 using Tracker.Instructions.Repositories;
 
@@ -8,7 +8,7 @@ namespace Tracker.Instructions;
 
 public class InstructionsRepository : IInstructionsRepository
 {
-    private readonly AppDbContext _db;
+    private readonly InstructionsDbContext _db;
     private readonly IInstructionsTreeRepository _treeRepository;
 
     // CTE Repository нужен для пересчета данных для быстрой работы с иерархиями
@@ -21,7 +21,7 @@ public class InstructionsRepository : IInstructionsRepository
     // чтобы можно было переключать способы без полного пересчета
     private readonly InstructionsTreeRepositoryClosure _closureRepository;
 
-    public InstructionsRepository(AppDbContext db, IInstructionsTreeRepository treeRepository)
+    public InstructionsRepository(InstructionsDbContext db, IInstructionsTreeRepository treeRepository)
     {
         _db = db;
         _treeRepository = treeRepository;

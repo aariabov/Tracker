@@ -6,6 +6,7 @@ using Tracker.Analytics.RequestModels;
 using Tracker.Analytics.ViewModels;
 using Tracker.Db;
 using Tracker.Instructions;
+using Tracker.Instructions.Db;
 
 namespace Tracker.Analytics;
 
@@ -14,10 +15,10 @@ namespace Tracker.Analytics;
 [Route("api/[controller]")]
 public class AnalyticsController : ControllerBase
 {
-    private readonly AppDbContext _db;
+    private readonly InstructionsDbContext _db;
     private readonly IInstructionStatusService _statusService;
 
-    public AnalyticsController(AppDbContext db, IInstructionStatusService statusService)
+    public AnalyticsController(InstructionsDbContext db, IInstructionStatusService statusService)
     {
         _db = db;
         _statusService = statusService;
