@@ -8,11 +8,12 @@
 
     <ItemGroup>
       <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.2.5" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.1" />
+      <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="6.0.3" />
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Tracker.Db\Tracker.Db.csproj" />
-      <ProjectReference Include="..\Tracker.Instructions\Tracker.Instructions.csproj" />
+      <Folder Include="Db\Migrations" />
     </ItemGroup>
 
 </Project>
