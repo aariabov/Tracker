@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Riabov.Tracker.Common.Progress;
+using Tracker.Analytics.Db;
 using Tracker.Audit;
 using Tracker.Audit.Db;
 using Tracker.Db;
@@ -32,6 +33,9 @@ builder.Services.AddDbContext<AuditDbContext>(options => options.UseNpgsql(audit
 
 var instructionsConnectionString = builder.Configuration.GetConnectionString("InstructionsConnection");
 builder.Services.AddDbContext<InstructionsDbContext>(options => options.UseNpgsql(instructionsConnectionString).UseSnakeCaseNamingConvention());
+
+var analyticsConnectionString = builder.Configuration.GetConnectionString("AnalyticsConnection");
+builder.Services.AddDbContext<AnalyticsDbContext>(options => options.UseNpgsql(analyticsConnectionString).UseSnakeCaseNamingConvention());
 
 var connectionString = builder.Configuration.GetConnectionString("PostgresConnection");
 builder.Services.AddDbContext<AppDbContext>(options => options.UseNpgsql(connectionString).UseSnakeCaseNamingConvention());

@@ -2,26 +2,23 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Tracker.Analytics.Db;
 using Tracker.Analytics.RequestModels;
 using Tracker.Analytics.ViewModels;
-using Tracker.Db;
-using Tracker.Instructions;
-using Tracker.Instructions.Db;
 
 namespace Tracker.Analytics;
 
+// TODO: вынести в репозиторий
 [ApiController]
 [Authorize(Roles = "Admin, Analyst")]
 [Route("api/[controller]")]
 public class AnalyticsController : ControllerBase
 {
-    private readonly InstructionsDbContext _db;
-    private readonly IInstructionStatusService _statusService;
+    private readonly AnalyticsDbContext _db;
 
-    public AnalyticsController(InstructionsDbContext db, IInstructionStatusService statusService)
+    public AnalyticsController(AnalyticsDbContext db)
     {
         _db = db;
-        _statusService = statusService;
     }
 
     [HttpPost("employee-report")]
@@ -47,7 +44,7 @@ public class AnalyticsController : ControllerBase
         var reportRows =
             from status in allStatuses
             join instruction in filteredInstructions
-                on status equals _statusService.GetStatus(instruction)
+                on status equals instruction.StatusId
                 into instructions
             select new EmployeeReportRowVm(status, instructions.Count());
 
@@ -68,7 +65,7 @@ public class AnalyticsController : ControllerBase
         var statusInfos = filteredInstructions.Select(i => new
         {
             Executor = i.Executor,
-            Status = _statusService.GetStatus(i)
+            Status = i.StatusId
         });
 
         var reportRows = from statusInfo in statusInfos
