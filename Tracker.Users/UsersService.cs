@@ -1,7 +1,6 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Http;
 using Riabov.Tracker.Common;
-using Tracker.Audit;
 using Tracker.Db.Models;
 using Tracker.Db.Transactions;
 using Tracker.Db.UnitOfWorks;
@@ -18,7 +17,7 @@ public class UsersService
     private readonly IUserRepository _userRepository;
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly ITransactionManager _transactionManager;
-    private readonly IAuditService _auditService;
+    private readonly IAuditWebService _auditWebService;
     private readonly IUnitOfWork _unitOfWork;
 
     public UsersService(IUserManagerService userManagerService
@@ -26,7 +25,7 @@ public class UsersService
         , IUserRepository userRepository
         , IHttpContextAccessor httpContextAccessor
         , ITransactionManager transactionManager
-        , IAuditService auditService
+        , IAuditWebService auditWebService
         , IUnitOfWork unitOfWork)
     {
         _userManagerService = userManagerService;
@@ -34,7 +33,7 @@ public class UsersService
         _userRepository = userRepository;
         _httpContextAccessor = httpContextAccessor;
         _transactionManager = transactionManager;
-        _auditService = auditService;
+        _auditWebService = auditWebService;
         _unitOfWork = unitOfWork;
     }
 
@@ -93,7 +92,14 @@ public class UsersService
                 throw new Exception(result.Errors.Join());
             }
 
-            auditLogId = await _auditService.LogAsync(AuditType.Create, newUser.Id, newUser.GetType().Name, GetCurrentUserId());
+            var logModel = new LogModel
+            {
+                Type = AuditType.Create,
+                EntityId = newUser.Id,
+                EntityName = newUser.GetType().Name,
+                UserId = GetCurrentUserId()
+            };
+            auditLogId = await _auditWebService.CreateLogAsync(logModel);
 
             if (userRm.Roles.Any())
             {
@@ -112,7 +118,7 @@ public class UsersService
         {
             if (auditLogId > 0)
             {
-                await _auditService.DeleteLog(auditLogId);
+                await _auditWebService.DeleteLogAsync(new DeleteLogModel { Id = auditLogId });
             }
 
             await transaction.RollbackAsync();
@@ -159,6 +165,15 @@ public class UsersService
                 throw new Exception(roleRemovingResult.Errors.Join());
             }
 
+            var logModel = new LogModel
+            {
+                Type = AuditType.Update,
+                EntityId = updatedUser.Id,
+                EntityName = updatedUser.GetType().Name,
+                UserId = GetCurrentUserId()
+            };
+            await _auditWebService.CreateLogAsync(logModel);
+
             await transaction.CommitAsync();
             return Result.Ok();
         }
@@ -180,25 +195,44 @@ public class UsersService
 
     public async Task<Result> DeleteUserAsync(UserDeletingRm userDeletingRm)
     {
-        var validationResult = await _userValidationService.ValidateDeletingModelAsync(userDeletingRm);
-        if (!validationResult.IsSuccess)
+        using var transaction = _transactionManager.BeginTransaction();
+        try
         {
-            return Result.Errors<string>(validationResult.ValidationErrors);
-        }
+            var validationResult = await _userValidationService.ValidateDeletingModelAsync(userDeletingRm);
+            if (!validationResult.IsSuccess)
+            {
+                return Result.Errors<string>(validationResult.ValidationErrors);
+            }
 
-        var deletedUser = await _userManagerService.FindByIdAsync(userDeletingRm.Id);
-        if (deletedUser is null)
+            var deletedUser = await _userManagerService.FindByIdAsync(userDeletingRm.Id);
+            if (deletedUser is null)
+            {
+                throw new Exception($"User with id {userDeletingRm.Id} not found");
+            }
+
+            var result = await _userManagerService.DeleteAsync(deletedUser);
+            if (!result.Succeeded)
+            {
+                throw new Exception(result.Errors.Join());
+            }
+
+            var logModel = new LogModel
+            {
+                Type = AuditType.Delete,
+                EntityId = deletedUser.Id,
+                EntityName = deletedUser.GetType().Name,
+                UserId = GetCurrentUserId()
+            };
+            await _auditWebService.CreateLogAsync(logModel);
+
+            await transaction.CommitAsync();
+            return Result.Ok();
+        }
+        catch
         {
-            throw new Exception($"User with id {userDeletingRm.Id} not found");
+            await transaction.RollbackAsync();
+            throw;
         }
-
-        var result = await _userManagerService.DeleteAsync(deletedUser);
-        if (!result.Succeeded)
-        {
-            throw new Exception(result.Errors.Join());
-        }
-
-        return Result.Ok();
     }
 
     public string GetCurrentUserId()

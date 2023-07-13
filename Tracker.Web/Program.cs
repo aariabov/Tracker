@@ -7,8 +7,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Riabov.Tracker.Common.Progress;
 using Tracker.Analytics.Db;
-using Tracker.Audit;
-using Tracker.Audit.Db;
 using Tracker.Db;
 using Tracker.Db.Models;
 using Tracker.Db.Transactions;
@@ -27,9 +25,6 @@ using Tracker.Web;
 using Tracker.Web.Sandbox;
 
 var builder = WebApplication.CreateBuilder(args);
-
-var auditConnectionString = builder.Configuration.GetConnectionString("AuditConnection");
-builder.Services.AddDbContext<AuditDbContext>(options => options.UseNpgsql(auditConnectionString).UseSnakeCaseNamingConvention());
 
 var instructionsConnectionString = builder.Configuration.GetConnectionString("InstructionsConnection");
 builder.Services.AddDbContext<InstructionsDbContext>(options => options.UseNpgsql(instructionsConnectionString).UseSnakeCaseNamingConvention());
@@ -80,6 +75,8 @@ builder.Services.AddControllers(option =>
     options.SuppressModelStateInvalidFilter = true; // ручная валидация в контроллерах
 });
 
+builder.Services.AddHttpClient();
+
 builder.Services.AddTransient<JwtGenerator>();
 
 builder.Services.AddScoped<IInstructionsService, InstructionsService>();
@@ -103,8 +100,7 @@ builder.Services.AddScoped<IUserValidationService, UserValidationService>();
 builder.Services.AddScoped<IUserManagerService, UserManagerService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 
-builder.Services.AddScoped<IAuditService, AuditService>();
-builder.Services.AddScoped<IAuditRepository, AuditRepository>();
+builder.Services.AddScoped<IAuditWebService, AuditWebService>();
 
 builder.Services.AddScoped<Progress>();
 builder.Services.AddScoped<ProgressableTestService>();
@@ -137,8 +133,6 @@ else
 }
 
 using var serviceScope = app.Services.CreateScope();
-var auditDbContext = serviceScope.ServiceProvider.GetRequiredService<AuditDbContext>();
-await auditDbContext.Database.MigrateAsync();
 
 var dbContext = serviceScope.ServiceProvider.GetRequiredService<AppDbContext>();
 var dataSeeder = serviceScope.ServiceProvider.GetRequiredService<DataSeeder>();

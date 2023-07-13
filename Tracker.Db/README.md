@@ -43,3 +43,21 @@ dotnet ef database update PREVIOUS_MIGRATION_NAME --context AppDbContext --proje
 ```sql
 TRUNCATE instructions RESTART IDENTITY CASCADE;
 ```
+
+
+## Транзакции
+
+Для работы с транзакциями используется ITransactionManager
+```csharp
+    using var transaction = _transactionManager.BeginTransaction();
+    try
+    {
+        ...
+        await transaction.CommitAsync();
+    }
+    catch
+    {
+        await transaction.RollbackAsync();
+        throw;
+    }
+```

@@ -2,11 +2,11 @@ using Tracker.Audit.Db.Models;
 
 namespace Tracker.Audit;
 
-public class AuditService : IAuditService
+public class AuditService
 {
-    private readonly IAuditRepository _auditRepository;
+    private readonly AuditRepository _auditRepository;
 
-    public AuditService(IAuditRepository auditRepository)
+    public AuditService(AuditRepository auditRepository)
     {
         _auditRepository = auditRepository;
     }

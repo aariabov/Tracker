@@ -4,7 +4,7 @@ using Tracker.Audit.Db.Models;
 
 namespace Tracker.Audit;
 
-public class AuditRepository : IAuditRepository
+public class AuditRepository
 {
     private readonly AuditDbContext _db;
 

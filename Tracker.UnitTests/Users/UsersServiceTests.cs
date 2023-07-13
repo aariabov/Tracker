@@ -10,7 +10,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Moq;
 using Riabov.Tracker.Common;
-using Tracker.Audit;
 using Tracker.Db.Models;
 using Tracker.Db.Transactions;
 using Tracker.Db.UnitOfWorks;
@@ -39,7 +38,7 @@ public class UsersServiceTests
         var fixture = new Fixture().Customize(new AutoMoqCustomization());
         var mockTransaction = fixture.Freeze<Mock<IContextTransaction>>();
         var mockUnitOfWork = fixture.Freeze<Mock<IUnitOfWork>>();
-        var mockAuditService = fixture.Freeze<Mock<IAuditService>>();
+        var mockAuditService = fixture.Freeze<Mock<IAuditWebService>>();
         var mockTransactionManager = fixture.Freeze<Mock<ITransactionManager>>();
         mockTransactionManager
             .Setup(m => m.BeginTransaction(IsolationLevel.Unspecified))
@@ -71,7 +70,9 @@ public class UsersServiceTests
         mockTransactionManager.Verify(m => m.BeginTransaction(IsolationLevel.Unspecified), Times.Once);
         mockUnitOfWork.Verify(m => m.SaveChangesAsync(), Times.Once);
         mockTransaction.Verify(m => m.CommitAsync(), Times.Once);
-        mockAuditService.Verify(m => m.LogAsync(AuditType.Create, It.IsAny<string>(), nameof(User), ADMIN), Times.Once);
+        mockAuditService.Verify(m => m.CreateLogAsync(It.Is<LogModel>(lm =>
+                lm.Type == AuditType.Create && lm.EntityName == nameof(User) && lm.UserId == ADMIN)),
+            Times.Once);
         mockTransaction.Verify(m => m.RollbackAsync(), Times.Never);
     }
 
@@ -89,7 +90,7 @@ public class UsersServiceTests
         var fixture = new Fixture().Customize(new AutoMoqCustomization());
         var mockTransaction = fixture.Freeze<Mock<IContextTransaction>>();
         var mockUnitOfWork = fixture.Freeze<Mock<IUnitOfWork>>();
-        var mockAuditService = fixture.Freeze<Mock<IAuditService>>();
+        var mockAuditService = fixture.Freeze<Mock<IAuditWebService>>();
         var mockTransactionManager = fixture.Freeze<Mock<ITransactionManager>>();
         mockTransactionManager
             .Setup(m => m.BeginTransaction(IsolationLevel.Unspecified))
@@ -112,7 +113,9 @@ public class UsersServiceTests
         mockTransactionManager.Verify(m => m.BeginTransaction(IsolationLevel.Unspecified), Times.Once);
         mockUnitOfWork.Verify(m => m.SaveChangesAsync(), Times.Never);
         mockTransaction.Verify(m => m.CommitAsync(), Times.Never);
-        mockAuditService.Verify(m => m.LogAsync(AuditType.Create, It.IsAny<string>(), nameof(User), ADMIN), Times.Never);
+        mockAuditService.Verify(m => m.CreateLogAsync(It.Is<LogModel>(lm =>
+                lm.Type == AuditType.Create && lm.EntityName == nameof(User) && lm.UserId == ADMIN)),
+            Times.Never);
         mockTransaction.Verify(m => m.RollbackAsync(), Times.Once);
     }
 
@@ -130,9 +133,10 @@ public class UsersServiceTests
         var fixture = new Fixture().Customize(new AutoMoqCustomization());
         var mockTransaction = fixture.Freeze<Mock<IContextTransaction>>();
         var mockUnitOfWork = fixture.Freeze<Mock<IUnitOfWork>>();
-        var mockAuditService = fixture.Freeze<Mock<IAuditService>>();
+        var mockAuditService = fixture.Freeze<Mock<IAuditWebService>>();
         mockAuditService
-            .Setup(m => m.LogAsync(AuditType.Create, It.IsAny<string>(), nameof(User), ADMIN))
+            .Setup(m => m.CreateLogAsync(It.Is<LogModel>(lm =>
+                lm.Type == AuditType.Create && lm.EntityName == nameof(User) && lm.UserId == ADMIN)))
             .Throws<Exception>();
 
         var mockTransactionManager = fixture.Freeze<Mock<ITransactionManager>>();
@@ -165,7 +169,9 @@ public class UsersServiceTests
         mockTransactionManager.Verify(m => m.BeginTransaction(IsolationLevel.Unspecified), Times.Once);
         mockUnitOfWork.Verify(m => m.SaveChangesAsync(), Times.Never);
         mockTransaction.Verify(m => m.CommitAsync(), Times.Never);
-        mockAuditService.Verify(m => m.LogAsync(AuditType.Create, It.IsAny<string>(), nameof(User), ADMIN), Times.Once);
+        mockAuditService.Verify(m => m.CreateLogAsync(It.Is<LogModel>(lm =>
+                lm.Type == AuditType.Create && lm.EntityName == nameof(User) && lm.UserId == ADMIN)),
+            Times.Once);
         mockTransaction.Verify(m => m.RollbackAsync(), Times.Once);
     }
 
@@ -185,9 +191,10 @@ public class UsersServiceTests
         var fixture = new Fixture().Customize(new AutoMoqCustomization());
         var mockTransaction = fixture.Freeze<Mock<IContextTransaction>>();
         var mockUnitOfWork = fixture.Freeze<Mock<IUnitOfWork>>();
-        var mockAuditService = fixture.Freeze<Mock<IAuditService>>();
+        var mockAuditService = fixture.Freeze<Mock<IAuditWebService>>();
         mockAuditService
-            .Setup(m => m.LogAsync(AuditType.Create, It.IsAny<string>(), nameof(User), ADMIN))
+            .Setup(m => m.CreateLogAsync(It.Is<LogModel>(lm =>
+                lm.Type == AuditType.Create && lm.EntityName == nameof(User) && lm.UserId == ADMIN)))
             .ReturnsAsync(AUDIT_LOG_ID);
 
         var mockTransactionManager = fixture.Freeze<Mock<ITransactionManager>>();
@@ -220,8 +227,10 @@ public class UsersServiceTests
         mockTransactionManager.Verify(m => m.BeginTransaction(IsolationLevel.Unspecified), Times.Once);
         mockUnitOfWork.Verify(m => m.SaveChangesAsync(), Times.Never);
         mockTransaction.Verify(m => m.CommitAsync(), Times.Never);
-        mockAuditService.Verify(m => m.LogAsync(AuditType.Create, It.IsAny<string>(), nameof(User), ADMIN), Times.Once);
-        mockAuditService.Verify(m => m.DeleteLog(AUDIT_LOG_ID), Times.Once);
+        mockAuditService.Verify(m => m.CreateLogAsync(It.Is<LogModel>(lm =>
+                lm.Type == AuditType.Create && lm.EntityName == nameof(User) && lm.UserId == ADMIN)),
+            Times.Once);
+        mockAuditService.Verify(m => m.DeleteLogAsync(It.Is<DeleteLogModel>(d => d.Id == AUDIT_LOG_ID)), Times.Once);
         mockTransaction.Verify(m => m.RollbackAsync(), Times.Once);
     }
 }
