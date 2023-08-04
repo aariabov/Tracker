@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Tracker.Db;
@@ -11,9 +12,10 @@ using Tracker.Db;
 namespace Tracker.Db.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230804075319_RemoveFkInstructionsFromCommonDb")]
+    partial class RemoveFkInstructionsFromCommonDb
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -184,7 +186,8 @@ namespace Tracker.Db.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
                         .HasColumnName("name");
 
                     b.Property<int?>("ParentId")
@@ -196,18 +199,38 @@ namespace Tracker.Db.Migrations
                         .HasColumnName("tree_path");
 
                     b.HasKey("Id")
-                        .HasName("pk_instruction");
+                        .HasName("pk_instructions");
 
                     b.HasIndex("CreatorId")
-                        .HasDatabaseName("ix_instruction_creator_id");
+                        .HasDatabaseName("ix_instructions_creator_id");
 
                     b.HasIndex("ExecutorId")
-                        .HasDatabaseName("ix_instruction_executor_id");
+                        .HasDatabaseName("ix_instructions_executor_id");
 
                     b.HasIndex("ParentId")
-                        .HasDatabaseName("ix_instruction_parent_id");
+                        .HasDatabaseName("ix_instructions_parent_id");
 
-                    b.ToTable("instruction", (string)null);
+                    b.ToTable("instructions", (string)null);
+                });
+
+            modelBuilder.Entity("Tracker.Db.Models.InstructionClosure", b =>
+                {
+                    b.Property<int>("ParentId")
+                        .HasColumnType("integer")
+                        .HasColumnName("parent_id");
+
+                    b.Property<int>("Id")
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    b.Property<int>("Depth")
+                        .HasColumnType("integer")
+                        .HasColumnName("depth");
+
+                    b.HasKey("ParentId", "Id")
+                        .HasName("pk_instructions_closures");
+
+                    b.ToTable("instructions_closures", (string)null);
                 });
 
             modelBuilder.Entity("Tracker.Db.Models.Role", b =>
@@ -671,19 +694,19 @@ namespace Tracker.Db.Migrations
                         .HasForeignKey("CreatorId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("fk_instruction_asp_net_users_creator_id");
+                        .HasConstraintName("fk_instructions_users_creator_id");
 
                     b.HasOne("Tracker.Db.Models.User", "Executor")
                         .WithMany()
                         .HasForeignKey("ExecutorId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("fk_instruction_asp_net_users_executor_id");
+                        .HasConstraintName("fk_instructions_users_executor_id");
 
                     b.HasOne("Tracker.Db.Models.Instruction", "Parent")
                         .WithMany("Children")
                         .HasForeignKey("ParentId")
-                        .HasConstraintName("fk_instruction_instruction_parent_id");
+                        .HasConstraintName("fk_instructions_instructions_parent_id");
 
                     b.Navigation("Creator");
 

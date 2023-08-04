@@ -89,6 +89,7 @@ builder.Services.AddScoped<IInstructionsRepository, InstructionsRepository>();
 // builder.Services.AddScoped<IInstructionsTreeRepository, InstructionsTreeRepositoryPath>();
 builder.Services.AddScoped<IInstructionsTreeRepository, InstructionsTreeRepositoryClosure>();
 builder.Services.AddScoped<InstructionValidationService>();
+builder.Services.AddScoped<Tracker.Instructions.UserRepository>();
 
 builder.Services.AddScoped<RolesService>();
 builder.Services.AddScoped<RoleValidationService>();
@@ -98,7 +99,7 @@ builder.Services.AddScoped<UsersService>();
 builder.Services.AddScoped<TokensService>();
 builder.Services.AddScoped<IUserValidationService, UserValidationService>();
 builder.Services.AddScoped<IUserManagerService, UserManagerService>();
-builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IUserRepository, Tracker.Users.UserRepository>();
 
 builder.Services.AddScoped<IAuditWebService, AuditWebService>();
 

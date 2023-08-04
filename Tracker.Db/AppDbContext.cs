@@ -7,9 +7,6 @@ namespace Tracker.Db;
 
 public class AppDbContext : IdentityDbContext<User, Role, string>
 {
-    public DbSet<Instruction> Instructions => Set<Instruction>();
-    public DbSet<InstructionClosure> InstructionsClosures => Set<InstructionClosure>();
-
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -22,36 +19,6 @@ public class AppDbContext : IdentityDbContext<User, Role, string>
         modelBuilder.Entity<Role>().ToTable("asp_net_roles").HasIndex(r => r.NormalizedName).HasDatabaseName("role_name_index");
         modelBuilder.Entity<IdentityUserRole<string>>().ToTable("asp_net_user_roles");
         modelBuilder.Entity<IdentityRoleClaim<string>>().ToTable("asp_net_role_claims");
-
-        modelBuilder.Entity<Instruction>(b =>
-        {
-            b.Property(p => p.Name).HasMaxLength(255);
-
-            b.HasOne(i => i.Parent)
-                .WithMany(i => i.Children)
-                .HasForeignKey(e => e.ParentId);
-
-            b.HasOne(i => i.Creator)
-                .WithMany()
-                .HasForeignKey(e => e.CreatorId);
-
-            b.HasOne(i => i.Executor)
-                .WithMany()
-                .HasForeignKey(e => e.ExecutorId);
-        });
-
-        modelBuilder.Entity<InstructionClosure>(b =>
-        {
-            b.HasKey(i => new { i.ParentId, i.Id });
-
-            b.HasOne<Instruction>()
-                .WithMany()
-                .HasForeignKey(e => e.ParentId);
-
-            b.HasOne<Instruction>()
-                .WithMany()
-                .HasForeignKey(e => e.Id);
-        });
 
         modelBuilder.Entity<User>(b =>
         {

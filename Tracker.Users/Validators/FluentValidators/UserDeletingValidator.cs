@@ -40,8 +40,7 @@ public class UserDeletingValidator : AbstractValidator<UserDeletingRm>
         }
 
         // TODO: получать через InstructionsService, когда сделаю
-        var hasInstructions = await _db.Instructions
-            .AnyAsync(i => i.CreatorId == user.Id || i.ExecutorId == user.Id, token);
+        var hasInstructions = true; // await _db.Instructions.AnyAsync(i => i.CreatorId == user.Id || i.ExecutorId == user.Id, token);
         if (hasInstructions)
         {
             context.AddFailure("У пользователя есть поручения");

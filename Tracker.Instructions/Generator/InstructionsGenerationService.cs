@@ -1,25 +1,24 @@
 using System.Diagnostics;
 using Tracker.Instructions.RequestModels;
-using Tracker.Users;
 
 namespace Tracker.Instructions.Generator;
 
 public class InstructionsGenerationService
 {
-    private readonly UsersService _usersService;
     private readonly InstructionGenerator _instructionGenerator;
     private readonly IInstructionsRepository _instructionsRepository;
     private readonly IInstructionsService _instructionsService;
+    private readonly UserRepository _userRepository;
 
-    public InstructionsGenerationService(UsersService usersService,
-        InstructionGenerator instructionGenerator,
+    public InstructionsGenerationService(InstructionGenerator instructionGenerator,
         IInstructionsRepository instructionsRepository,
-        IInstructionsService instructionsService)
+        IInstructionsService instructionsService,
+        UserRepository userRepository)
     {
-        _usersService = usersService;
         _instructionGenerator = instructionGenerator;
         _instructionsRepository = instructionsRepository;
         _instructionsService = instructionsService;
+        _userRepository = userRepository;
     }
 
     public async Task RunJob(GenerationRm model)
@@ -28,10 +27,10 @@ public class InstructionsGenerationService
 
         await _instructionsRepository.TruncateInstructions();
 
-        var allUsers = await _usersService.GetUsersTreeAsync();
-        var bosses = allUsers.Where(u => u.Children != null && u.Children.Any()).ToArray();
+        var allUsers = await _userRepository.GetAllUsers();
+        var bosses = allUsers.Where(u => u.Children.Any()).ToArray();
 
-        var instructions = _instructionGenerator.GenerateForLoop(model.Total, bosses.Select(b => b.MapToUser()).ToArray());
+        var instructions = _instructionGenerator.GenerateForLoop(model.Total, bosses.ToArray());
         foreach (var instruction in instructions)
         {
             _instructionsRepository.CreateInstruction(instruction);

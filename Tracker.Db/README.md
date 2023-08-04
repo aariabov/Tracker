@@ -15,6 +15,14 @@ dotnet ef migrations add MIGRATION_NAME --context AuditDbContext --project ..\Tr
 ```bash
 dotnet ef migrations add MIGRATION_NAME --context AppDbContext --project ..\Tracker.Db
 ```
+Иногда возникает проблема типа
+```
+An item with the same key has already been added. Key: [0, Property: Tracker.Db.Models.Instruction (Dictionary<string, object>).ExecutorId (no field, string) Indexer Required FK Index]
+```
+Видимо, возникает, из-за ключей https://stackoverflow.com/questions/56144823/entity-framework-core-add-migration-throws-an-item-with-the-same-key-has-alread
+
+Можно сначала создать миграцию на удаление ключей, а потом на удаление сущности.
+Или не парится и написать миграцию самому https://learn.microsoft.com/en-us/ef/ef6/modeling/code-first/migrations/?redirectedfrom=MSDN#customizing-migrations
 5. Проверить новый файл с миграцией, и посмотреть скрипт:
 ```bash
 dotnet ef migrations script PREVIOUS_MIGRATION_NAME --context AppDbContext --project ..\Tracker.Db
