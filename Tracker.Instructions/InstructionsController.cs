@@ -1,12 +1,10 @@
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Riabov.Tracker.Common;
 using Riabov.Tracker.Common.Progress;
 using Tracker.Instructions.Generator;
 using Tracker.Instructions.RequestModels;
 using Tracker.Instructions.ViewModels;
-using Tracker.Users;
 
 namespace Tracker.Instructions;
 
@@ -14,18 +12,15 @@ namespace Tracker.Instructions;
 [Route("api/[controller]")]
 public class InstructionsController : ControllerBase
 {
-    private readonly IInstructionsService _instructionsService;
-    private readonly UsersService _usersService;
+    private readonly InstructionsService _instructionsService;
     private readonly TreePathsService _treePathsService;
     private readonly InstructionsGenerationService _instructionsGenerationService;
 
-    public InstructionsController(IInstructionsService instructionsService,
-        UsersService usersService,
+    public InstructionsController(InstructionsService instructionsService,
         TreePathsService treePathsService,
         InstructionsGenerationService instructionsGenerationService)
     {
         _instructionsService = instructionsService;
-        _usersService = usersService;
         _treePathsService = treePathsService;
         _instructionsGenerationService = instructionsGenerationService;
     }
@@ -60,8 +55,7 @@ public class InstructionsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ModelErrorsVm))]
     public async Task<ActionResult<int>> CreateInstruction([FromBody] InstructionRm instructionRm)
     {
-        var user = await _usersService.GetCurrentUser();
-        var result = await _instructionsService.CreateInstructionAsync(instructionRm, user.MapToUser(), DateTime.UtcNow);
+        var result = await _instructionsService.CreateInstructionAsync(instructionRm, DateTime.UtcNow);
         if (result.IsSuccess)
         {
             return Ok(result.Value);
@@ -75,8 +69,7 @@ public class InstructionsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ModelErrorsVm))]
     public async Task<ActionResult> SetExecDate([FromBody] ExecDateRm execDateRm)
     {
-        var userId = _usersService.GetCurrentUserId();
-        var result = await _instructionsService.SetExecDateAsync(execDateRm, userId, DateTime.UtcNow);
+        var result = await _instructionsService.SetExecDateAsync(execDateRm, DateTime.UtcNow);
         if (result.IsSuccess)
         {
             return Ok();

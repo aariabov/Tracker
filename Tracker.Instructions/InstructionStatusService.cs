@@ -2,7 +2,7 @@ using Tracker.Instructions.Db.Models;
 
 namespace Tracker.Instructions;
 
-public class InstructionStatusService : IInstructionStatusService
+public class InstructionStatusService
 {
     public ExecStatus GetStatus(Instruction instruction)
     {

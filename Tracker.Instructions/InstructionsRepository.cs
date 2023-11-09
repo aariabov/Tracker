@@ -6,7 +6,7 @@ using Tracker.Instructions.Repositories;
 
 namespace Tracker.Instructions;
 
-public class InstructionsRepository : IInstructionsRepository
+public class InstructionsRepository
 {
     private readonly InstructionsDbContext _db;
     private readonly IInstructionsTreeRepository _treeRepository;

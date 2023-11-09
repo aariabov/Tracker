@@ -40,9 +40,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Tracker.Analytics\Tracker.Analytics.csproj" />
       <ProjectReference Include="..\Tracker.Db\Tracker.Db.csproj" />
-      <ProjectReference Include="..\Tracker.Instructions\Tracker.Instructions.csproj" />
       <ProjectReference Include="..\Tracker.Roles\Tracker.Roles.csproj" />
       <ProjectReference Include="..\Tracker.Users\Tracker.Users.csproj" />
     </ItemGroup>

@@ -77,14 +77,4 @@ public static class Helpers
             Sort.ExecDateDesc => instructions.OrderByDescending(i => i.ExecDate),
             _ => throw new ArgumentException("Unknown sort", nameof(sort))
         };
-
-    public static User MapToUser(this Tracker.Db.Models.User user)
-    {
-        return new User
-        {
-            Id = user.Id,
-            UserName = user.UserName,
-            BossId = user.BossId
-        };
-    }
 }

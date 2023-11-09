@@ -1,44 +1,45 @@
+using System.Security.Claims;
 using Riabov.Tracker.Common;
-using Tracker.Db.Models;
 using Tracker.Instructions.Db.Models;
 using Tracker.Instructions.RequestModels;
 using Tracker.Instructions.Validators;
 using Tracker.Instructions.ViewModels;
-using Tracker.Users;
 using Instruction = Tracker.Instructions.Db.Models.Instruction;
-using User = Tracker.Instructions.Db.Models.User;
 
 namespace Tracker.Instructions;
 
-public class InstructionsService : IInstructionsService
+public class InstructionsService
 {
     private readonly InstructionValidationService _instructionValidationService;
-    private readonly IInstructionsRepository _instructionsRepository;
-    private readonly UsersService _usersService;
-    private readonly IInstructionStatusService _statusService;
+    private readonly InstructionsRepository _instructionsRepository;
+    private readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly InstructionStatusService _statusService;
     private readonly TreePathsService _treePathsService;
+    private readonly UserRepository _userRepository;
 
     public InstructionsService(InstructionValidationService instructionValidationService
-        , IInstructionsRepository instructionsRepository
-        , UsersService usersService
-        , IInstructionStatusService statusService
-        , TreePathsService treePathsService)
+        , InstructionsRepository instructionsRepository
+        , InstructionStatusService statusService
+        , TreePathsService treePathsService
+        , IHttpContextAccessor httpContextAccessor
+        , UserRepository userRepository)
     {
         _instructionValidationService = instructionValidationService;
         _instructionsRepository = instructionsRepository;
-        _usersService = usersService;
         _statusService = statusService;
         _treePathsService = treePathsService;
+        _httpContextAccessor = httpContextAccessor;
+        _userRepository = userRepository;
     }
 
     public async Task<InstructionVm[]> GetUserInstructionsAsync(int page, int perPage, Sort sort)
     {
-        var userId = _usersService.GetCurrentUserId();
+        var userId = GetCurrentUserId();
         var allUserInstructions = await _instructionsRepository.GetUserInstructionsWithDescendantsAsync(userId, page, perPage, sort);
         var userInstructions = allUserInstructions
             .Where(i => i.CreatorId == userId || i.ExecutorId == userId);
 
-        var isUserBoss = await _usersService.HasUserChildrenAsync(userId);
+        var isUserBoss = await _userRepository.HasUserChildrenAsync(userId);
 
         var instructionVms = userInstructions.Select(instruction =>
         {
@@ -79,6 +80,13 @@ public class InstructionsService : IInstructionsService
         return instructionTreeItemVms.ToArray();
     }
 
+    public async Task<Result<int>> CreateInstructionAsync(InstructionRm instructionRm, DateTime today)
+    {
+        var userId = GetCurrentUserId();
+        var creator = await _userRepository.GetById(userId);
+        return await CreateInstructionAsync(instructionRm, creator, today);
+    }
+
     // TODO: можно написать юнит тест
     public async Task<Result<int>> CreateInstructionAsync(InstructionRm instructionRm, User creator, DateTime today)
     {
@@ -111,6 +119,12 @@ public class InstructionsService : IInstructionsService
         await _instructionsRepository.UpdateInstructionClosureAsync(id, parentId);
     }
 
+    public Task<Result> SetExecDateAsync(ExecDateRm execDateRm, DateTime today)
+    {
+        var executorId = GetCurrentUserId();
+        return SetExecDateAsync(execDateRm, executorId, today);
+    }
+
     public async Task<Result> SetExecDateAsync(ExecDateRm execDateRm, string executorId, DateTime today)
     {
         var validationResult = await _instructionValidationService.ValidateExecDateAsync(execDateRm, executorId, today);
@@ -138,7 +152,7 @@ public class InstructionsService : IInstructionsService
 
     public async Task<int> GetTotalUserInstructionsAsync()
     {
-        var userId = _usersService.GetCurrentUserId();
+        var userId = GetCurrentUserId();
         var total = await _instructionsRepository.GetTotalUserInstructionsAsync(userId);
         return total;
     }
@@ -176,5 +190,16 @@ public class InstructionsService : IInstructionsService
         }
 
         return !_statusService.AnyChildInWork(instruction);
+    }
+
+    private string GetCurrentUserId()
+    {
+        var userId = _httpContextAccessor.HttpContext!.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (userId is null)
+        {
+            throw new Exception("User not found");
+        }
+
+        return userId;
     }
 }

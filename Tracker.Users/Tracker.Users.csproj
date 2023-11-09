@@ -16,7 +16,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Tracker.Audit\Tracker.Audit.csproj" />
       <ProjectReference Include="..\Tracker.Db\Tracker.Db.csproj" />
     </ItemGroup>
 

@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Tracker.Instructions.Db;
 using Tracker.Instructions.Db.Models;
 
@@ -13,8 +13,23 @@ public class UserRepository
         _db = db;
     }
 
+    public Task<User> GetById(string userId)
+    {
+        return _db.Users.SingleAsync(u => u.Id == userId);
+    }
+
     public Task<User[]> GetAllUsers()
     {
         return _db.Users.ToArrayAsync();
+    }
+
+    public Task<bool> IsUserExistsAsync(string executorId)
+    {
+        return _db.Users.AnyAsync(u => u.Id == executorId);
+    }
+
+    public Task<bool> HasUserChildrenAsync(string userId)
+    {
+        return _db.Users.AnyAsync(u => u.BossId == userId);
     }
 }

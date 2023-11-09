@@ -6,17 +6,10 @@ using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Riabov.Tracker.Common.Progress;
-using Tracker.Analytics.Db;
 using Tracker.Db;
 using Tracker.Db.Models;
 using Tracker.Db.Transactions;
 using Tracker.Db.UnitOfWorks;
-using Tracker.Instructions;
-using Tracker.Instructions.Db;
-using Tracker.Instructions.Generator;
-using Tracker.Instructions.Interfaces;
-using Tracker.Instructions.Repositories;
-using Tracker.Instructions.Validators;
 using Tracker.Roles;
 using Tracker.Roles.Validators;
 using Tracker.Users;
@@ -25,12 +18,6 @@ using Tracker.Web;
 using Tracker.Web.Sandbox;
 
 var builder = WebApplication.CreateBuilder(args);
-
-var instructionsConnectionString = builder.Configuration.GetConnectionString("InstructionsConnection");
-builder.Services.AddDbContext<InstructionsDbContext>(options => options.UseNpgsql(instructionsConnectionString).UseSnakeCaseNamingConvention());
-
-var analyticsConnectionString = builder.Configuration.GetConnectionString("AnalyticsConnection");
-builder.Services.AddDbContext<AnalyticsDbContext>(options => options.UseNpgsql(analyticsConnectionString).UseSnakeCaseNamingConvention());
 
 var connectionString = builder.Configuration.GetConnectionString("PostgresConnection");
 builder.Services.AddDbContext<AppDbContext>(options => options.UseNpgsql(connectionString).UseSnakeCaseNamingConvention());
@@ -69,7 +56,7 @@ builder.Services.AddControllers(option =>
     var policy = new AuthorizationPolicyBuilder()
         .RequireAuthenticatedUser()
         .Build();
-    option.Filters.Add(new AuthorizeFilter(policy));
+    //option.Filters.Add(new AuthorizeFilter(policy));
 }).ConfigureApiBehaviorOptions(options =>
 {
     options.SuppressModelStateInvalidFilter = true; // ручная валидация в контроллерах
@@ -78,18 +65,6 @@ builder.Services.AddControllers(option =>
 builder.Services.AddHttpClient();
 
 builder.Services.AddTransient<JwtGenerator>();
-
-builder.Services.AddScoped<IInstructionsService, InstructionsService>();
-builder.Services.AddScoped<InstructionSlowGeneratorService>();
-builder.Services.AddScoped<InstructionGenerator>();
-builder.Services.AddScoped<InstructionsGenerationService>();
-builder.Services.AddScoped<IInstructionStatusService, InstructionStatusService>();
-builder.Services.AddScoped<IInstructionsRepository, InstructionsRepository>();
-// builder.Services.AddScoped<IInstructionsTreeRepository, InstructionsTreeRepositoryCte>();
-// builder.Services.AddScoped<IInstructionsTreeRepository, InstructionsTreeRepositoryPath>();
-builder.Services.AddScoped<IInstructionsTreeRepository, InstructionsTreeRepositoryClosure>();
-builder.Services.AddScoped<InstructionValidationService>();
-builder.Services.AddScoped<Tracker.Instructions.UserRepository>();
 
 builder.Services.AddScoped<RolesService>();
 builder.Services.AddScoped<RoleValidationService>();
@@ -106,7 +81,6 @@ builder.Services.AddScoped<IAuditWebService, AuditWebService>();
 builder.Services.AddScoped<Progress>();
 builder.Services.AddScoped<ProgressableTestService>();
 builder.Services.AddScoped<ProgressableParamsTestService>();
-builder.Services.AddScoped<TreePathsService>();
 
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<ITransactionManager, TransactionManager>();

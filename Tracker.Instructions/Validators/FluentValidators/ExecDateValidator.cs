@@ -3,14 +3,14 @@ using Tracker.Instructions.RequestModels;
 
 namespace Tracker.Instructions.Validators.FluentValidators;
 
-internal class ExecDateValidator : AbstractValidator<ExecDateRm>
+internal sealed class ExecDateValidator : AbstractValidator<ExecDateRm>
 {
-    private readonly IInstructionsRepository _instructionsRepository;
-    private readonly IInstructionStatusService _statusService;
+    private readonly InstructionsRepository _instructionsRepository;
+    private readonly InstructionStatusService _statusService;
     private readonly string _executorId;
 
-    public ExecDateValidator(IInstructionsRepository instructionsRepository
-        , IInstructionStatusService statusService
+    public ExecDateValidator(InstructionsRepository instructionsRepository
+        , InstructionStatusService statusService
         , string executorId
         , DateTime today)
     {
