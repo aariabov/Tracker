@@ -25,9 +25,9 @@ public class InstructionsController : ControllerBase
         _instructionsGenerationService = instructionsGenerationService;
     }
 
-    [HttpGet]
+    [HttpGet("get-user-instructions")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<InstructionVm>))]
-    public async Task<ActionResult<IEnumerable<InstructionVm>>> GetUserInstructions(int page, int perPage, string sort = "name")
+    public async Task<ActionResult<IEnumerable<InstructionVm>>> GetUserInstructions(int page, int perPage, string? sort = "name")
     {
         var sortEnum = Helpers.GetSort(sort);
         var instructionVms = await _instructionsService.GetUserInstructionsAsync(page, perPage, sortEnum);

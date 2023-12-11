@@ -1,6 +1,6 @@
 import { action, makeObservable, observable } from "mobx";
-import { ExecDateRm, InstructionRm } from "../../../api/Api";
-import { apiClient } from "../../../ApiClient";
+import { ExecDateRm, InstructionRm } from "../../../api/InstructionsApi";
+import { apiClientInstructions } from "../../../ApiClient";
 import { api, ModelErrors } from "../../../helpers/api";
 
 export class InstructionStore {
@@ -104,7 +104,7 @@ export class InstructionStore {
       execDate: execDate.toISOString(),
     };
 
-    await api(apiClient.api.instructionsSetExecDate, body);
+    await api(apiClientInstructions.api.instructionsSetExecDate, body);
   }
 
   save = async (): Promise<boolean> => {
@@ -115,7 +115,7 @@ export class InstructionStore {
       deadline: this._deadline?.toISOString() ?? "",
     };
 
-    var result = await api(apiClient.api.instructionsCreate, body);
+    var result = await api(apiClientInstructions.api.instructionsCreate, body);
     if (result.data.modelErrors) {
       this._errors = result.data.modelErrors;
       return false;

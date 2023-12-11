@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Riabov.Tracker.Common;
 using Riabov.Tracker.Common.Progress;
 using Tracker.Db;
 using Tracker.Db.Models;
@@ -34,21 +35,7 @@ builder.Services.AddIdentityCore<User>(o =>
     .AddEntityFrameworkStores<AppDbContext>()
     .AddSignInManager<SignInManager<User>>();
 
-var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Token:TokenKey"]));
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(
-        opt =>
-        {
-            opt.TokenValidationParameters = new TokenValidationParameters
-            {
-                ValidateIssuerSigningKey = true,
-                IssuerSigningKey = key,
-                ValidateAudience = false,
-                ValidateIssuer = false,
-                RequireExpirationTime = true,
-                ClockSkew = TimeSpan.Zero
-            };
-        });
+builder.Services.AddJwtAuthentication();
 
 builder.Services.AddControllers(option =>
 {
@@ -63,6 +50,11 @@ builder.Services.AddControllers(option =>
 });
 
 builder.Services.AddHttpClient();
+
+builder.Services.AddRouting(options =>
+{
+    options.LowercaseUrls = true;
+});
 
 builder.Services.AddTransient<JwtGenerator>();
 

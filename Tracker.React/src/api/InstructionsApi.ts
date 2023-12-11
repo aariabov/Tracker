@@ -14,41 +14,6 @@ export interface ClientSocketRm {
   methodName: string;
 }
 
-export interface EmployeeReportRm {
-  executorId: string;
-  /** @format date-time */
-  startDate: string;
-  /** @format date-time */
-  endDate: string;
-}
-
-export interface EmployeeReportRowVm {
-  id: ExecStatus;
-  status: string;
-  /** @format int32 */
-  count: number;
-}
-
-export interface EmployeesReportRm {
-  /** @format date-time */
-  startDate: string;
-  /** @format date-time */
-  endDate: string;
-}
-
-export interface EmployeesReportRowVm {
-  id: string;
-  executor: string;
-  /** @format int32 */
-  inWorkCount: number;
-  /** @format int32 */
-  inWorkOverdueCount: number;
-  /** @format int32 */
-  completedCount: number;
-  /** @format int32 */
-  completedOverdueCount: number;
-}
-
 export interface ExecDateRm {
   /** @format int32 */
   instructionId: number;
@@ -56,17 +21,9 @@ export interface ExecDateRm {
   execDate: string;
 }
 
-/** @format int32 */
-export type ExecStatus = 1 | 2 | 3 | 4;
-
 export interface GenerationRm {
   /** @format int32 */
   total: number;
-}
-
-export interface IdentityError {
-  code: string | null;
-  description: string | null;
 }
 
 export interface InstructionRm {
@@ -110,95 +67,15 @@ export interface InstructionVm {
   canBeExecuted: boolean;
 }
 
-export interface LoginVM {
-  email: string;
-  password: string;
-}
-
 export interface ModelErrorsVm {
   commonErrors: string[];
   modelErrors: Record<string, string>;
-}
-
-export interface OrgStructElementVm {
-  id: string;
-  name: string;
-  email: string;
-  parentId: string | null;
-  roles: string[];
-}
-
-export interface ProblemDetails {
-  type: string | null;
-  title: string | null;
-  /** @format int32 */
-  status: number | null;
-  detail: string | null;
-  instance: string | null;
-  [key: string]: any;
 }
 
 export interface ProgressRm {
   socketInfo: ClientSocketRm;
   /** @format int32 */
   taskId: number;
-}
-
-export interface RoleCreationRm {
-  name: string;
-}
-
-export interface RoleDeletingRm {
-  id: string;
-}
-
-export interface RoleUpdatingRm {
-  name: string;
-  id: string;
-  concurrencyStamp: string;
-}
-
-export interface RoleVm {
-  id: string;
-  name: string;
-  concurrencyStamp: string;
-}
-
-export interface TestJobParams {
-  /** @format int32 */
-  value: number;
-}
-
-export interface TestJobParamsProgressRm {
-  socketInfo: ClientSocketRm;
-  /** @format int32 */
-  taskId: number;
-  pars: TestJobParams;
-}
-
-export interface TokensVm {
-  token: string;
-  refreshToken: string;
-}
-
-export interface UserDeletingRm {
-  id: string;
-}
-
-export interface UserRegistrationRm {
-  name: string;
-  email: string;
-  bossId: string | null;
-  roles: string[];
-  password: string;
-}
-
-export interface UserUpdatingRm {
-  name: string;
-  email: string;
-  bossId: string | null;
-  roles: string[];
-  id: string;
 }
 
 export type QueryParamsType = Record<string | number, any>;
@@ -412,7 +289,7 @@ export class HttpClient<SecurityDataType = unknown> {
 }
 
 /**
- * @title Tracker.Web
+ * @title Tracker.Instructions
  * @version 1.0
  */
 export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDataType> {
@@ -420,45 +297,11 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
-     * @tags Analytics
-     * @name AnalyticsEmployeeReport
-     * @request POST:/api/Analytics/employee-report
-     */
-    analyticsEmployeeReport: (data: EmployeeReportRm, params: RequestParams = {}) =>
-      this.request<EmployeeReportRowVm[], any>({
-        path: `/api/Analytics/employee-report`,
-        method: "POST",
-        body: data,
-        type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @tags Analytics
-     * @name AnalyticsEmployeesReport
-     * @request POST:/api/Analytics/employees-report
-     */
-    analyticsEmployeesReport: (data: EmployeesReportRm, params: RequestParams = {}) =>
-      this.request<EmployeesReportRowVm[], any>({
-        path: `/api/Analytics/employees-report`,
-        method: "POST",
-        body: data,
-        type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
      * @tags Instructions
-     * @name InstructionsList
-     * @request GET:/api/Instructions
+     * @name InstructionsGetUserInstructionsList
+     * @request GET:/api/instructions/get-user-instructions
      */
-    instructionsList: (
+    instructionsGetUserInstructionsList: (
       query?: {
         /** @format int32 */
         page?: number;
@@ -470,7 +313,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       params: RequestParams = {},
     ) =>
       this.request<InstructionVm[], any>({
-        path: `/api/Instructions`,
+        path: `/api/instructions/get-user-instructions`,
         method: "GET",
         query: query,
         format: "json",
@@ -482,11 +325,11 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      *
      * @tags Instructions
      * @name InstructionsTotalList
-     * @request GET:/api/Instructions/total
+     * @request GET:/api/instructions/total
      */
     instructionsTotalList: (params: RequestParams = {}) =>
       this.request<number, any>({
-        path: `/api/Instructions/total`,
+        path: `/api/instructions/total`,
         method: "GET",
         format: "json",
         ...params,
@@ -497,11 +340,11 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      *
      * @tags Instructions
      * @name InstructionsDetail
-     * @request GET:/api/Instructions/{id}
+     * @request GET:/api/instructions/{id}
      */
     instructionsDetail: (id: number, params: RequestParams = {}) =>
       this.request<InstructionTreeItemVm[], any>({
-        path: `/api/Instructions/${id}`,
+        path: `/api/instructions/${id}`,
         method: "GET",
         format: "json",
         ...params,
@@ -512,11 +355,11 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      *
      * @tags Instructions
      * @name InstructionsCreate
-     * @request POST:/api/Instructions/create
+     * @request POST:/api/instructions/create
      */
     instructionsCreate: (data: InstructionRm, params: RequestParams = {}) =>
       this.request<ModelErrorsVm, any>({
-        path: `/api/Instructions/create`,
+        path: `/api/instructions/create`,
         method: "POST",
         body: data,
         type: ContentType.Json,
@@ -529,11 +372,11 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      *
      * @tags Instructions
      * @name InstructionsSetExecDate
-     * @request POST:/api/Instructions/set-exec-date
+     * @request POST:/api/instructions/set-exec-date
      */
     instructionsSetExecDate: (data: ExecDateRm, params: RequestParams = {}) =>
       this.request<ModelErrorsVm, any>({
-        path: `/api/Instructions/set-exec-date`,
+        path: `/api/instructions/set-exec-date`,
         method: "POST",
         body: data,
         type: ContentType.Json,
@@ -546,11 +389,11 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      *
      * @tags Instructions
      * @name InstructionsRecalculateAllTreePaths
-     * @request POST:/api/Instructions/recalculate-all-tree-paths
+     * @request POST:/api/instructions/recalculate-all-tree-paths
      */
     instructionsRecalculateAllTreePaths: (data: ProgressRm, params: RequestParams = {}) =>
       this.request<void, any>({
-        path: `/api/Instructions/recalculate-all-tree-paths`,
+        path: `/api/instructions/recalculate-all-tree-paths`,
         method: "POST",
         body: data,
         type: ContentType.Json,
@@ -562,11 +405,11 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      *
      * @tags Instructions
      * @name InstructionsRecalculateAllClosureTable
-     * @request POST:/api/Instructions/recalculate-all-closure-table
+     * @request POST:/api/instructions/recalculate-all-closure-table
      */
     instructionsRecalculateAllClosureTable: (params: RequestParams = {}) =>
       this.request<void, any>({
-        path: `/api/Instructions/recalculate-all-closure-table`,
+        path: `/api/instructions/recalculate-all-closure-table`,
         method: "POST",
         ...params,
       }),
@@ -576,270 +419,14 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      *
      * @tags Instructions
      * @name InstructionsGenerateInstructions
-     * @request POST:/api/Instructions/generate-instructions
+     * @request POST:/api/instructions/generate-instructions
      */
     instructionsGenerateInstructions: (data: GenerationRm, params: RequestParams = {}) =>
       this.request<void, any>({
-        path: `/api/Instructions/generate-instructions`,
+        path: `/api/instructions/generate-instructions`,
         method: "POST",
         body: data,
         type: ContentType.Json,
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @tags Roles
-     * @name RolesList
-     * @request GET:/api/Roles
-     */
-    rolesList: (params: RequestParams = {}) =>
-      this.request<RoleVm[], any>({
-        path: `/api/Roles`,
-        method: "GET",
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @tags Roles
-     * @name RolesCreate
-     * @request POST:/api/Roles/create
-     */
-    rolesCreate: (data: RoleCreationRm, params: RequestParams = {}) =>
-      this.request<ModelErrorsVm, IdentityError[]>({
-        path: `/api/Roles/create`,
-        method: "POST",
-        body: data,
-        type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @tags Roles
-     * @name RolesUpdate
-     * @request POST:/api/Roles/update
-     */
-    rolesUpdate: (data: RoleUpdatingRm, params: RequestParams = {}) =>
-      this.request<ModelErrorsVm, any>({
-        path: `/api/Roles/update`,
-        method: "POST",
-        body: data,
-        type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @tags Roles
-     * @name RolesDelete
-     * @request POST:/api/Roles/delete
-     */
-    rolesDelete: (data: RoleDeletingRm, params: RequestParams = {}) =>
-      this.request<ModelErrorsVm, any>({
-        path: `/api/Roles/delete`,
-        method: "POST",
-        body: data,
-        type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @tags Test
-     * @name TestRunProgressableJob
-     * @request POST:/api/Test/run-progressable-job
-     */
-    testRunProgressableJob: (data: ProgressRm, params: RequestParams = {}) =>
-      this.request<void, any>({
-        path: `/api/Test/run-progressable-job`,
-        method: "POST",
-        body: data,
-        type: ContentType.Json,
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @tags Test
-     * @name TestRunProgressableJobWithParams
-     * @request POST:/api/Test/run-progressable-job-with-params
-     */
-    testRunProgressableJobWithParams: (data: TestJobParamsProgressRm, params: RequestParams = {}) =>
-      this.request<void, any>({
-        path: `/api/Test/run-progressable-job-with-params`,
-        method: "POST",
-        body: data,
-        type: ContentType.Json,
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @tags Test
-     * @name TestRunUnprogressableJob
-     * @request POST:/api/Test/run-unprogressable-job
-     */
-    testRunUnprogressableJob: (params: RequestParams = {}) =>
-      this.request<void, any>({
-        path: `/api/Test/run-unprogressable-job`,
-        method: "POST",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @tags Test
-     * @name TestRunUnprogressableJobWithParams
-     * @request POST:/api/Test/run-unprogressable-job-with-params
-     */
-    testRunUnprogressableJobWithParams: (data: TestJobParams, params: RequestParams = {}) =>
-      this.request<void, any>({
-        path: `/api/Test/run-unprogressable-job-with-params`,
-        method: "POST",
-        body: data,
-        type: ContentType.Json,
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @tags Test
-     * @name TestTest
-     * @request POST:/api/Test/test
-     */
-    testTest: (params: RequestParams = {}) =>
-      this.request<void, any>({
-        path: `/api/Test/test`,
-        method: "POST",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @tags Users
-     * @name UsersList
-     * @request GET:/api/Users
-     */
-    usersList: (params: RequestParams = {}) =>
-      this.request<OrgStructElementVm[], any>({
-        path: `/api/Users`,
-        method: "GET",
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @tags Users
-     * @name UsersRegister
-     * @request POST:/api/Users/register
-     */
-    usersRegister: (data: UserRegistrationRm, params: RequestParams = {}) =>
-      this.request<ModelErrorsVm, any>({
-        path: `/api/Users/register`,
-        method: "POST",
-        body: data,
-        type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @tags Users
-     * @name UsersUpdate
-     * @request POST:/api/Users/update
-     */
-    usersUpdate: (data: UserUpdatingRm, params: RequestParams = {}) =>
-      this.request<ModelErrorsVm, any>({
-        path: `/api/Users/update`,
-        method: "POST",
-        body: data,
-        type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @tags Users
-     * @name UsersDelete
-     * @request POST:/api/Users/delete
-     */
-    usersDelete: (data: UserDeletingRm, params: RequestParams = {}) =>
-      this.request<ModelErrorsVm, any>({
-        path: `/api/Users/delete`,
-        method: "POST",
-        body: data,
-        type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @tags Users
-     * @name UsersLogin
-     * @request POST:/api/Users/login
-     */
-    usersLogin: (data: LoginVM, params: RequestParams = {}) =>
-      this.request<TokensVm, ProblemDetails>({
-        path: `/api/Users/login`,
-        method: "POST",
-        body: data,
-        type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @tags Users
-     * @name UsersRefreshToken
-     * @request POST:/api/Users/refresh-token
-     */
-    usersRefreshToken: (data: string, params: RequestParams = {}) =>
-      this.request<TokensVm, ProblemDetails>({
-        path: `/api/Users/refresh-token`,
-        method: "POST",
-        body: data,
-        type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @tags Users
-     * @name UsersRevoke
-     * @request POST:/api/Users/revoke
-     */
-    usersRevoke: (params: RequestParams = {}) =>
-      this.request<void, any>({
-        path: `/api/Users/revoke`,
-        method: "POST",
         ...params,
       }),
   };

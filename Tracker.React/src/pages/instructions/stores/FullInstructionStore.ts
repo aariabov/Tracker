@@ -1,6 +1,6 @@
 import { makeObservable, observable, computed, action } from "mobx";
-import { InstructionTreeItemVm } from "../../../api/Api";
-import { apiClient } from "../../../ApiClient";
+import { InstructionTreeItemVm } from "../../../api/InstructionsApi";
+import { apiClientInstructions } from "../../../ApiClient";
 import { listToTree } from "../../../helpers";
 import { api } from "../../../helpers/api";
 
@@ -36,7 +36,7 @@ export class FullInstructionStore {
 
   show = async (instructionId: number): Promise<void> => {
     this._isDrawerVisible = true;
-    const res = await api(apiClient.api.instructionsDetail, instructionId);
+    const res = await api(apiClientInstructions.api.instructionsDetail, instructionId);
     this._instructions = res.data;
   };
 

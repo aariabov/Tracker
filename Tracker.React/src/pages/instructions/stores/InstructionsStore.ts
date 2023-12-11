@@ -8,8 +8,8 @@ import {
   SorterResult,
   TableCurrentDataSource,
 } from "antd/lib/table/interface";
-import { apiClient } from "../../../ApiClient";
-import { InstructionVm } from "../../../api/Api";
+import { apiClientInstructions } from "../../../ApiClient";
+import { InstructionVm } from "../../../api/InstructionsApi";
 
 const DEFAULT_PER_PAGE = 5;
 
@@ -66,12 +66,12 @@ export class InstructionsStore {
       sort: sort,
     };
 
-    const res = await api(apiClient.api.instructionsList, query);
+    const res = await api(apiClientInstructions.api.instructionsGetUserInstructionsList, query);
     this.instructions = res.data;
   }
 
   async getTotalInstructions(): Promise<void> {
-    var res = await api(apiClient.api.instructionsTotalList);
+    var res = await api(apiClientInstructions.api.instructionsTotalList);
     this.totalInstructions = res.data;
   }
 

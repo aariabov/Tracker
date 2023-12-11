@@ -1,6 +1,6 @@
 import { HubConnection } from "@microsoft/signalr";
-import { HttpResponse, RequestParams, TestJobParams } from "../../api/Api";
-import { apiClient } from "../../ApiClient";
+import { HttpResponse, RequestParams, TestJobParams } from "../../api/UsersApi";
+import { apiClientUsers } from "../../ApiClient";
 import { api } from "../../helpers/api";
 import { Status } from "./Status";
 
@@ -32,7 +32,7 @@ export abstract class Util {
     this.changeStatus(Status.Completed);
   }
 
-  private changeStatus(newStatus: Status) {
+  private changeStatus(newStatus: Status): void {
     this.status = newStatus;
     this._updateUtils();
   }
@@ -67,7 +67,7 @@ export class ProgressableUtil extends Util {
     await this._api();
   }
 
-  public updateProgress(processed: number, total: number) {
+  public updateProgress(processed: number, total: number): void {
     this.progress = Math.floor((processed * 100) / total);
     this._updateUtils();
   }

@@ -2,7 +2,7 @@ import { Table } from "antd";
 import React, { FC } from "react";
 import { observer } from "mobx-react";
 import { EmployeeReportStore } from "./EmployeeReportStore";
-import { EmployeeReportRowVm } from "../../api/Api";
+import { EmployeeReportRowVm } from "../../api/AnalyticsApi";
 
 interface Props {
   store: EmployeeReportStore;

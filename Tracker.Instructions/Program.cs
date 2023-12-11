@@ -1,5 +1,7 @@
 using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore;
+using Riabov.Tracker.Common;
+using Riabov.Tracker.Common.Progress;
 using Tracker.Instructions;
 using Tracker.Instructions.Db;
 using Tracker.Instructions.Generator;
@@ -27,7 +29,12 @@ builder.Services.AddScoped<IInstructionsTreeRepository, InstructionsTreeReposito
 builder.Services.AddScoped<InstructionValidationService>();
 builder.Services.AddScoped<TreePathsService>();
 builder.Services.AddScoped<UserRepository>();
+builder.Services.AddHttpContextAccessor();
 
+builder.Services.AddJwtAuthentication();
+
+builder.Services.AddScoped<Progress>();
+builder.Services.AddSignalR();
 
 builder.Services
     .AddControllers()
@@ -35,7 +42,11 @@ builder.Services
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SchemaFilter<RequireValueTypePropertiesSchemaFilter>(true);
+    options.SupportNonNullableReferenceTypes();
+});
 
 var app = builder.Build();
 
@@ -52,8 +63,9 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
-
+app.MapHub<ProgressHub>("/api/progress-hub");
 app.Run();

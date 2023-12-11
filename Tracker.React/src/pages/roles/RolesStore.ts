@@ -1,6 +1,6 @@
 import { makeObservable, observable, action } from "mobx";
-import { RoleVm } from "../../api/Api";
-import { apiClient } from "../../ApiClient";
+import { RoleVm } from "../../api/UsersApi";
+import { apiClientUsers } from "../../ApiClient";
 import { api } from "../../helpers/api";
 
 export class RolesStore {
@@ -19,7 +19,7 @@ export class RolesStore {
 
   load = async (): Promise<void> => {
     this._roles = [];
-    var res = await api(apiClient.api.rolesList);
+    var res = await api(apiClientUsers.api.rolesGetAllRolesList);
     this._roles = res.data;
   };
 }

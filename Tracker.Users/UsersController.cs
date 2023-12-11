@@ -20,7 +20,7 @@ public class UsersController : ControllerBase
         _tokensService = tokensService;
     }
 
-    [HttpGet]
+    [HttpGet("get-all-users")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<OrgStructElementVm>))]
     public async Task<ActionResult<IEnumerable<OrgStructElementVm>>> GetAllUsers()
     {

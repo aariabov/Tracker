@@ -1,6 +1,6 @@
 import { action, makeObservable, observable } from "mobx";
-import { LoginVM } from "../api/Api";
-import { apiClient } from "../ApiClient";
+import { LoginVM } from "../api/UsersApi";
+import { apiClientUsers } from "../ApiClient";
 import { api } from "../helpers/api";
 import { userStore } from "./UserStore";
 
@@ -58,7 +58,7 @@ export class LoginStore {
     };
 
     try {
-      const res = await api(apiClient.api.usersLogin, body);
+      const res = await api(apiClientUsers.api.usersLogin, body);
       userStore.setTokens(res.data.token, res.data.refreshToken);
       this.clear();
     } catch (err) {
