@@ -3,8 +3,8 @@ import {
   UserDeletingRm,
   UserRegistrationRm,
   UserUpdatingRm,
-} from "../../api/Api";
-import { apiClient } from "../../ApiClient";
+} from "../../api/UsersApi";
+import { apiClientUsers } from "../../ApiClient";
 import { api, ModelErrors } from "../../helpers/api";
 import { OrgStructElementRow } from "../../stores/OrgStructStore";
 
@@ -129,7 +129,7 @@ export class OrgStructElementStore {
       id: roleId,
     };
 
-    var res = await api(apiClient.api.usersDelete, body);
+    var res = await api(apiClientUsers.api.usersDelete, body);
     return res.data;
   };
 
@@ -157,7 +157,7 @@ export class OrgStructElementStore {
       roles: this._roles,
     };
 
-    var res = await api(apiClient.api.usersRegister, body);
+    var res = await api(apiClientUsers.api.usersRegister, body);
     return res.data;
   }
 
@@ -170,7 +170,7 @@ export class OrgStructElementStore {
       roles: this._roles,
     };
 
-    var res = await api(apiClient.api.usersUpdate, body);
+    var res = await api(apiClientUsers.api.usersUpdate, body);
     return res.data;
   }
 }

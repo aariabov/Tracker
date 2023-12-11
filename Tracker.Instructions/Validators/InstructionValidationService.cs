@@ -1,31 +1,27 @@
 using Riabov.Tracker.Common;
-using Tracker.Db.Models;
-using Tracker.Instructions.Db.Models;
 using Tracker.Instructions.RequestModels;
 using Tracker.Instructions.Validators.FluentValidators;
-using Tracker.Users;
 using User = Tracker.Instructions.Db.Models.User;
 
 namespace Tracker.Instructions.Validators;
 
 public class InstructionValidationService
 {
-    private readonly IInstructionsRepository _instructionsRepository;
-    private readonly UsersService _usersService;
-    private readonly IInstructionStatusService _statusService;
+    private readonly InstructionsRepository _instructionsRepository;
+    private readonly InstructionStatusService _statusService;
+    private readonly UserRepository _userRepository;
 
-    public InstructionValidationService(IInstructionsRepository instructionsRepository
-        , UsersService usersService
-        , IInstructionStatusService statusService)
+    public InstructionValidationService(InstructionsRepository instructionsRepository
+        , InstructionStatusService statusService, UserRepository userRepository)
     {
         _instructionsRepository = instructionsRepository;
-        _usersService = usersService;
         _statusService = statusService;
+        _userRepository = userRepository;
     }
 
     public async Task<Result> ValidateInstructionAsync(InstructionRm instructionRm, User creator, DateTime today)
     {
-        var validator = new InstructionValidator(_instructionsRepository, _usersService, _statusService, creator, today);
+        var validator = new InstructionValidator(_instructionsRepository, _userRepository, _statusService, creator, today);
         var validationResult = await validator.ValidateAsync(instructionRm);
         if (validationResult.IsValid)
         {

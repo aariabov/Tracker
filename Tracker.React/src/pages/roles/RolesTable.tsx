@@ -3,7 +3,7 @@ import React, { FC, ReactNode } from "react";
 import { observer } from "mobx-react";
 import { RolesStore } from "./RolesStore";
 import { RoleStore } from "./RoleStore";
-import { RoleVm } from "../../api/Api";
+import { RoleVm } from "../../api/UsersApi";
 
 interface Props {
   rolesStore: RolesStore;

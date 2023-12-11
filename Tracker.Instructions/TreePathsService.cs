@@ -7,10 +7,10 @@ public class TreePathsService
 {
     public const char TreePathDelimiter = '/';
 
-    private readonly IInstructionsRepository _instructionsRepository;
+    private readonly InstructionsRepository _instructionsRepository;
     private readonly Progress _progress;
 
-    public TreePathsService(IInstructionsRepository instructionsRepository, Progress progress)
+    public TreePathsService(InstructionsRepository instructionsRepository, Progress progress)
     {
         _instructionsRepository = instructionsRepository;
         _progress = progress;

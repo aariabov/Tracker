@@ -23,7 +23,7 @@ public class RolesController : ControllerBase
     /// Получить список всех ролей
     /// </summary>
     /// <returns></returns>
-    [HttpGet]
+    [HttpGet("get-all-roles")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<RoleVm>))]
     public async Task<ActionResult<IEnumerable<RoleVm>>> GetAllRoles()
     {

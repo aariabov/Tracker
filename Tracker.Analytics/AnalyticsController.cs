@@ -10,7 +10,6 @@ namespace Tracker.Analytics;
 
 // TODO: вынести в репозиторий
 [ApiController]
-[Authorize(Roles = "Admin, Analyst")]
 [Route("api/[controller]")]
 public class AnalyticsController : ControllerBase
 {

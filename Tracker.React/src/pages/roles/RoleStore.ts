@@ -4,8 +4,8 @@ import {
   RoleDeletingRm,
   RoleUpdatingRm,
   RoleVm,
-} from "../../api/Api";
-import { apiClient } from "../../ApiClient";
+} from "../../api/UsersApi";
+import { apiClientUsers } from "../../ApiClient";
 import { ModelErrors, api } from "../../helpers/api";
 
 export class RoleStore {
@@ -78,7 +78,7 @@ export class RoleStore {
       id: roleId,
     };
 
-    const res = await api(apiClient.api.rolesDelete, body);
+    const res = await api(apiClientUsers.api.rolesDelete, body);
     return res.data;
   };
 
@@ -100,7 +100,7 @@ export class RoleStore {
       name: this._name,
     };
 
-    const res = await api(apiClient.api.rolesCreate, body);
+    const res = await api(apiClientUsers.api.rolesCreate, body);
     return res.data;
   }
 
@@ -111,7 +111,7 @@ export class RoleStore {
       concurrencyStamp: this._concurrencyStamp,
     };
 
-    const res = await api(apiClient.api.rolesUpdate, body);
+    const res = await api(apiClientUsers.api.rolesUpdate, body);
     return res.data;
   }
 }

@@ -1,6 +1,6 @@
 import { makeObservable, observable, computed, action } from "mobx";
-import { OrgStructElementVm } from "../api/Api";
-import { apiClient } from "../ApiClient";
+import { OrgStructElementVm } from "../api/UsersApi";
+import { apiClientUsers } from "../ApiClient";
 import { listToTree } from "../helpers";
 import { api } from "../helpers/api";
 import TreeNode from "../interfaces/TreeNode";
@@ -42,7 +42,7 @@ export class OrgStructStore {
   };
 
   load = async (): Promise<void> => {
-    var res = await api(apiClient.api.usersList);
+    var res = await api(apiClientUsers.api.usersGetAllUsersList);
     this.orgStructElements = res.data;
   };
 }

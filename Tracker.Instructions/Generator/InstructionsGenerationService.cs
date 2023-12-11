@@ -6,13 +6,13 @@ namespace Tracker.Instructions.Generator;
 public class InstructionsGenerationService
 {
     private readonly InstructionGenerator _instructionGenerator;
-    private readonly IInstructionsRepository _instructionsRepository;
-    private readonly IInstructionsService _instructionsService;
+    private readonly InstructionsRepository _instructionsRepository;
+    private readonly InstructionsService _instructionsService;
     private readonly UserRepository _userRepository;
 
     public InstructionsGenerationService(InstructionGenerator instructionGenerator,
-        IInstructionsRepository instructionsRepository,
-        IInstructionsService instructionsService,
+        InstructionsRepository instructionsRepository,
+        InstructionsService instructionsService,
         UserRepository userRepository)
     {
         _instructionGenerator = instructionGenerator;

@@ -3,8 +3,8 @@ import {
   ProblemDetails,
   RequestParams,
   TokensVm,
-} from "../api/Api";
-import { apiClient } from "../ApiClient";
+} from "../api/UsersApi";
+import { apiClientUsers } from "../ApiClient";
 import { userStore } from "../auth/UserStore";
 import { errorStore } from "../stores/ErrorStore";
 
@@ -16,7 +16,7 @@ let fetchPromise: Promise<HttpResponse<TokensVm, ProblemDetails>> | null;
 
 async function refreshToken(): Promise<void> {
   if (!fetchPromise) {
-    fetchPromise = apiClient.api.usersRefreshToken(userStore.refreshToken);
+    fetchPromise = apiClientUsers.api.usersRefreshToken(userStore.refreshToken);
   }
 
   const response = await fetchPromise;

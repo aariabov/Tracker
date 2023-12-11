@@ -1,8 +1,8 @@
 import { makeObservable, observable, computed, action } from "mobx";
 import { Moment } from "moment";
 import { RangeValue } from "rc-picker/lib/interface";
-import { EmployeesReportRm, EmployeesReportRowVm } from "../../api/Api";
-import { apiClient } from "../../ApiClient";
+import { EmployeesReportRm, EmployeesReportRowVm } from "../../api/AnalyticsApi";
+import { apiClientAnalytics } from "../../ApiClient";
 import { api } from "../../helpers/api";
 
 export class EmployeesReportStore {
@@ -42,7 +42,7 @@ export class EmployeesReportStore {
         endDate: this._period[1].toDate().toISOString(),
       };
 
-      const res = await api(apiClient.api.analyticsEmployeesReport, body);
+      const res = await api(apiClientAnalytics.api.analyticsEmployeesReport, body);
       this._rows = res.data;
     } else {
       if (!this._period) this._periodError = "Выберите период";

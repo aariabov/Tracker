@@ -1,29 +1,26 @@
 using FluentValidation;
-using Tracker.Db.Models;
-using Tracker.Instructions.Db.Models;
 using Tracker.Instructions.RequestModels;
-using Tracker.Users;
 using User = Tracker.Instructions.Db.Models.User;
 
 namespace Tracker.Instructions.Validators.FluentValidators;
 
-internal class InstructionValidator : AbstractValidator<InstructionRm>
+internal sealed class InstructionValidator : AbstractValidator<InstructionRm>
 {
-    private readonly IInstructionsRepository _instructionsRepository;
-    private readonly UsersService _usersService;
-    private readonly IInstructionStatusService _statusService;
+    private readonly InstructionsRepository _instructionsRepository;
+    private readonly InstructionStatusService _statusService;
     private readonly User _creator;
+    private readonly UserRepository _userRepository;
 
-    public InstructionValidator(IInstructionsRepository instructionsRepository
-        , UsersService usersService
-        , IInstructionStatusService statusService
+    public InstructionValidator(InstructionsRepository instructionsRepository
+        , UserRepository userRepository
+        , InstructionStatusService statusService
         , User creator
         , DateTime today)
     {
         _instructionsRepository = instructionsRepository;
-        _usersService = usersService;
         _statusService = statusService;
         _creator = creator;
+        _userRepository = userRepository;
 
         const int nameMinLen = 3;
         const int nameMaxLen = 100;
@@ -50,7 +47,7 @@ internal class InstructionValidator : AbstractValidator<InstructionRm>
 
     private async Task<bool> ExecutorExistsAsync(string executorId, CancellationToken token)
     {
-        return await _usersService.IsUserExistsAsync(executorId);
+        return await _userRepository.IsUserExistsAsync(executorId);
     }
 
     private async Task<bool> ParentExistsAsync(int? parentId, CancellationToken token)

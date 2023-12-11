@@ -2,7 +2,6 @@ using System.Diagnostics;
 using Riabov.Tracker.Common.Progress;
 using Tracker.Instructions.Db.Models;
 using Tracker.Instructions.RequestModels;
-using Tracker.Users;
 
 namespace Tracker.Instructions;
 
@@ -18,16 +17,16 @@ public class InstructionSlowGeneratorService
     private const double ChildDeadlineThreshold = 0.1;
     private const double ExecutionThreshold = 0.1;
 
-    private readonly UsersService _usersService;
-    private readonly IInstructionsService _instructionsService;
+    private readonly InstructionsService _instructionsService;
     private readonly Progress _progress;
     private readonly Random _random;
+    private readonly UserRepository _userRepository;
 
-    public InstructionSlowGeneratorService(UsersService usersService, IInstructionsService instructionsService, Progress progress)
+    public InstructionSlowGeneratorService(InstructionsService instructionsService, Progress progress, UserRepository userRepository)
     {
-        _usersService = usersService;
         _instructionsService = instructionsService;
         _progress = progress;
+        _userRepository = userRepository;
         _random = new Random();
     }
 
@@ -36,8 +35,8 @@ public class InstructionSlowGeneratorService
     {
         var watch = Stopwatch.StartNew();
 
-        var allUsers = await _usersService.GetUsersTreeAsync();
-        var bosses = allUsers.Where(u => u.Children != null && u.Children.Any()).ToArray();
+        var allUsers = await _userRepository.GetAllUsers();
+        var bosses = allUsers.Where(u => u.Children.Any()).ToArray();
 
         for (var i = 1; i < model.Total; i++)
         {
@@ -52,7 +51,7 @@ public class InstructionSlowGeneratorService
             var deadline = pastDay.AddDays(_random.Next(0, MaxDeadlineDaysFromToday));
 
             var instruction = new InstructionRm($"Поручение {i}", executor.Id, deadline, parentId: null);
-            var res = await _instructionsService.CreateInstructionAsync(instruction, creator.MapToUser(), pastDay);
+            var res = await _instructionsService.CreateInstructionAsync(instruction, creator, pastDay);
             if (!res.IsSuccess)
             {
                 throw new Exception(string.Join(", ", res.ValidationErrors));
@@ -61,7 +60,7 @@ public class InstructionSlowGeneratorService
             // тк не все поручения делегируются, рандомно решаем, будем ли делегировать
             if (_random.NextDouble() > DelegationThreshold)
             {
-                await Delegate(executor.MapToUser(), res.Value, i.ToString(), pastDay, deadline);
+                await Delegate(executor, res.Value, i.ToString(), pastDay, deadline);
             }
 
             _progress.NotifyClient(i, model.Total, socket, frequency: 1, taskId);

@@ -1,7 +1,8 @@
 import { HubConnection, HubConnectionBuilder } from "@microsoft/signalr";
 import { makeObservable, observable, action } from "mobx";
-import { GenerationRm, TestJobParams } from "../../api/Api";
-import { apiClient } from "../../ApiClient";
+import { GenerationRm } from "../../api/InstructionsApi";
+import { TestJobParams } from "../../api/UsersApi";
+import { apiClientInstructions, apiClientUsers } from "../../ApiClient";
 import { api } from "../../helpers/api";
 import { ProgressableUtil, UnProgressableUtil, Util } from "./Util";
 
@@ -32,7 +33,7 @@ export class UtilsStore {
         name: "Полный пересчет tree paths для иерархий поручений",
         updateUtils: this.updateUtils.bind(this),
         api: () =>
-          api(apiClient.api.instructionsRecalculateAllTreePaths, {
+          api(apiClientInstructions.api.instructionsRecalculateAllTreePaths, {
             socketInfo: {
               connectionId: this._connection.connectionId!,
               methodName: progressMethodName,
@@ -44,21 +45,21 @@ export class UtilsStore {
         id: 2,
         name: "Полный пересчет closure table для иерархий поручений",
         updateUtils: this.updateUtils.bind(this),
-        api: () => api(apiClient.api.instructionsRecalculateAllClosureTable),
+        api: () => api(apiClientInstructions.api.instructionsRecalculateAllClosureTable),
       }),
       new UnProgressableUtil({
         id: 3,
         name: "Генерация поручений",
         updateUtils: this.updateUtils.bind(this),
         api: () =>
-          api(apiClient.api.instructionsGenerateInstructions, generationParam),
+          api(apiClientInstructions.api.instructionsGenerateInstructions, generationParam),
       }),
       new ProgressableUtil({
         id: 4,
         name: "Test run progressable job",
         updateUtils: this.updateUtils.bind(this),
         api: () =>
-          api(apiClient.api.testRunProgressableJob, {
+          api(apiClientUsers.api.testRunProgressableJob, {
             socketInfo: {
               connectionId: this._connection.connectionId!,
               methodName: progressMethodName,
@@ -71,7 +72,7 @@ export class UtilsStore {
         name: "Test run progressable job with params",
         updateUtils: this.updateUtils.bind(this),
         api: () =>
-          api(apiClient.api.testRunProgressableJobWithParams, {
+          api(apiClientUsers.api.testRunProgressableJobWithParams, {
             socketInfo: {
               connectionId: this._connection.connectionId!,
               methodName: progressMethodName,
@@ -83,7 +84,7 @@ export class UtilsStore {
       new UnProgressableUtil({
         id: 6,
         name: "Test run unprogressable job",
-        api: () => api(apiClient.api.testRunUnprogressableJob),
+        api: () => api(apiClientUsers.api.testRunUnprogressableJob),
         updateUtils: this.updateUtils.bind(this),
       }),
       new UnProgressableUtil({
@@ -91,7 +92,7 @@ export class UtilsStore {
         name: "Test run unprogressable job with params",
         updateUtils: this.updateUtils.bind(this),
         api: () =>
-          api(apiClient.api.testRunUnprogressableJobWithParams, testParam),
+          api(apiClientUsers.api.testRunUnprogressableJobWithParams, testParam),
       }),
     ];
   }

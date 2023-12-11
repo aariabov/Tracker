@@ -15,7 +15,7 @@ const config = {
     historyApiFallback: true,
     proxy: {
       "/api": {
-        target: "https://localhost:7006/",
+        target: "https://localhost:5077/",
         secure: false,
         ws: true,
       },

@@ -19,7 +19,7 @@
         <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       </PackageReference>
       <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="6.0.10" />
-      <PackageReference Include="Riabov.Tracker.Common" Version="1.0.0" />
+      <PackageReference Include="Riabov.Tracker.Common" Version="1.0.1" />
       <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
     </ItemGroup>
 
@@ -40,9 +40,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Tracker.Analytics\Tracker.Analytics.csproj" />
       <ProjectReference Include="..\Tracker.Db\Tracker.Db.csproj" />
-      <ProjectReference Include="..\Tracker.Instructions\Tracker.Instructions.csproj" />
       <ProjectReference Include="..\Tracker.Roles\Tracker.Roles.csproj" />
       <ProjectReference Include="..\Tracker.Users\Tracker.Users.csproj" />
     </ItemGroup>
