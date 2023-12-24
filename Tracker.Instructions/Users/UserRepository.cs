@@ -32,4 +32,16 @@ public class UserRepository
     {
         return _db.Users.AnyAsync(u => u.BossId == userId);
     }
+
+    public void UpdateUser(User user)
+    {
+        _db.Users.Update(user);
+    }
+
+    public void InsertUser(User user)
+    {
+        _db.Users.Add(user);
+    }
+
+    public async Task SaveChangesAsync() => await _db.SaveChangesAsync();
 }

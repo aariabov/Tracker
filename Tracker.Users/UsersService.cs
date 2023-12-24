@@ -1,9 +1,12 @@
 using System.Security.Claims;
+using Confluent.Kafka;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
 using Riabov.Tracker.Common;
 using Tracker.Db.Models;
 using Tracker.Db.Transactions;
 using Tracker.Db.UnitOfWorks;
+using Tracker.Users.Kafka;
 using Tracker.Users.RequestModels;
 using Tracker.Users.Validators;
 using Tracker.Users.ViewModels;
@@ -12,6 +15,10 @@ namespace Tracker.Users;
 
 public class UsersService
 {
+    private readonly string _userWasUpdatedTopic;
+    private readonly string _userWasAddedTopic;
+    private readonly string _userWasDeletedTopic;
+
     private readonly IUserManagerService _userManagerService;
     private readonly IUserValidationService _userValidationService;
     private readonly IUserRepository _userRepository;
@@ -19,6 +26,7 @@ public class UsersService
     private readonly ITransactionManager _transactionManager;
     private readonly IAuditWebService _auditWebService;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IProducer _producer;
 
     public UsersService(IUserManagerService userManagerService
         , IUserValidationService userValidationService
@@ -26,7 +34,9 @@ public class UsersService
         , IHttpContextAccessor httpContextAccessor
         , ITransactionManager transactionManager
         , IAuditWebService auditWebService
-        , IUnitOfWork unitOfWork)
+        , IUnitOfWork unitOfWork
+        , IProducer producer
+        , IConfiguration config)
     {
         _userManagerService = userManagerService;
         _userValidationService = userValidationService;
@@ -35,6 +45,11 @@ public class UsersService
         _transactionManager = transactionManager;
         _auditWebService = auditWebService;
         _unitOfWork = unitOfWork;
+        _producer = producer;
+
+        _userWasUpdatedTopic = config.GetValue<string>("Kafka:UserWasUpdatedTopic");
+        _userWasAddedTopic = config.GetValue<string>("Kafka:UserWasAddedTopic");
+        _userWasDeletedTopic = config.GetValue<string>("Kafka:UserWasDeletedTopic");
     }
 
     public async Task<OrgStructElementVm[]> GetAllUsersAsync()
@@ -111,6 +126,10 @@ public class UsersService
             }
 
             await _unitOfWork.SaveChangesAsync();
+
+            var kafkaUser = KafkaUser.CreateFromUser(newUser);
+            await _producer.Produce(_userWasAddedTopic, newUser.Id, kafkaUser);
+
             await transaction.CommitAsync();
             return Result.Ok(newUser.Id);
         }
@@ -174,6 +193,9 @@ public class UsersService
             };
             await _auditWebService.CreateLogAsync(logModel);
 
+            var kafkaUser = KafkaUser.CreateFromUser(updatedUser);
+            await _producer.Produce(_userWasUpdatedTopic, updatedUser.Id, kafkaUser);
+
             await transaction.CommitAsync();
             return Result.Ok();
         }
@@ -224,6 +246,8 @@ public class UsersService
                 UserId = GetCurrentUserId()
             };
             await _auditWebService.CreateLogAsync(logModel);
+
+            await _producer.Produce(_userWasDeletedTopic, deletedUser.Id, deletedUser.Id);
 
             await transaction.CommitAsync();
             return Result.Ok();
