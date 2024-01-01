@@ -39,13 +39,7 @@ public class UserDeletingValidator : AbstractValidator<UserDeletingRm>
             return;
         }
 
-        // TODO: получать через InstructionsService, когда сделаю
-        var hasInstructions = true; // await _db.Instructions.AnyAsync(i => i.CreatorId == user.Id || i.ExecutorId == user.Id, token);
-        if (hasInstructions)
-        {
-            context.AddFailure("У пользователя есть поручения");
-            return;
-        }
+        // TODO: возможно, надо проверить есть ли у юзера поручения (запрос в сервис с поручениями)
 
         if (user.IsAdmin(_adminEmail))
         {

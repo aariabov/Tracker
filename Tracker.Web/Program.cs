@@ -1,4 +1,5 @@
 using System.Text;
+using Confluent.Kafka;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -14,6 +15,7 @@ using Tracker.Db.UnitOfWorks;
 using Tracker.Roles;
 using Tracker.Roles.Validators;
 using Tracker.Users;
+using Tracker.Users.Kafka;
 using Tracker.Users.Validators;
 using Tracker.Web;
 using Tracker.Web.Sandbox;
@@ -78,6 +80,10 @@ builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<ITransactionManager, TransactionManager>();
 builder.Services.AddScoped<DataSeeder>();
 builder.Services.AddSignalR();
+
+builder.Services.AddSingleton<KafkaClientHandle>();
+builder.Services.AddSingleton<IProducer, KafkaProducer>();
+
 builder.Services.AddSwaggerGen(options =>
 {
     options.SchemaFilter<RequireValueTypePropertiesSchemaFilter>(true);

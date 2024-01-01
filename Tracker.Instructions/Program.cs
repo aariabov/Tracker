@@ -6,6 +6,7 @@ using Tracker.Instructions;
 using Tracker.Instructions.Db;
 using Tracker.Instructions.Generator;
 using Tracker.Instructions.Interfaces;
+using Tracker.Instructions.Kafka;
 using Tracker.Instructions.Repositories;
 using Tracker.Instructions.Validators;
 using UserRepository = Tracker.Instructions.UserRepository;
@@ -29,12 +30,15 @@ builder.Services.AddScoped<IInstructionsTreeRepository, InstructionsTreeReposito
 builder.Services.AddScoped<InstructionValidationService>();
 builder.Services.AddScoped<TreePathsService>();
 builder.Services.AddScoped<UserRepository>();
+builder.Services.AddScoped<UserService>();
 builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddJwtAuthentication();
 
 builder.Services.AddScoped<Progress>();
 builder.Services.AddSignalR();
+
+builder.Services.AddHostedService<KafkaUserConsumer>();
 
 builder.Services
     .AddControllers()
