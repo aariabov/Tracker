@@ -418,6 +418,34 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * No description
      *
      * @tags Instructions
+     * @name InstructionsRecalculateAllStatuses
+     * @request POST:/api/instructions/recalculate-all-statuses
+     */
+    instructionsRecalculateAllStatuses: (params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/instructions/recalculate-all-statuses`,
+        method: "POST",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Instructions
+     * @name InstructionsRecalculateStatusesForInWorkAndDeadline
+     * @request POST:/api/instructions/recalculate-statuses-for-in-work-and-deadline
+     */
+    instructionsRecalculateStatusesForInWorkAndDeadline: (params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/instructions/recalculate-statuses-for-in-work-and-deadline`,
+        method: "POST",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Instructions
      * @name InstructionsGenerateInstructions
      * @request POST:/api/instructions/generate-instructions
      */

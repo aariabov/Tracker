@@ -17,6 +17,10 @@ const config = {
       "/api": {
         target: "https://localhost:5077/",
         secure: false,
+      },
+      "/signalr": {
+        target: "https://localhost:5077/",
+        secure: false,
         ws: true,
       },
     },

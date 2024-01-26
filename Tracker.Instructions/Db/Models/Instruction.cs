@@ -13,6 +13,7 @@ public class Instruction
     public DateTime Deadline { get; set; }
     public DateTime? ExecDate { get; set; }
     public Instruction? Parent { get; set; }
+    public int? StatusId { get; set; }
     public ICollection<Instruction> Children { get; set; } = new List<Instruction>();
 
     public override string ToString()

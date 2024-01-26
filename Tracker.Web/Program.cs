@@ -121,7 +121,7 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}").RequireAuthorization();
 
 app.UseExceptionHandler(app.Environment.IsDevelopment() ? "/error-development" : "/error");
-app.MapHub<ProgressHub>("/api/progress-hub");
+app.MapHub<ProgressHub>("progress-hub");
 app.Run();
 
 public partial class Program { }

@@ -25,6 +25,24 @@ public class InstructionsTreeRepositoryClosure : IInstructionsTreeRepository
             .ToArrayAsync();
     }
 
+    public async Task<int[]> GetReCalcStatusRootInstructionIds()
+    {
+        var idWithDepths = from ic in _db.InstructionsClosures
+                           group ic by ic.Id
+            into g
+                           select new { Id = g.Key, MaxDepth = g.Max(i => i.Depth) };
+
+        var ids = _db.Instructions
+            .Where(i => i.StatusId == (int?)ExecStatus.InWork && i.Deadline < DateTime.UtcNow.Date)
+            .Select(i => i.Id);
+
+        var query = from ic in _db.InstructionsClosures.Where(i => ids.Contains(i.Id))
+                    join g in idWithDepths on new { ic.Id, ic.Depth } equals new { g.Id, Depth = g.MaxDepth }
+                    select ic.ParentId;
+
+        return await query.Distinct().ToArrayAsync();
+    }
+
     public async Task<Instruction[]> GetUserInstructionsWithDescendantsAsync(string userId, int page, int perPage, Sort sort)
     {
         var sortedInstruction = _db.Instructions

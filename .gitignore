@@ -261,6 +261,6 @@ __pycache__/
 *.pyc
 *.design
 *.favdoc
-/Asugf.BudgetPlanning/Web.config
+Tracker.Benchmark/BenchmarkDotNet.Artifacts/
 IntegrationTests/App.config
 /_workspaces.db
