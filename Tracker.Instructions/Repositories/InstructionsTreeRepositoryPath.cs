@@ -62,4 +62,9 @@ public class InstructionsTreeRepositoryPath : IInstructionsTreeRepository
 
         return await instructions.ToArrayAsync();
     }
+
+    public Task<int[]> GetReCalcStatusRootInstructionIds()
+    {
+        throw new NotImplementedException();
+    }
 }

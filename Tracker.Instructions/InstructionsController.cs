@@ -15,14 +15,17 @@ public class InstructionsController : ControllerBase
     private readonly InstructionsService _instructionsService;
     private readonly TreePathsService _treePathsService;
     private readonly InstructionsGenerationService _instructionsGenerationService;
+    private readonly ReCalcStatusService _reCalcStatusService;
 
     public InstructionsController(InstructionsService instructionsService,
         TreePathsService treePathsService,
-        InstructionsGenerationService instructionsGenerationService)
+        InstructionsGenerationService instructionsGenerationService,
+        ReCalcStatusService reCalcStatusService)
     {
         _instructionsService = instructionsService;
         _treePathsService = treePathsService;
         _instructionsGenerationService = instructionsGenerationService;
+        _reCalcStatusService = reCalcStatusService;
     }
 
     [HttpGet("get-user-instructions")]
@@ -93,6 +96,24 @@ public class InstructionsController : ControllerBase
     public async Task<ActionResult> RecalculateAllClosureTable()
     {
         await _instructionsService.RecalculateAllClosureTable();
+        return Ok();
+    }
+
+    [HttpPost("recalculate-all-statuses")]
+    [Authorize(Roles = "Admin")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<ActionResult> RecalculateAllStatuses()
+    {
+        await _reCalcStatusService.RecalculateStatusesForRoot();
+        return Ok();
+    }
+
+    [HttpPost("recalculate-statuses-for-in-work-and-deadline")]
+    [Authorize(Roles = "Admin")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<ActionResult> RecalculateStatusesForInWorkAndDeadline()
+    {
+        await _reCalcStatusService.RecalculateStatusesForRootInWorkAndDeadlineLessNow();
         return Ok();
     }
 

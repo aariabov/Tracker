@@ -4,22 +4,33 @@ namespace Tracker.Instructions;
 
 public class InstructionStatusService
 {
-    public ExecStatus GetStatus(Instruction instruction)
+    public void ReCalcStatus(Instruction instruction)
     {
         if (!instruction.Children.Any())
         {
-            return GetStatusDespiteChildren(instruction);
+            var statusDespiteChildren = GetStatusDespiteChildren(instruction);
+            instruction.StatusId = (int?)statusDespiteChildren;
+            return;
         }
 
         var anyChildInWork = AnyChildInWork(instruction);
 
-        return anyChildInWork ? GetInWorkStatus(instruction) : GetStatusDespiteChildren(instruction);
+        var status = anyChildInWork ? GetInWorkStatus(instruction) : GetStatusDespiteChildren(instruction);
+        instruction.StatusId = (int?)status;
     }
 
     public bool AnyChildInWork(Instruction instruction)
     {
-        var inWorkStatuses = new List<ExecStatus> { ExecStatus.InWork, ExecStatus.InWorkOverdue };
-        var anyChildInWork = instruction.Children.Any(c => inWorkStatuses.Contains(GetStatus(c)));
+        var inWorkStatuses = new List<int?> { (int?)ExecStatus.InWork, (int?)ExecStatus.InWorkOverdue };
+        var anyChildInWork = false;
+        foreach (var child in instruction.Children)
+        {
+            ReCalcStatus(child);
+            if (inWorkStatuses.Contains(child.StatusId))
+            {
+                anyChildInWork = true;
+            }
+        }
         return anyChildInWork;
     }
 

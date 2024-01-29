@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Tracker.Instructions.Db;
@@ -11,9 +12,10 @@ using Tracker.Instructions.Db;
 namespace Tracker.Instructions.Db.Migrations
 {
     [DbContext(typeof(InstructionsDbContext))]
-    partial class InstructionsDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240115060855_AddStatus")]
+    partial class AddStatus
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

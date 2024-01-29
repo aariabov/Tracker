@@ -94,6 +94,18 @@ export class UtilsStore {
         api: () =>
           api(apiClientUsers.api.testRunUnprogressableJobWithParams, testParam),
       }),
+      new UnProgressableUtil({
+        id: 8,
+        name: "Пересчитать все статусы",
+        updateUtils: this.updateUtils.bind(this),
+        api: () => api(apiClientInstructions.api.instructionsRecalculateAllStatuses),
+      }),
+      new UnProgressableUtil({
+        id: 9,
+        name: "Пересчитать статусы для поручений в работе и дедлайне",
+        updateUtils: this.updateUtils.bind(this),
+        api: () => api(apiClientInstructions.api.instructionsRecalculateStatusesForInWorkAndDeadline),
+      }),
     ];
   }
 
@@ -129,7 +141,7 @@ export class UtilsStore {
 
   private createConnection(): HubConnection {
     return new HubConnectionBuilder()
-      .withUrl("/api/progress-hub")
+      .withUrl("/signalr/progress-hub")
       .withAutomaticReconnect()
       .build();
   }

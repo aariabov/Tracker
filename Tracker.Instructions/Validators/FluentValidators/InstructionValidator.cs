@@ -58,8 +58,8 @@ internal sealed class InstructionValidator : AbstractValidator<InstructionRm>
     private async Task<bool> BeNotExecutedAsync(int? parentId, CancellationToken token)
     {
         var parentInstruction = await _instructionsRepository.GetInstructionTreeAsync(parentId.Value);
-        var status = _statusService.GetStatus(parentInstruction);
-        return status is ExecStatus.InWork or ExecStatus.InWorkOverdue;
+        _statusService.ReCalcStatus(parentInstruction);
+        return parentInstruction.StatusId is (int?)ExecStatus.InWork or (int?)ExecStatus.InWorkOverdue;
     }
 
     private async Task<bool> BeCreatedByMyBossAsync(int? parentId, CancellationToken token)

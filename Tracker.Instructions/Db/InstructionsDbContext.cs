@@ -28,6 +28,10 @@ public class InstructionsDbContext : DbContext
             b.HasOne(i => i.Executor)
                 .WithMany()
                 .HasForeignKey(e => e.ExecutorId);
+
+            b.HasOne<Status>()
+                .WithMany()
+                .HasForeignKey(e => e.StatusId);
         });
 
         modelBuilder.Entity<InstructionClosure>(b =>

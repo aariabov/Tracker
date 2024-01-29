@@ -42,6 +42,27 @@ public class InstructionsRepository
             .ToArrayAsync();
     }
 
+    public async Task<int[]> GetInWorkRootInstructionIdsAsync()
+    {
+        return await _db.Instructions
+            .Where(i => i.ParentId == null
+                        && (i.StatusId == (long)ExecStatus.InWork || i.StatusId == (long)ExecStatus.InWorkOverdue))
+            .Select(i => i.Id)
+            .ToArrayAsync();
+    }
+
+    public async Task<int[]> GetInstructionIdsAsync()
+    {
+        return await _db.Instructions
+            .Select(i => i.Id)
+            .ToArrayAsync();
+    }
+
+    public async Task<IEnumerable<int>> GetReCalcStatusRootInstructionIds()
+    {
+        return await _treeRepository.GetReCalcStatusRootInstructionIds();
+    }
+
     public async Task<int> GetRootInstructionCountAsync()
     {
         return await _db.Instructions.CountAsync(i => i.ParentId == null);
@@ -84,6 +105,11 @@ public class InstructionsRepository
     public async Task UpdateAllTreePathsToNullAsync()
     {
         await _db.Database.ExecuteSqlRawAsync("update instructions set tree_path = null");
+    }
+
+    public async Task UpdateAllStatusesToNullAsync()
+    {
+        await _db.Database.ExecuteSqlRawAsync("update instructions set status_id = null");
     }
 
     public async Task RecalculateAllInstructionsClosuresAsync()

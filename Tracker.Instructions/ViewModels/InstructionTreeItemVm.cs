@@ -13,7 +13,7 @@ public class InstructionTreeItemVm
     public DateTime? ExecDate { get; set; }
     public string Status { get; set; }
 
-    public static InstructionTreeItemVm Create(Instruction instruction, ExecStatus status)
+    public static InstructionTreeItemVm Create(Instruction instruction)
     {
         return new InstructionTreeItemVm
         {
@@ -31,7 +31,7 @@ public class InstructionTreeItemVm
             ,
             ExecDate = instruction.ExecDate
             ,
-            Status = status.GetString()
+            Status = ((ExecStatus)instruction.StatusId).GetString()
         };
     }
 }

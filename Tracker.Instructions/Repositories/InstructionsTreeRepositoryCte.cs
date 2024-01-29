@@ -82,6 +82,11 @@ SELECT * FROM r";
             .ToArrayAsync();
     }
 
+    public Task<int[]> GetReCalcStatusRootInstructionIds()
+    {
+        throw new NotImplementedException();
+    }
+
     private async Task<int> GetTreeRootId(int instructionId)
     {
         FormattableString cte = @$"

@@ -195,7 +195,7 @@ public class UsersService
 
             var kafkaUser = KafkaUser.CreateFromUser(updatedUser);
             await _producer.Produce(_userWasUpdatedTopic, updatedUser.Id, kafkaUser);
-
+            // TODO: вот тут может отпасть БД, но сообщение в Кавку уже отправлено - надо сделать компенсирующую транзакцию
             await transaction.CommitAsync();
             return Result.Ok();
         }

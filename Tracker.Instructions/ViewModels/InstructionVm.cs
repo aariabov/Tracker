@@ -15,8 +15,7 @@ public class InstructionVm
     public bool CanCreateChild { get; set; }
     public bool CanBeExecuted { get; set; }
 
-    public static InstructionVm Create(Instruction instruction, ExecStatus status
-        , bool canCreateChild, bool canBeExecuted)
+    public static InstructionVm Create(Instruction instruction, bool canCreateChild, bool canBeExecuted)
     {
         return new InstructionVm
         {
@@ -34,7 +33,7 @@ public class InstructionVm
             ,
             ExecDate = instruction.ExecDate
             ,
-            Status = status.GetString()
+            Status = ((ExecStatus)instruction.StatusId).GetString()
             ,
             CanCreateChild = canCreateChild
             ,

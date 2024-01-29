@@ -16,13 +16,15 @@ public class InstructionsService
     private readonly InstructionStatusService _statusService;
     private readonly TreePathsService _treePathsService;
     private readonly UserRepository _userRepository;
+    private readonly InstructionStatusService _instructionStatusService;
 
     public InstructionsService(InstructionValidationService instructionValidationService
         , InstructionsRepository instructionsRepository
         , InstructionStatusService statusService
         , TreePathsService treePathsService
         , IHttpContextAccessor httpContextAccessor
-        , UserRepository userRepository)
+        , UserRepository userRepository
+        , InstructionStatusService instructionStatusService)
     {
         _instructionValidationService = instructionValidationService;
         _instructionsRepository = instructionsRepository;
@@ -30,6 +32,7 @@ public class InstructionsService
         _treePathsService = treePathsService;
         _httpContextAccessor = httpContextAccessor;
         _userRepository = userRepository;
+        _instructionStatusService = instructionStatusService;
     }
 
     public async Task<InstructionVm[]> GetUserInstructionsAsync(int page, int perPage, Sort sort)
@@ -45,8 +48,8 @@ public class InstructionsService
         {
             var canCreateChild = CanUserCreateChild(instruction, userId, isUserBoss);
             var canBeExecuted = CanBeExecuted(instruction, userId);
-            var status = _statusService.GetStatus(instruction);
-            return InstructionVm.Create(instruction, status, canCreateChild, canBeExecuted);
+            _statusService.ReCalcStatus(instruction);
+            return InstructionVm.Create(instruction, canCreateChild, canBeExecuted);
         });
 
         return instructionVms.ToArray();
@@ -73,8 +76,8 @@ public class InstructionsService
         var instructions = Helpers.GetAllChildren(rootInstruction);
         var instructionTreeItemVms = instructions.Select(currentInstruction =>
         {
-            var status = _statusService.GetStatus(currentInstruction);
-            return InstructionTreeItemVm.Create(currentInstruction, status);
+            _statusService.ReCalcStatus(currentInstruction);
+            return InstructionTreeItemVm.Create(currentInstruction);
         });
 
         return instructionTreeItemVms.ToArray();
@@ -140,6 +143,7 @@ public class InstructionsService
         }
 
         instruction.ExecDate = execDateRm.ExecDate.Date;
+        _instructionStatusService.ReCalcStatus(instruction);
         _instructionsRepository.UpdateInstruction(instruction);
         await _instructionsRepository.SaveChangesAsync();
         return Result.Ok();

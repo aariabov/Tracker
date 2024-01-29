@@ -12,7 +12,7 @@ builder.Services.AddOcelot(configuration);
 builder.Services.AddJwtAuthentication();
 
 var app = builder.Build();
-
+app.UseWebSockets();
 await app.UseOcelot();
 
 app.MapGet("/", () => "Hello World!");

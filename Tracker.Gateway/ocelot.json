@@ -53,10 +53,34 @@
       ],
       "UpstreamPathTemplate": "/api/roles/{everything}",
       "UpstreamHttpMethod": [ "POST", "PUT", "GET" ],
-      "Key": "users",
+      "Key": "roles",
       "AuthenticationOptions": {
         "AuthenticationProviderKey": "Bearer"
       }
+    },
+    {
+      "DownstreamPathTemplate": "/api/test/{everything}",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 7006
+        }
+      ],
+      "UpstreamPathTemplate": "/api/test/{everything}",
+      "UpstreamHttpMethod": [ "POST", "PUT", "GET" ],
+      "Key": "test",
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer"
+      }
+    },
+    {
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE", "OPTIONS" ],
+      "UpstreamPathTemplate": "/signalr/{everything}",
+      "DownstreamPathTemplate": "/{everything}",
+      "DownstreamHostAndPorts": [
+        { "Host": "localhost", "Port": 7006 }
+      ]
     },
     {
       "DownstreamPathTemplate": "/api/analytics/{everything}",
