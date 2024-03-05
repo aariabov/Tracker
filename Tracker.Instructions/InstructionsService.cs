@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using Riabov.Tracker.Common;
 using Tracker.Instructions.Db.Models;
+using Tracker.Instructions.Kafka;
 using Tracker.Instructions.RequestModels;
 using Tracker.Instructions.Validators;
 using Tracker.Instructions.ViewModels;
@@ -10,6 +11,9 @@ namespace Tracker.Instructions;
 
 public class InstructionsService
 {
+    private readonly string _instructionWasUpdatedTopic;
+    private readonly string _instructionWasAddedTopic;
+
     private readonly InstructionValidationService _instructionValidationService;
     private readonly InstructionsRepository _instructionsRepository;
     private readonly IHttpContextAccessor _httpContextAccessor;
@@ -17,6 +21,7 @@ public class InstructionsService
     private readonly TreePathsService _treePathsService;
     private readonly UserRepository _userRepository;
     private readonly InstructionStatusService _instructionStatusService;
+    private readonly IProducer _producer;
 
     public InstructionsService(InstructionValidationService instructionValidationService
         , InstructionsRepository instructionsRepository
@@ -24,7 +29,9 @@ public class InstructionsService
         , TreePathsService treePathsService
         , IHttpContextAccessor httpContextAccessor
         , UserRepository userRepository
-        , InstructionStatusService instructionStatusService)
+        , InstructionStatusService instructionStatusService
+        , IProducer producer
+        , IConfiguration config)
     {
         _instructionValidationService = instructionValidationService;
         _instructionsRepository = instructionsRepository;
@@ -33,6 +40,10 @@ public class InstructionsService
         _httpContextAccessor = httpContextAccessor;
         _userRepository = userRepository;
         _instructionStatusService = instructionStatusService;
+        _producer = producer;
+
+        _instructionWasUpdatedTopic = config.GetValue<string>("Kafka:InstructionWasUpdatedTopic");
+        _instructionWasAddedTopic = config.GetValue<string>("Kafka:InstructionWasAddedTopic");
     }
 
     public async Task<InstructionVm[]> GetUserInstructionsAsync(int page, int perPage, Sort sort)
@@ -107,6 +118,7 @@ public class InstructionsService
             ParentId = instructionRm.ParentId,
             Deadline = instructionRm.Deadline.Date
         };
+        _instructionStatusService.ReCalcStatus(newInstruction);
 
         _instructionsRepository.CreateInstruction(newInstruction);
         await _instructionsRepository.SaveChangesAsync();
@@ -114,6 +126,10 @@ public class InstructionsService
         await _treePathsService.UpdateInstructionTreePath(newInstruction);
         await UpdateInstructionClosure(newInstruction.Id, newInstruction.ParentId);
         await _instructionsRepository.SaveChangesAsync();
+
+        var kafkaInstruction = KafkaInstruction.CreateFromInstruction(newInstruction);
+        await _producer.Produce(_instructionWasAddedTopic, newInstruction.Id.ToString(), kafkaInstruction);
+
         return Result.Ok(newInstruction.Id);
     }
 
@@ -146,6 +162,10 @@ public class InstructionsService
         _instructionStatusService.ReCalcStatus(instruction);
         _instructionsRepository.UpdateInstruction(instruction);
         await _instructionsRepository.SaveChangesAsync();
+
+        var kafkaInstruction = KafkaInstruction.CreateFromInstruction(instruction);
+        await _producer.Produce(_instructionWasUpdatedTopic, instruction.Id.ToString(), kafkaInstruction);
+
         return Result.Ok();
     }
 

@@ -110,6 +110,8 @@ public class InstructionsRepository
     public async Task UpdateAllStatusesToNullAsync()
     {
         await _db.Database.ExecuteSqlRawAsync("update instructions set status_id = null");
+        // EF мог закешировать статусы
+        _db.ChangeTracker.Clear();
     }
 
     public async Task RecalculateAllInstructionsClosuresAsync()

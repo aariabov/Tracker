@@ -2,11 +2,20 @@ using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore;
 using Riabov.Tracker.Common;
 using Tracker.Analytics.Db;
+using Tracker.Analytics.Instructions;
+using Tracker.Analytics.Kafka;
+using Tracker.Analytics.Users;
 
 var builder = WebApplication.CreateBuilder(args);
 
 var analyticsConnectionString = builder.Configuration.GetConnectionString("AnalyticsConnection");
 builder.Services.AddDbContext<AnalyticsDbContext>(options => options.UseNpgsql(analyticsConnectionString).UseSnakeCaseNamingConvention());
+
+builder.Services.AddHostedService<KafkaUserConsumer>();
+builder.Services.AddScoped<UserService>();
+builder.Services.AddScoped<UserRepository>();
+builder.Services.AddScoped<InstructionService>();
+builder.Services.AddScoped<InstructionRepository>();
 
 builder.Services.AddRouting(options =>
 {

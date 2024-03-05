@@ -9,14 +9,14 @@ public class InstructionStatusService
         if (!instruction.Children.Any())
         {
             var statusDespiteChildren = GetStatusDespiteChildren(instruction);
-            instruction.StatusId = (int?)statusDespiteChildren;
+            instruction.StatusId = (int)statusDespiteChildren;
             return;
         }
 
         var anyChildInWork = AnyChildInWork(instruction);
 
         var status = anyChildInWork ? GetInWorkStatus(instruction) : GetStatusDespiteChildren(instruction);
-        instruction.StatusId = (int?)status;
+        instruction.StatusId = (int)status;
     }
 
     public bool AnyChildInWork(Instruction instruction)

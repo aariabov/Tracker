@@ -53,8 +53,10 @@ public class Startup
         services.AddScoped<Progress>();
         services.AddSignalR();
 
+        services.AddSingleton<KafkaClientHandle>();
         services.AddHostedService<KafkaUserConsumer>();
         services.AddHostedService<ReCalcStatusBackgroundService>();
+        services.AddSingleton<IProducer, KafkaProducer>();
 
         services
             .AddControllers()
