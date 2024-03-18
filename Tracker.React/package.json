@@ -4,11 +4,12 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "build": "webpack --mode production",
     "start": "webpack-dev-server --mode development --open --hot",
     "serve": "webpack serve",
     "format": "prettier --ignore-path .gitignore --write \"**/*.+(tsx|ts|json)\"",
+    "playwright-run-tests": "npx playwright test",
+    "playwright-codegen": "npx playwright codegen",
     "generate-analytics-api": "swagger-typescript-api -p https://localhost:7074/swagger/v1/swagger.json -o ./src/api -n AnalyticsApi.ts --disableStrictSSL --union-enums --templates ./src/api/templates",
     "generate-audit-api": "swagger-typescript-api -p https://localhost:7071/swagger/v1/swagger.json -o ./src/api -n AuditApi.ts --disableStrictSSL --union-enums --templates ./src/api/templates",
     "generate-users-api": "swagger-typescript-api -p https://localhost:7006/swagger/v1/swagger.json -o ./src/api -n UsersApi.ts --disableStrictSSL --union-enums --templates ./src/api/templates",
@@ -38,6 +39,7 @@
   "devDependencies": {
     "@babel/core": "^7.16.12",
     "@babel/preset-react": "^7.16.7",
+    "@playwright/test": "^1.42.1",
     "@typescript-eslint/eslint-plugin": "^5.11.0",
     "@typescript-eslint/parser": "^5.11.0",
     "babel-loader": "^8.2.3",
