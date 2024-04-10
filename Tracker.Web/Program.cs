@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Riabov.Tracker.Common;
+using Riabov.Tracker.Common.Cache;
 using Riabov.Tracker.Common.Progress;
 using Tracker.Db;
 using Tracker.Db.Models;
@@ -88,6 +89,13 @@ builder.Services.AddSwaggerGen(options =>
 {
     options.SchemaFilter<RequireValueTypePropertiesSchemaFilter>(true);
     options.SupportNonNullableReferenceTypes();
+});
+
+builder.Services.AddSingleton<ICacheService, CacheService>();
+builder.Services.AddStackExchangeRedisCache(options =>
+{
+    options.Configuration = "localhost";
+    options.InstanceName = "local";
 });
 
 var app = builder.Build();

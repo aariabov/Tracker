@@ -3,6 +3,7 @@ using Confluent.Kafka;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Riabov.Tracker.Common;
+using Riabov.Tracker.Common.Cache;
 using Tracker.Db.Models;
 using Tracker.Db.Transactions;
 using Tracker.Db.UnitOfWorks;
@@ -18,6 +19,7 @@ public class UsersService
     private readonly string _userWasUpdatedTopic;
     private readonly string _userWasAddedTopic;
     private readonly string _userWasDeletedTopic;
+    private readonly TimeSpan _cacheExpire;
 
     private readonly IUserManagerService _userManagerService;
     private readonly IUserValidationService _userValidationService;
@@ -27,6 +29,7 @@ public class UsersService
     private readonly IAuditWebService _auditWebService;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IProducer _producer;
+    private readonly ICacheService _cacheService;
 
     public UsersService(IUserManagerService userManagerService
         , IUserValidationService userValidationService
@@ -36,7 +39,8 @@ public class UsersService
         , IAuditWebService auditWebService
         , IUnitOfWork unitOfWork
         , IProducer producer
-        , IConfiguration config)
+        , IConfiguration config
+        , ICacheService cacheService)
     {
         _userManagerService = userManagerService;
         _userValidationService = userValidationService;
@@ -46,15 +50,26 @@ public class UsersService
         _auditWebService = auditWebService;
         _unitOfWork = unitOfWork;
         _producer = producer;
+        _cacheService = cacheService;
 
         _userWasUpdatedTopic = config.GetValue<string>("Kafka:UserWasUpdatedTopic");
         _userWasAddedTopic = config.GetValue<string>("Kafka:UserWasAddedTopic");
         _userWasDeletedTopic = config.GetValue<string>("Kafka:UserWasDeletedTopic");
+        _cacheExpire = TimeSpan.FromMinutes(config.GetValue<int>("Cache:GetAllUsersCacheExpireInMinutes"));
     }
 
     public async Task<OrgStructElementVm[]> GetAllUsersAsync()
     {
-        return await _userRepository.GetOrgStructVm();
+        var usersFromCache = await _cacheService.GetAsync<OrgStructElementVm[]>("users");
+        if (usersFromCache is not null)
+        {
+            return usersFromCache;
+        }
+
+        var users = await _userRepository.GetOrgStructVm();
+        await _cacheService.SetAsync("users", users, _cacheExpire);
+
+        return users;
     }
 
     public async Task<User[]> GetUsersTreeAsync()
